@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(node --version)",
+      "PowerShell(npm --version)",
+      "PowerShell(supabase --version)",
+      "mcp__Claude_Preview__preview_start",
+      "PowerShell(node scripts/check-matchup.mjs)",
+      "mcp__visualize__show_widget",
+      "PowerShell(gh auth status; Write-Output \"---GH EXIT: $LASTEXITCODE---\"; gh --version)",
+      "Bash(git --version)",
+      "Bash(gh --version)"
+    ]
+  }
+}

@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+/* ===========================================================================
+   Sistema de diseño — "Verde Cancha" (ver docs/design-system.md)
+   Mobile-first. Marca esmeralda + tinta pizarra + acento ámbar.
+   Los tokens de color por EQUIPO (su color hex) se aplican en línea desde los
+   datos; aquí va solo el tema global.
+   =========================================================================== */
+@theme {
+  /* Tipografía: fuente display "Plus Jakarta Sans" (premium) con fallback al
+     sistema. Se carga en index.html y se cachea offline (vite.config). */
+  --font-sans:
+    "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji",
+    sans-serif;
+
+  /* Sombra de tarjeta más suave y difusa (look premium). Reemplaza shadow-sm. */
+  --shadow-sm: 0 1px 2px 0 rgb(15 23 42 / 0.04), 0 6px 16px -6px rgb(15 23 42 / 0.08);
+  --shadow-md: 0 4px 12px -2px rgb(15 23 42 / 0.10), 0 12px 28px -8px rgb(15 23 42 / 0.12);
+
+  /* Marca (esmeralda). Se expone como `brand-*` y además se remapea `sky-*`
+     para que los usos existentes (enlaces, nav activa, focus) adopten la marca
+     sin tocar cada archivo. */
+  --color-brand-50:  #ecfdf5;  --color-sky-50:  #ecfdf5;
+  --color-brand-100: #d1fae5;  --color-sky-100: #d1fae5;
+  --color-brand-200: #a7f3d0;  --color-sky-200: #a7f3d0;
+  --color-brand-300: #6ee7b7;  --color-sky-300: #6ee7b7;
+  --color-brand-400: #34d399;  --color-sky-400: #34d399;
+  --color-brand-500: #10b981;  --color-sky-500: #10b981;
+  --color-brand-600: #059669;  --color-sky-600: #059669;
+  --color-brand-700: #047857;  --color-sky-700: #047857;
+  --color-brand-800: #065f46;  --color-sky-800: #065f46;
+  --color-brand-900: #064e3b;  --color-sky-900: #064e3b;
+  --color-brand-950: #022c22;  --color-sky-950: #022c22;
+
+  /* Acento (ámbar): destacados, ganador, llamadas secundarias. */
+  --color-accent-50:  #fffbeb;
+  --color-accent-100: #fef3c7;
+  --color-accent-200: #fde68a;
+  --color-accent-300: #fcd34d;
+  --color-accent-400: #fbbf24;
+  --color-accent-500: #f59e0b;
+  --color-accent-600: #d97706;
+  --color-accent-700: #b45309;
+  --color-accent-800: #92400e;
+  --color-accent-900: #78350f;
+}
+
+:root {
+  /* App de tema claro: evita que los controles nativos se pinten en oscuro. */
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background-color: #f8fafc; /* slate-50 */
+  color: #0f172a; /* slate-900 (tinta) */
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  -webkit-tap-highlight-color: transparent; /* sin flash gris al tocar */
+  overscroll-behavior-y: none; /* sin "rubber band" raro en móvil */
+}
+
+/* Micro-interacción táctil premium: todo botón/enlace se siente "presionable". */
+button,
+a {
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.1s ease;
+}
+button:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+@layer utilities {
+  /* Respeta el notch y el home indicator (PWA con viewport-fit=cover). */
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  /* Oculta la barra de scroll horizontal (selectores de jornada, etc.). */
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
