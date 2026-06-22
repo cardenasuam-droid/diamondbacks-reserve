@@ -4,6 +4,7 @@ import { useAuth } from '@/features/auth/context'
 import { BottomNav } from '@/components/nav/BottomNav'
 import { NavDrawer } from '@/components/nav/NavDrawer'
 import { Brand } from '@/components/ui/Brand'
+import { DevBanner } from '@/components/dev/DevBanner'
 import type { NavItem } from '@/components/nav/navItems'
 
 // Accesos rápidos públicos en la barra inferior. El resto (Equipos, Estadísticas,
@@ -22,6 +23,7 @@ export function PublicLayout() {
 
   return (
     <div className="min-h-full bg-slate-50 text-slate-900">
+      <DevBanner />
       <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/90 pt-safe backdrop-blur">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">

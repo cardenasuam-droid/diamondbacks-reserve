@@ -11,6 +11,7 @@ import { NewsListPage } from './public/NewsListPage'
 import { NewsDetailPage } from './public/NewsDetailPage'
 import { ReglamentoPage } from './public/ReglamentoPage'
 import { MorePage } from './public/MorePage'
+import { DevPage } from './dev/DevPage'
 import { NotFoundPage } from './NotFoundPage'
 import { LoginPage } from './auth/LoginPage'
 import { RequireAuth, RequireRole } from './guards'
@@ -49,6 +50,7 @@ export const router = createBrowserRouter([
       { path: 'noticias/:newsId', element: <NewsDetailPage /> },
       { path: 'reglamento', element: <ReglamentoPage /> },
       { path: 'mas', element: <MorePage /> },
+      { path: 'dev', element: <DevPage /> },
       { path: 'login', element: <LoginPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],

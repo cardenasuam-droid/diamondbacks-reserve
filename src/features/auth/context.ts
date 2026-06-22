@@ -11,8 +11,10 @@ export interface AuthContextValue {
   loading: boolean
   /** true mientras se (re)lee el perfil tras un cambio de sesión. */
   profileLoading: boolean
-  /** Rol efectivo; null mientras no haya perfil cargado. */
+  /** Rol efectivo (incluye override de vista dev); null sin sesión/perfil. */
   role: UserRole | null
+  /** Rol forzado por la consola /dev (solo UI), o null. */
+  devRole: UserRole | null
   signOut: () => Promise<void>
   /** Vuelve a leer el perfil desde la BD (p. ej. tras enlazar la cuenta). */
   refreshProfile: () => Promise<void>

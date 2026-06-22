@@ -4,6 +4,7 @@ import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import type { Profile } from '@/lib/types'
 import { AuthContext, type AuthContextValue } from './context'
+import { getDevRole, DEV_ROLE_EVENT } from './devRole'
 
 async function fetchProfile(userId: string): Promise<Profile | null> {
   const { data, error } = await supabase
@@ -24,7 +25,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
   const [profileLoading, setProfileLoading] = useState(true)
+  const [devRole, setDevRoleState] = useState(() => getDevRole())
   const currentUserId = useRef<string | null>(null)
+
+  // Sincroniza el override de rol de la consola /dev.
+  useEffect(() => {
+    const sync = () => setDevRoleState(getDevRole())
+    window.addEventListener(DEV_ROLE_EVENT, sync)
+    window.addEventListener('storage', sync)
+    return () => {
+      window.removeEventListener(DEV_ROLE_EVENT, sync)
+      window.removeEventListener('storage', sync)
+    }
+  }, [])
 
   const loadProfile = useCallback(async (user: User | null) => {
     if (!user) {
@@ -85,11 +98,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       profile,
       loading,
       profileLoading,
-      role: profile?.role ?? null,
+      // El override dev solo aplica con sesión iniciada (la UI lo respeta; RLS no).
+      role: session && devRole ? devRole : (profile?.role ?? null),
+      devRole: session ? devRole : null,
       signOut,
       refreshProfile,
     }),
-    [session, profile, loading, profileLoading, signOut, refreshProfile],
+    [session, profile, loading, profileLoading, devRole, signOut, refreshProfile],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
