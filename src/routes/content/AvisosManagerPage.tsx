@@ -115,7 +115,7 @@ export function AvisosManagerPage() {
                   </Badge>
                 </div>
                 <div className="mt-1 flex items-center justify-between">
-                  <span className="text-xs text-slate-400">{formatDate(n.created_at)}</span>
+                  <span className="text-xs text-slate-500">{formatDate(n.created_at)}</span>
                   <a
                     href={whatsappShareUrl(n.title, n.body)}
                     target="_blank"

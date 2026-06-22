@@ -176,7 +176,7 @@ export function LineupEditorPage() {
             aria-hidden
           />
           <span className="font-semibold text-slate-800">{mu.myTeam.name}</span>
-          <span className="text-xs font-medium text-slate-400">vs</span>
+          <span className="text-xs font-medium text-slate-500">vs</span>
           <span className="font-semibold text-slate-800">{mu.opponent.name}</span>
         </div>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-2 text-sm text-slate-600">
@@ -259,7 +259,7 @@ export function LineupEditorPage() {
             {save.isPending ? 'Guardando…' : 'Enviar alineación'}
           </button>
         </div>
-        <p className="text-center text-xs text-slate-400">
+        <p className="text-center text-xs text-slate-500">
           <Link to="/app/capitan" className="underline">
             Volver al panel
           </Link>
@@ -313,7 +313,7 @@ function CategoryRow({
               value={selectedId}
               disabled={disabled}
               onChange={(e) => onChange(cat.code, idx as 0 | 1, e.target.value)}
-              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 disabled:bg-slate-50 disabled:text-slate-400"
+              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 disabled:bg-slate-50 disabled:text-slate-500"
             >
               <option value="">— Jugador {idx + 1} —</option>
               {candidates.map((p) => {

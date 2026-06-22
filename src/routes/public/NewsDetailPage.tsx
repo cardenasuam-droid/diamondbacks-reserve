@@ -27,7 +27,7 @@ export function NewsDetailPage() {
       <header>
         <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">{n.title}</h1>
         {formatDate(n.published_at ?? n.created_at) && (
-          <p className="mt-1 text-sm text-slate-400">{formatDate(n.published_at ?? n.created_at)}</p>
+          <p className="mt-1 text-sm text-slate-500">{formatDate(n.published_at ?? n.created_at)}</p>
         )}
       </header>
       {n.body && <p className="whitespace-pre-wrap text-slate-700">{n.body}</p>}

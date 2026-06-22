@@ -20,6 +20,10 @@ dist-ssr
 # Claude Code: ajustes locales personales (no compartir)
 .claude/settings.local.json
 
+# Logo original sin optimizar (1.1MB). La app usa public/logo-mark.png; el
+# original se mantiene en disco pero no se versiona para no inflar el repo.
+public/logo.png
+
 # supabase
 .branches
 .temp

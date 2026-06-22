@@ -116,7 +116,7 @@ export function NewsManagerPage() {
           >
             <span className="flex-1">
               <span className="block font-medium text-slate-800">{n.title}</span>
-              <span className="text-xs text-slate-400">{formatDate(n.created_at)}</span>
+              <span className="text-xs text-slate-500">{formatDate(n.created_at)}</span>
             </span>
             <Badge color={n.published ? 'emerald' : 'slate'}>
               {n.published ? 'Publicada' : 'Borrador'}

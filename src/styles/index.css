@@ -102,6 +102,26 @@ button:not(:disabled):active {
   transform: scale(0.97);
 }
 
+/* Foco visible accesible para teclado en toda la app. :where() mantiene
+   especificidad 0 para que los componentes puedan sobreescribir. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid #059669; /* brand-600 (esmeralda) */
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* prefers-reduced-motion (WCAG): apaga transiciones/animaciones globales. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 @layer utilities {
   .pt-safe {
     padding-top: env(safe-area-inset-top);

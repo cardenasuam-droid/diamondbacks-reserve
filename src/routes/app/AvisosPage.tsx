@@ -45,7 +45,7 @@ export function AvisosPage() {
                 <Badge color="emerald">{audienceTag(n)}</Badge>
               </div>
               {formatDate(n.created_at) && (
-                <p className="mt-0.5 text-xs text-slate-400">{formatDate(n.created_at)}</p>
+                <p className="mt-0.5 text-xs text-slate-500">{formatDate(n.created_at)}</p>
               )}
               {n.body && <p className="mt-2 whitespace-pre-wrap text-sm text-slate-600">{n.body}</p>}
               <a

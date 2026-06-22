@@ -38,7 +38,12 @@ export function LoginPage() {
   return (
     <div className="mx-auto max-w-sm space-y-6">
       <div className="text-center">
-        <h1 className="text-xl font-bold">Entrar</h1>
+        <img
+          src="/logo-mark.png"
+          alt="Liga de Pádel"
+          className="mx-auto h-16 w-16 rounded-2xl object-contain ring-1 ring-gold-500/30"
+        />
+        <h1 className="mt-3 font-heading text-xl">Entrar</h1>
         <p className="mt-1 text-sm text-slate-600">
           {mode === 'list'
             ? 'Elige tu nombre y usa tu contraseña.'
@@ -56,7 +61,7 @@ export function LoginPage() {
 
       <div className="text-center text-sm">
         {mode === 'list' ? (
-          <button onClick={() => setMode('email')} className="text-slate-400 underline">
+          <button onClick={() => setMode('email')} className="text-slate-500 underline">
             Acceso por correo
           </button>
         ) : (
@@ -163,7 +168,7 @@ function IdentityLogin({ onDone }: { onDone: () => void }) {
                   aria-hidden
                 />
                 <span className="flex-1 truncate font-medium text-slate-800">{i.name}</span>
-                <span className="truncate text-xs text-slate-400">{i.sublabel}</span>
+                <span className="truncate text-xs text-slate-500">{i.sublabel}</span>
               </button>
             </li>
           ))}

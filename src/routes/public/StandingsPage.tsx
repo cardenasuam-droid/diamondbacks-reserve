@@ -55,46 +55,65 @@ export function StandingsPage() {
                 </tr>
               </thead>
               <tbody>
-                {standings.data.map((t) => (
-                  <tr key={t.team_id} className="border-b border-slate-100 last:border-0">
-                    <td className="px-2 py-2.5 text-center font-semibold text-slate-400">
-                      {t.position}
-                    </td>
-                    <td className="px-2 py-2.5">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className="inline-block h-3 w-3 shrink-0 rounded-full ring-1 ring-black/5"
-                          style={{ backgroundColor: teamColor(t.color) }}
-                          aria-hidden
-                        />
-                        <span className="font-medium text-slate-800">
-                          {t.team_name}
-                          {t.tiedUnresolved && (
-                            <span className="ml-1 text-amber-500" title="Empate por definir (enfrentamiento directo / organizador)">
-                              *
-                            </span>
-                          )}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-2 py-2.5 text-center tabular-nums text-slate-600">{t.played}</td>
-                    <td className="px-2 py-2.5 text-center tabular-nums text-slate-600">{t.won}</td>
-                    <td className="hidden px-2 py-2.5 text-center tabular-nums text-slate-600 sm:table-cell">
-                      {t.set_diff > 0 ? `+${t.set_diff}` : t.set_diff}
-                    </td>
-                    <td className="hidden px-2 py-2.5 text-center tabular-nums text-slate-600 sm:table-cell">
-                      {t.game_diff > 0 ? `+${t.game_diff}` : t.game_diff}
-                    </td>
-                    <td className="px-2 py-2.5 text-center font-bold tabular-nums text-slate-900">
-                      {t.points}
-                    </td>
-                  </tr>
-                ))}
+                {standings.data.map((t) => {
+                  const leader = t.position === 1
+                  return (
+                    <tr
+                      key={t.team_id}
+                      className={
+                        'border-b border-slate-100 last:border-0 ' +
+                        (leader ? 'bg-gold-50/70' : '')
+                      }
+                    >
+                      <td
+                        className={
+                          'px-2 py-2.5 text-center font-bold tabular-nums ' +
+                          (leader ? 'text-gold-600' : 'font-semibold text-slate-500')
+                        }
+                      >
+                        {t.position}
+                      </td>
+                      <td className="px-2 py-2.5">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="inline-block h-3 w-3 shrink-0 rounded-full ring-1 ring-black/5"
+                            style={{ backgroundColor: teamColor(t.color) }}
+                            aria-hidden
+                          />
+                          <span className={leader ? 'font-bold text-slate-900' : 'font-medium text-slate-800'}>
+                            {t.team_name}
+                            {t.tiedUnresolved && (
+                              <span className="ml-1 text-amber-500" title="Empate por definir (enfrentamiento directo / organizador)">
+                                *
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-2 py-2.5 text-center tabular-nums text-slate-600">{t.played}</td>
+                      <td className="px-2 py-2.5 text-center tabular-nums text-slate-600">{t.won}</td>
+                      <td className="hidden px-2 py-2.5 text-center tabular-nums text-slate-600 sm:table-cell">
+                        {t.set_diff > 0 ? `+${t.set_diff}` : t.set_diff}
+                      </td>
+                      <td className="hidden px-2 py-2.5 text-center tabular-nums text-slate-600 sm:table-cell">
+                        {t.game_diff > 0 ? `+${t.game_diff}` : t.game_diff}
+                      </td>
+                      <td
+                        className={
+                          'px-2 py-2.5 text-center font-bold tabular-nums ' +
+                          (leader ? 'text-gold-700' : 'text-slate-900')
+                        }
+                      >
+                        {t.points}
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>
 
-          <div className="mt-3 space-y-1 text-xs text-slate-400">
+          <div className="mt-3 space-y-1 text-xs text-slate-500">
             <p>PJ jugados · PG ganados · DS dif. sets · DJ dif. juegos · Pts puntos.</p>
             {standings.data.some((t) => t.tiedUnresolved) && (
               <p>

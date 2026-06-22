@@ -145,7 +145,7 @@ export function CsvImporter<T>({ sample, validate, onImport }: CsvImporterProps<
             : 'Importar'}
       </button>
       {result && result.errors.length > 0 && (
-        <p className="text-center text-xs text-slate-400">
+        <p className="text-center text-xs text-slate-500">
           Corrige los errores para poder importar.
         </p>
       )}

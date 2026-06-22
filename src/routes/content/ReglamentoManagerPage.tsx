@@ -88,7 +88,7 @@ export function ReglamentoManagerPage() {
             >
               <span className="flex-1">
                 <span className="block font-medium text-slate-800">{d.title}</span>
-                <span className="text-xs text-slate-400">
+                <span className="text-xs text-slate-500">
                   {d.version ? `v${d.version} · ` : ''}
                   {formatDate(d.created_at)}
                 </span>

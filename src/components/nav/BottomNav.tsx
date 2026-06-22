@@ -20,7 +20,7 @@ export function BottomNav({
             end={item.end}
             className={({ isActive }) =>
               'flex flex-col items-center gap-0.5 py-2 text-[11px] font-medium transition ' +
-              (isActive ? 'text-sky-600' : 'text-slate-400 hover:text-slate-600')
+              (isActive ? 'text-sky-600' : 'text-slate-500 hover:text-slate-600')
             }
           >
             <span className="text-lg" aria-hidden>
@@ -31,7 +31,7 @@ export function BottomNav({
         ))}
         <button
           onClick={onMenu}
-          className="flex flex-col items-center gap-0.5 py-2 text-[11px] font-medium text-slate-400 transition hover:text-slate-600"
+          className="flex flex-col items-center gap-0.5 py-2 text-[11px] font-medium text-slate-500 transition hover:text-slate-600"
         >
           <span className="text-lg" aria-hidden>
             ☰

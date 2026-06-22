@@ -19,7 +19,7 @@ export function MatchupHeader({ teamA, teamB }: { teamA: TeamLite | null; teamB:
   return (
     <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-3 py-2">
       <TeamTag team={teamA} align="left" />
-      <span className="shrink-0 text-xs font-medium text-slate-400">vs</span>
+      <span className="shrink-0 text-xs font-medium text-slate-500">vs</span>
       <TeamTag team={teamB} align="right" />
     </div>
   )

@@ -92,7 +92,7 @@ export function ResultsPage() {
                               {scoreLine(m.result!)}
                             </span>
                           ) : (
-                            <span className="shrink-0 text-xs text-slate-400">Pendiente</span>
+                            <span className="shrink-0 text-xs text-slate-500">Pendiente</span>
                           )}
                         </li>
                       )

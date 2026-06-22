@@ -66,7 +66,7 @@ export function CaptainDashboard() {
           <div className="space-y-3 p-4">
             <div className="flex items-center gap-2 text-slate-800">
               <span className="font-semibold">{matchup.data.myTeam.name}</span>
-              <span className="text-xs text-slate-400">vs</span>
+              <span className="text-xs text-slate-500">vs</span>
               <span className="font-semibold">{matchup.data.opponent.name}</span>
             </div>
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-600">

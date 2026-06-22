@@ -63,7 +63,7 @@ export function OrganizerResultsPage() {
               <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-3 py-2">
                 <TeamDot team={g.teamA} />
                 <span className="font-semibold text-slate-800">{g.teamA?.name ?? '—'}</span>
-                <span className="text-xs text-slate-400">vs</span>
+                <span className="text-xs text-slate-500">vs</span>
                 <span className="font-semibold text-slate-800">{g.teamB?.name ?? '—'}</span>
               </div>
 
@@ -203,7 +203,7 @@ function ResultEditor({
                 onChange={(a) => row.set((p) => ({ ...p, a }))}
                 label={`${teamA?.name ?? 'A'} ${row.label}`}
               />
-              <span className="text-slate-400">–</span>
+              <span className="text-slate-500">–</span>
               <ScoreInput
                 value={row.v.b}
                 onChange={(b) => row.set((p) => ({ ...p, b }))}
@@ -211,7 +211,7 @@ function ResultEditor({
               />
             </div>
           ))}
-          <p className="text-[11px] text-slate-400">
+          <p className="text-[11px] text-slate-500">
             {teamA?.name} (izquierda) – {teamB?.name} (derecha). Deja el Set 3 vacío si se ganó en 2.
           </p>
         </div>

@@ -103,7 +103,7 @@ function PlayersTab({
             const team = teamById.get(p.team_id)
             return (
               <tr key={p.player_id} className="border-b border-slate-100 last:border-0">
-                <td className="px-2 py-2.5 text-center font-semibold text-slate-400">{p.position}</td>
+                <td className="px-2 py-2.5 text-center font-semibold text-slate-500">{p.position}</td>
                 <td className="px-2 py-2.5">
                   <div className="flex items-center gap-2">
                     <span
@@ -158,7 +158,7 @@ function TeamsTab({ seasonId }: { seasonId: string }) {
         <tbody>
           {standings.data.map((t) => (
             <tr key={t.team_id} className="border-b border-slate-100 last:border-0">
-              <td className="px-2 py-2.5 text-center font-semibold text-slate-400">{t.position}</td>
+              <td className="px-2 py-2.5 text-center font-semibold text-slate-500">{t.position}</td>
               <td className="px-2 py-2.5">
                 <div className="flex items-center gap-2">
                   <span

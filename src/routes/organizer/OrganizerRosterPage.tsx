@@ -197,7 +197,7 @@ export function OrganizerRosterPage() {
               <span className="flex-1 truncate">
                 <span className="font-medium text-slate-800">{p.full_name}</span>
                 {p.is_captain && <span title="Capitán"> ⭐</span>}
-                {!p.is_active && <span className="text-xs text-slate-400"> · inactivo</span>}
+                {!p.is_active && <span className="text-xs text-slate-500"> · inactivo</span>}
               </span>
               <Badge color={categoryColor(typeByCode.get(p.category_code))}>{p.category_code}</Badge>
               <button onClick={() => edit(p)} className="text-sm text-slate-600 underline">

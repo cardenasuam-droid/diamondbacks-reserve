@@ -61,7 +61,7 @@ export function NavDrawer({ open, onClose }: { open: boolean; onClose: () => voi
         <nav className="flex-1 overflow-y-auto px-2 py-3">
           {groups.map((g) => (
             <div key={g.title} className="mb-4">
-              <p className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+              <p className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
                 {g.title}
               </p>
               <ul>
@@ -75,7 +75,7 @@ export function NavDrawer({ open, onClose }: { open: boolean; onClose: () => voi
                         {item.icon}
                       </span>
                       <span className="flex-1">{item.label}</span>
-                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-400">
+                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500">
                         Pronto
                       </span>
                     </li>

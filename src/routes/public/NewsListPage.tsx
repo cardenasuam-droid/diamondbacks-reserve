@@ -31,7 +31,7 @@ export function NewsListPage() {
                 <div className="p-4">
                   <h2 className="font-semibold text-slate-800">{n.title}</h2>
                   {formatDate(n.published_at ?? n.created_at) && (
-                    <p className="mt-0.5 text-xs text-slate-400">
+                    <p className="mt-0.5 text-xs text-slate-500">
                       {formatDate(n.published_at ?? n.created_at)}
                     </p>
                   )}

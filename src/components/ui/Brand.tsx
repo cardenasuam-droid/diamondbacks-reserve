@@ -10,7 +10,7 @@ export function Brand({ compact = false }: { compact?: boolean }) {
     <span className="flex items-center gap-2">
       {logoOk ? (
         <img
-          src="/logo.png"
+          src="/logo-mark.png"
           alt="Logo de la liga"
           onError={() => setLogoOk(false)}
           className="h-9 w-9 rounded-lg object-contain ring-1 ring-gold-500/30"
