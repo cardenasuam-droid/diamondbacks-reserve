@@ -1,26 +1,27 @@
 @import "tailwindcss";
 
 /* ===========================================================================
-   Sistema de diseño — "Verde Cancha" (ver docs/design-system.md)
-   Mobile-first. Marca esmeralda + tinta pizarra + acento ámbar.
-   Los tokens de color por EQUIPO (su color hex) se aplican en línea desde los
-   datos; aquí va solo el tema global.
+   Sistema de diseño — "Diamondbacks Reserve"
+   Inspirado en el escudo de la liga: ESMERALDA (serpiente) + ORO (trofeo/filos)
+   + TINTA casi negra sobre fondo cálido. Premium, deportivo, mobile-first.
+   (Recomendado por la skill ui-ux-pro-max: negro premium + oro, display athlética.)
+   El color por EQUIPO (su hex) se aplica en línea desde los datos.
    =========================================================================== */
 @theme {
-  /* Tipografía: fuente display "Plus Jakarta Sans" (premium) con fallback al
-     sistema. Se carga en index.html y se cachea offline (vite.config). */
+  /* Tipografía: display athlética (Russo One) para marca/hero/marcadores;
+     cuerpo en Plus Jakarta Sans (legible para datos). Cargadas en index.html. */
   --font-sans:
     "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
     Roboto, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji",
     sans-serif;
+  --font-heading: "Russo One", var(--font-sans);
 
-  /* Sombra de tarjeta más suave y difusa (look premium). Reemplaza shadow-sm. */
-  --shadow-sm: 0 1px 2px 0 rgb(15 23 42 / 0.04), 0 6px 16px -6px rgb(15 23 42 / 0.08);
-  --shadow-md: 0 4px 12px -2px rgb(15 23 42 / 0.10), 0 12px 28px -8px rgb(15 23 42 / 0.12);
+  /* Sombras suaves premium (reemplazan shadow-sm/md). */
+  --shadow-sm: 0 1px 2px 0 rgb(28 25 23 / 0.05), 0 6px 16px -6px rgb(28 25 23 / 0.10);
+  --shadow-md: 0 4px 12px -2px rgb(28 25 23 / 0.12), 0 12px 28px -8px rgb(28 25 23 / 0.14);
 
-  /* Marca (esmeralda). Se expone como `brand-*` y además se remapea `sky-*`
-     para que los usos existentes (enlaces, nav activa, focus) adopten la marca
-     sin tocar cada archivo. */
+  /* Marca — ESMERALDA (serpiente). `brand-*` + remapeo de `sky-*` para que los
+     usos existentes (enlaces, nav activa, focus) adopten la marca sin tocar archivos. */
   --color-brand-50:  #ecfdf5;  --color-sky-50:  #ecfdf5;
   --color-brand-100: #d1fae5;  --color-sky-100: #d1fae5;
   --color-brand-200: #a7f3d0;  --color-sky-200: #a7f3d0;
@@ -33,21 +34,36 @@
   --color-brand-900: #064e3b;  --color-sky-900: #064e3b;
   --color-brand-950: #022c22;  --color-sky-950: #022c22;
 
-  /* Acento (ámbar): destacados, ganador, llamadas secundarias. */
-  --color-accent-50:  #fffbeb;
-  --color-accent-100: #fef3c7;
-  --color-accent-200: #fde68a;
-  --color-accent-300: #fcd34d;
-  --color-accent-400: #fbbf24;
-  --color-accent-500: #f59e0b;
-  --color-accent-600: #d97706;
-  --color-accent-700: #b45309;
-  --color-accent-800: #92400e;
-  --color-accent-900: #78350f;
+  /* Acento — ORO (trofeo, filos, lettering). Para destacados, ganador, trims.
+     `accent-*` también remapea `amber-*` para coherencia. */
+  --color-gold-50:  #fdf8ed;  --color-accent-50:  #fdf8ed;  --color-amber-50:  #fdf8ed;
+  --color-gold-100: #f9ecc6;  --color-accent-100: #f9ecc6;  --color-amber-100: #f9ecc6;
+  --color-gold-200: #f2d98a;  --color-accent-200: #f2d98a;  --color-amber-200: #f2d98a;
+  --color-gold-300: #e9c14e;  --color-accent-300: #e9c14e;  --color-amber-300: #e9c14e;
+  --color-gold-400: #dfa92a;  --color-accent-400: #dfa92a;  --color-amber-400: #dfa92a;
+  --color-gold-500: #ca8a04;  --color-accent-500: #ca8a04;  --color-amber-500: #ca8a04;
+  --color-gold-600: #a16207;  --color-accent-600: #a16207;  --color-amber-600: #a16207;
+  --color-gold-700: #854d0e;  --color-accent-700: #854d0e;  --color-amber-700: #854d0e;
+  --color-gold-800: #713f12;  --color-accent-800: #713f12;  --color-amber-800: #713f12;
+  --color-gold-900: #5c3310;  --color-accent-900: #5c3310;  --color-amber-900: #5c3310;
+
+  /* Neutros CÁLIDOS (stone) — combinan mejor con el oro. Remapean `slate-*`
+     (mismos pasos de luminosidad, solo más cálidos): toda la app se calienta
+     sin tocar componentes. Para volver a frío, borra este bloque. */
+  --color-slate-50:  #fafaf9;
+  --color-slate-100: #f5f5f4;
+  --color-slate-200: #e7e5e4;
+  --color-slate-300: #d6d3d1;
+  --color-slate-400: #a8a29e;
+  --color-slate-500: #78716c;
+  --color-slate-600: #57534e;
+  --color-slate-700: #44403c;
+  --color-slate-800: #292524;
+  --color-slate-900: #1c1917;
+  --color-slate-950: #0c0a09;
 }
 
 :root {
-  /* App de tema claro: evita que los controles nativos se pinten en oscuro. */
   color-scheme: light;
 }
 
@@ -64,15 +80,15 @@ html {
 body {
   margin: 0;
   font-family: var(--font-sans);
-  background-color: #f8fafc; /* slate-50 */
-  color: #0f172a; /* slate-900 (tinta) */
+  background-color: #fafaf9; /* stone-50 (cálido) */
+  color: #1c1917; /* stone-900 (tinta) */
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  -webkit-tap-highlight-color: transparent; /* sin flash gris al tocar */
-  overscroll-behavior-y: none; /* sin "rubber band" raro en móvil */
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
 }
 
-/* Micro-interacción táctil premium: todo botón/enlace se siente "presionable". */
+/* Micro-interacción táctil premium. */
 button,
 a {
   transition:
@@ -87,14 +103,12 @@ button:not(:disabled):active {
 }
 
 @layer utilities {
-  /* Respeta el notch y el home indicator (PWA con viewport-fit=cover). */
   .pt-safe {
     padding-top: env(safe-area-inset-top);
   }
   .pb-safe {
     padding-bottom: env(safe-area-inset-bottom);
   }
-  /* Oculta la barra de scroll horizontal (selectores de jornada, etc.). */
   .no-scrollbar {
     scrollbar-width: none;
   }

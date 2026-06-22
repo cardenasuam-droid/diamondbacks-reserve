@@ -1,13 +1,27 @@
-// Marca de la liga: cuadro esmeralda con la pelota + wordmark. Reutilizable en
-// cabeceras, drawer y login para una identidad consistente.
+import { useState } from 'react'
+
+// Marca de la liga. Usa el logo real en /logo.png (escudo Diamondbacks);
+// mientras no exista el archivo, cae a un monograma premium esmeralda+oro.
+// Para activar el logo: guarda la imagen como  public/logo.png
 export function Brand({ compact = false }: { compact?: boolean }) {
+  const [logoOk, setLogoOk] = useState(true)
+
   return (
     <span className="flex items-center gap-2">
-      <span className="grid h-8 w-8 place-items-center rounded-lg bg-brand-600 text-base text-white shadow-sm">
-        🎾
-      </span>
+      {logoOk ? (
+        <img
+          src="/logo.png"
+          alt="Logo de la liga"
+          onError={() => setLogoOk(false)}
+          className="h-9 w-9 rounded-lg object-contain ring-1 ring-gold-500/30"
+        />
+      ) : (
+        <span className="grid h-9 w-9 place-items-center rounded-lg bg-stone-900 font-heading text-xs tracking-wider text-gold-400 ring-1 ring-gold-500/40">
+          DR
+        </span>
+      )}
       {!compact && (
-        <span className="text-base font-extrabold tracking-tight text-slate-900">
+        <span className="font-heading text-sm tracking-wide text-stone-900">
           Liga de Pádel
         </span>
       )}

@@ -13,11 +13,16 @@ export function HomePage() {
 
   return (
     <div className="space-y-6">
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-500 via-emerald-600 to-emerald-800 p-6 text-white shadow-md">
-        <div className="pointer-events-none absolute -right-10 -top-12 h-40 w-40 rounded-full bg-white/10" aria-hidden />
-        <div className="pointer-events-none absolute -bottom-14 -left-8 h-36 w-36 rounded-full bg-emerald-300/20" aria-hidden />
-        <h1 className="relative text-3xl font-extrabold tracking-tight">Liga de Pádel por Equipos</h1>
-        <p className="relative mt-1.5 text-sm text-emerald-50">
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-800 via-emerald-900 to-stone-950 p-7 text-white shadow-md ring-1 ring-gold-500/30">
+        <div className="pointer-events-none absolute -right-10 -top-12 h-44 w-44 rounded-full bg-gold-500/10" aria-hidden />
+        <div className="pointer-events-none absolute -bottom-16 -left-10 h-40 w-40 rounded-full bg-emerald-400/10" aria-hidden />
+        <p className="relative text-[11px] font-semibold uppercase tracking-[0.2em] text-gold-300">
+          Temporada
+        </p>
+        <h1 className="relative mt-1 font-heading text-3xl leading-tight">
+          Liga de Pádel <span className="text-gold-400">por Equipos</span>
+        </h1>
+        <p className="relative mt-2 text-sm text-emerald-100/90">
           {season ? (
             <>
               Temporada <span className="font-semibold">{season.name}</span>
