@@ -14,6 +14,12 @@ dist-ssr
 .env.*
 !.env.example
 
+# MCP local: contiene el token de Netlify, NO commitear
+.mcp.json
+
+# Claude Code: ajustes locales personales (no compartir)
+.claude/settings.local.json
+
 # supabase
 .branches
 .temp
