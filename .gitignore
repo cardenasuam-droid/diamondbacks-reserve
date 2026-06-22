@@ -3,10 +3,11 @@ node_modules
 .pnp
 .pnp.js
 
-# build
+# build / deploy artifacts
 dist
 dist-ssr
 *.local
+*.zip
 
 # env — NUNCA commitear claves
 .env
