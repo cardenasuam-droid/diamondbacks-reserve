@@ -1,18 +1,20 @@
-import type { CSSProperties } from 'react'
+import { useState, type CSSProperties } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useActiveSeason } from '@/features/season/useActiveSeason'
 import { useTeams } from '@/features/teams/useTeams'
 import { usePublicPlayers } from '@/features/teams/usePublicPlayers'
 import { useStandings } from '@/features/standings/useStandings'
 import { useCategories } from '@/features/categories/useCategories'
-import { groupRoster } from '@/features/teams/groupRoster'
+import { groupRoster, type RosterGroup } from '@/features/teams/groupRoster'
 import { categoryColor } from '@/features/categories/categoryColor'
 import { teamColor } from '@/lib/color'
 import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
+import { Icon } from '@/components/ui/Icon'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { Loader } from '@/components/ui/Loader'
+import type { CategoryType } from '@/lib/types'
 
 const signed = (n: number) => (n > 0 ? `+${n}` : String(n))
 
@@ -89,31 +91,60 @@ export function TeamRosterPage() {
       {groups.length === 0 ? (
         <EmptyState icon="teams" title="Sin jugadores" description="Este equipo aún no tiene roster cargado." />
       ) : (
-        <div className="space-y-5">
+        <section className="space-y-3">
+          <h2 className="text-sm font-bold uppercase tracking-wide text-slate-700">Plantilla</h2>
           {groups.map((g) => (
-            <section key={g.code}>
-              <div className="mb-2 flex items-center gap-2">
-                <h2 className="text-sm font-bold uppercase tracking-wide text-slate-700">{g.name}</h2>
-                <Badge color={categoryColor(typeOf.get(g.code))}>{g.code}</Badge>
-              </div>
-              <ul className="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm">
-                {g.players.map((p) => (
-                  <li key={p.id}>
-                    <Link
-                      to={`/jugadores/${p.id}`}
-                      className="flex items-center gap-3 px-4 py-2.5 transition hover:bg-slate-50"
-                    >
-                      <Avatar name={p.full_name} photoUrl={p.photo_url} color={team.color} size={36} />
-                      <span className="flex-1 font-medium text-slate-800">{p.full_name}</span>
-                      {p.is_captain && <Badge color="amber">Capitán</Badge>}
-                      <span className="text-slate-300" aria-hidden>›</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </section>
+            <CategoryAccordion key={g.code} group={g} type={typeOf.get(g.code)} color={team.color} />
           ))}
-        </div>
+        </section>
+      )}
+    </div>
+  )
+}
+
+// Categoría plegable: el encabezado es un botón que despliega/oculta sus jugadores.
+function CategoryAccordion({
+  group,
+  type,
+  color,
+}: {
+  group: RosterGroup
+  type: CategoryType | undefined
+  color: string | null
+}) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="overflow-hidden rounded-xl border border-slate-200/80 bg-gradient-to-b from-slate-100 to-slate-50 shadow-sm">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className="flex w-full items-center gap-2 px-4 py-3 text-left transition hover:bg-slate-100"
+      >
+        <span className="text-sm font-bold uppercase tracking-wide text-slate-700">{group.name}</span>
+        <Badge color={categoryColor(type)}>{group.code}</Badge>
+        <span className="ml-auto text-xs font-medium text-slate-500">{group.players.length} jug.</span>
+        <Icon
+          name="chevron-right"
+          size={18}
+          className={'text-slate-400 transition-transform ' + (open ? 'rotate-90' : '')}
+        />
+      </button>
+      {open && (
+        <ul className="divide-y divide-slate-100 border-t border-slate-200/80">
+          {group.players.map((p) => (
+            <li key={p.id}>
+              <Link
+                to={`/jugadores/${p.id}`}
+                className="flex items-center gap-3 px-4 py-2.5 transition hover:bg-slate-100"
+              >
+                <Avatar name={p.full_name} photoUrl={p.photo_url} color={color} size={36} />
+                <span className="flex-1 font-medium text-slate-800">{p.full_name}</span>
+                {p.is_captain && <Badge color="amber">Capitán</Badge>}
+                <Icon name="chevron-right" size={16} className="text-slate-400" />
+              </Link>
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   )
