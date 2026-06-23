@@ -55,6 +55,7 @@ export interface PublicPlayer {
   category_code: string
   is_captain: boolean
   is_active: boolean
+  photo_url: string | null
 }
 
 export interface Profile {

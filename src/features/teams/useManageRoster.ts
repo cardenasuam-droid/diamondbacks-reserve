@@ -14,12 +14,13 @@ export interface ManagedPlayer {
   team_id: string
   is_captain: boolean
   is_active: boolean
+  photo_url: string | null
 }
 
 async function fetchManageRoster(teamId: string): Promise<ManagedPlayer[]> {
   const { data, error } = await supabase
     .from('players')
-    .select('id, full_name, email, phone, gender, category_code, team_id, is_captain, is_active')
+    .select('id, full_name, email, phone, gender, category_code, team_id, is_captain, is_active, photo_url')
     .eq('team_id', teamId)
     .order('full_name')
   if (error) throw error

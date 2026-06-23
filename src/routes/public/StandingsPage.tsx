@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useActiveSeason } from '@/features/season/useActiveSeason'
 import { useStandings } from '@/features/standings/useStandings'
 import { teamColor } from '@/lib/color'
@@ -74,7 +75,7 @@ export function StandingsPage() {
                         {t.position}
                       </td>
                       <td className="px-2 py-2.5">
-                        <div className="flex items-center gap-2">
+                        <Link to={`/equipos/${t.team_id}`} className="flex items-center gap-2 hover:opacity-70">
                           <span
                             className="inline-block h-3 w-3 shrink-0 rounded-full ring-1 ring-black/5"
                             style={{ backgroundColor: teamColor(t.color) }}
@@ -88,7 +89,7 @@ export function StandingsPage() {
                               </span>
                             )}
                           </span>
-                        </div>
+                        </Link>
                       </td>
                       <td className="px-2 py-2.5 text-center tabular-nums text-slate-600">{t.played}</td>
                       <td className="px-2 py-2.5 text-center tabular-nums text-slate-600">{t.won}</td>

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, Link } from 'react-router-dom'
 import { useActiveSeason } from '@/features/season/useActiveSeason'
 import { useTeams } from '@/features/teams/useTeams'
 import { useStandings } from '@/features/standings/useStandings'
@@ -105,7 +105,7 @@ function PlayersTab({
               <tr key={p.player_id} className="border-b border-slate-100 last:border-0">
                 <td className="px-2 py-2.5 text-center font-semibold text-slate-500">{p.position}</td>
                 <td className="px-2 py-2.5">
-                  <div className="flex items-center gap-2">
+                  <Link to={`/jugadores/${p.player_id}`} className="flex items-center gap-2 hover:opacity-70">
                     <span
                       className="inline-block h-2.5 w-2.5 shrink-0 rounded-full ring-1 ring-black/5"
                       style={{ backgroundColor: teamColor(team?.color) }}
@@ -113,7 +113,7 @@ function PlayersTab({
                     />
                     <span className="font-medium text-slate-800">{p.full_name}</span>
                     <Badge color={categoryColor(typeOf.get(p.category_code))}>{p.category_code}</Badge>
-                  </div>
+                  </Link>
                 </td>
                 <td className="hidden px-2 py-2.5 text-center tabular-nums text-slate-600 sm:table-cell">
                   {p.matches_played}
@@ -160,14 +160,14 @@ function TeamsTab({ seasonId }: { seasonId: string }) {
             <tr key={t.team_id} className="border-b border-slate-100 last:border-0">
               <td className="px-2 py-2.5 text-center font-semibold text-slate-500">{t.position}</td>
               <td className="px-2 py-2.5">
-                <div className="flex items-center gap-2">
+                <Link to={`/equipos/${t.team_id}`} className="flex items-center gap-2 hover:opacity-70">
                   <span
                     className="inline-block h-2.5 w-2.5 shrink-0 rounded-full ring-1 ring-black/5"
                     style={{ backgroundColor: teamColor(t.color) }}
                     aria-hidden
                   />
                   <span className="font-medium text-slate-800">{t.team_name}</span>
-                </div>
+                </Link>
               </td>
               <td className="px-2 py-2.5 text-center tabular-nums text-slate-600">{t.played}</td>
               <td className="px-2 py-2.5 text-center tabular-nums text-slate-600">{t.won}</td>

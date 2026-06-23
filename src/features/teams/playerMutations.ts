@@ -13,6 +13,7 @@ export interface SavePlayerVars {
   category_code: string
   is_captain: boolean
   is_active: boolean
+  photo_url: string
 }
 
 function friendly(msg: string): string {
@@ -43,6 +44,7 @@ export function useSavePlayer() {
         category_code: v.category_code,
         is_captain: v.is_captain,
         is_active: v.is_active,
+        photo_url: v.photo_url.trim() || null,
       }
       if (v.id) {
         const { error } = await supabase.from('players').update(row).eq('id', v.id)

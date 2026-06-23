@@ -7,11 +7,13 @@ import { categoryColor } from '@/features/categories/categoryColor'
 import { genderForCategoryType } from '@/features/categories/eligibility'
 import { useManageRoster, type ManagedPlayer } from '@/features/teams/useManageRoster'
 import { useSavePlayer, useTogglePlayerActive } from '@/features/teams/playerMutations'
+import { MediaField } from '@/features/news/MediaField'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { Loader } from '@/components/ui/Loader'
 import { Badge } from '@/components/ui/Badge'
+import { Avatar } from '@/components/ui/Avatar'
 
 interface Draft {
   id?: string
@@ -21,6 +23,7 @@ interface Draft {
   phone: string
   is_captain: boolean
   is_active: boolean
+  photo_url: string
 }
 
 const EMPTY: Draft = {
@@ -30,6 +33,7 @@ const EMPTY: Draft = {
   phone: '',
   is_captain: false,
   is_active: true,
+  photo_url: '',
 }
 
 export function OrganizerRosterPage() {
@@ -62,6 +66,7 @@ export function OrganizerRosterPage() {
       phone: p.phone ?? '',
       is_captain: p.is_captain,
       is_active: p.is_active,
+      photo_url: p.photo_url ?? '',
     })
   }
 
@@ -140,6 +145,18 @@ export function OrganizerRosterPage() {
             inputMode="email"
             className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
           />
+          <div className="flex items-center gap-3">
+            <Avatar name={draft.full_name || '?'} photoUrl={draft.photo_url} color={team?.color} size={48} />
+            <div className="flex-1">
+              <MediaField
+                label="Foto (opcional)"
+                value={draft.photo_url}
+                onChange={(url) => setDraft({ ...draft, photo_url: url })}
+                accept="image/*"
+                folder="players"
+              />
+            </div>
+          </div>
           <div className="flex flex-wrap gap-4 text-sm text-slate-700">
             <label className="flex items-center gap-2">
               <input
@@ -194,6 +211,7 @@ export function OrganizerRosterPage() {
                 (p.is_active ? '' : 'opacity-60')
               }
             >
+              <Avatar name={p.full_name} photoUrl={p.photo_url} color={team?.color} size={32} />
               <span className="flex-1 truncate">
                 <span className="font-medium text-slate-800">{p.full_name}</span>
                 {p.is_captain && <span title="Capitán"> ⭐</span>}

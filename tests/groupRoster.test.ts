@@ -14,6 +14,7 @@ function player(p: Partial<PublicPlayer> & { id: string; full_name: string; cate
     gender: 'male',
     is_captain: false,
     is_active: true,
+    photo_url: null,
     ...p,
   }
 }
