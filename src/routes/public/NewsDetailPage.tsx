@@ -18,7 +18,7 @@ export function NewsDetailPage() {
   const n = post.data
   return (
     <article className="space-y-4">
-      <Link to="/noticias" className="text-sm text-sky-600 underline">
+      <Link to="/noticias" className="text-sm text-sky-300 underline">
         ‹ Noticias
       </Link>
       {n.image_url && (

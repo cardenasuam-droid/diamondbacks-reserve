@@ -17,7 +17,7 @@ export function ReglamentoPage() {
       {!doc.data ? (
         <EmptyState icon="rules" title="Aún no hay reglamento" description="Cuando se publique, podrás abrirlo aquí." />
       ) : (
-        <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-100 p-5 shadow-sm">
           <div>
             <h2 className="text-lg font-semibold text-slate-800">{doc.data.title}</h2>
             <p className="mt-0.5 text-sm text-slate-500">
@@ -29,7 +29,7 @@ export function ReglamentoPage() {
             href={doc.data.file_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800"
+            className="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
           >
             📄 Abrir reglamento (PDF)
           </a>

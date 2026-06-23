@@ -58,7 +58,7 @@ export function OrganizerResultsPage() {
           {groups.map((g) => (
             <section
               key={g.matchupId}
-              className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
+              className="overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm"
             >
               <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-3 py-2">
                 <TeamDot team={g.teamA} />
@@ -226,7 +226,7 @@ function ResultEditor({
         <select
           value={walkoverTeamId}
           onChange={(e) => setWalkoverTeamId(e.target.value)}
-          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"
+          className="w-full rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm"
         >
           <option value="">— ¿Quién no se presentó? —</option>
           {teamA && <option value={teamA.id}>{teamA.name}</option>}
@@ -244,7 +244,7 @@ function ResultEditor({
         </p>
       )}
       {save.isError && (
-        <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
+        <p className="rounded-lg bg-rose-500/15 px-3 py-2 text-sm text-rose-200">
           {(save.error as Error).message}
         </p>
       )}
@@ -259,7 +259,7 @@ function ResultEditor({
         <button
           onClick={handleSave}
           disabled={!canSave || save.isPending}
-          className="flex-1 rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
+          className="flex-1 rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
         >
           {save.isPending ? 'Guardando…' : 'Guardar y validar'}
         </button>
@@ -285,7 +285,7 @@ function ScoreInput({
       aria-label={label}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-14 rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-center text-sm tabular-nums"
+      className="w-14 rounded-lg border border-slate-300 bg-slate-100 px-2 py-1.5 text-center text-sm tabular-nums"
     />
   )
 }

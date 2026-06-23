@@ -54,7 +54,7 @@ export function CsvImporter<T>({ sample, validate, onImport }: CsvImporterProps<
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
-        <label className="cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100">
+        <label className="cursor-pointer rounded-lg border border-slate-300 bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100">
           Subir archivo…
           <input
             type="file"
@@ -68,7 +68,7 @@ export function CsvImporter<T>({ sample, validate, onImport }: CsvImporterProps<
             setText(sample)
             reset()
           }}
-          className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
+          className="rounded-lg border border-slate-300 bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
         >
           Cargar ejemplo
         </button>
@@ -83,7 +83,7 @@ export function CsvImporter<T>({ sample, validate, onImport }: CsvImporterProps<
         placeholder={sample}
         rows={8}
         spellCheck={false}
-        className="w-full rounded-lg border border-slate-300 bg-white p-3 font-mono text-xs text-slate-800"
+        className="w-full rounded-lg border border-slate-300 bg-slate-100 p-3 font-mono text-xs text-slate-800"
       />
 
       {result && (
@@ -96,7 +96,7 @@ export function CsvImporter<T>({ sample, validate, onImport }: CsvImporterProps<
               {result.valid.length} válidas
             </span>
             {result.errors.length > 0 && (
-              <span className="rounded-full bg-rose-100 px-2.5 py-1 font-medium text-rose-700">
+              <span className="rounded-full bg-rose-100 px-2.5 py-1 font-medium text-rose-200">
                 {result.errors.length} errores
               </span>
             )}
@@ -108,7 +108,7 @@ export function CsvImporter<T>({ sample, validate, onImport }: CsvImporterProps<
           </div>
 
           {result.errors.length > 0 && (
-            <ul className="max-h-48 space-y-1 overflow-y-auto rounded-lg bg-rose-50 p-3 text-xs text-rose-700">
+            <ul className="max-h-48 space-y-1 overflow-y-auto rounded-lg bg-rose-500/15 p-3 text-xs text-rose-200">
               {result.errors.slice(0, 100).map((e, i) => (
                 <li key={i}>
                   {e.row > 0 ? `Fila ${e.row}: ` : ''}
@@ -118,7 +118,7 @@ export function CsvImporter<T>({ sample, validate, onImport }: CsvImporterProps<
             </ul>
           )}
           {result.warnings.length > 0 && (
-            <ul className="max-h-32 space-y-1 overflow-y-auto rounded-lg bg-amber-50 p-3 text-xs text-amber-700">
+            <ul className="max-h-32 space-y-1 overflow-y-auto rounded-lg bg-amber-500/15 p-3 text-xs text-amber-700">
               {result.warnings.slice(0, 50).map((w, i) => (
                 <li key={i}>
                   {w.row > 0 ? `Fila ${w.row}: ` : ''}
@@ -130,13 +130,13 @@ export function CsvImporter<T>({ sample, validate, onImport }: CsvImporterProps<
         </div>
       )}
 
-      {error && <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}
+      {error && <p className="rounded-lg bg-rose-500/15 px-3 py-2 text-sm text-rose-200">{error}</p>}
       {done && <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{done}</p>}
 
       <button
         onClick={handleImport}
         disabled={!canImport}
-        className="w-full rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
+        className="w-full rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
       >
         {importing
           ? 'Importando…'

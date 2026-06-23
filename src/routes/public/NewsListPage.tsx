@@ -23,7 +23,7 @@ export function NewsListPage() {
             <li key={n.id}>
               <Link
                 to={`/noticias/${n.id}`}
-                className="block overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm hover:border-slate-300"
+                className="block overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm hover:border-slate-300"
               >
                 {n.image_url && (
                   <img src={n.image_url} alt="" className="h-40 w-full object-cover" loading="lazy" />

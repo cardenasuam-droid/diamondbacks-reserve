@@ -43,7 +43,7 @@ export function MediaField({
           placeholder="https://… o sube un archivo"
           className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm"
         />
-        <label className="cursor-pointer whitespace-nowrap rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
+        <label className="cursor-pointer whitespace-nowrap rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
           {busy ? 'Subiendo…' : 'Subir'}
           <input
             type="file"
@@ -56,7 +56,7 @@ export function MediaField({
       </div>
       {err && <p className="text-xs text-rose-600">{err}</p>}
       {value && (
-        <a href={value} target="_blank" rel="noopener noreferrer" className="text-xs text-sky-600 underline">
+        <a href={value} target="_blank" rel="noopener noreferrer" className="text-xs text-sky-300 underline">
           Ver archivo
         </a>
       )}

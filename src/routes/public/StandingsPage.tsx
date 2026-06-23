@@ -42,7 +42,7 @@ export function StandingsPage() {
         />
       ) : (
         <>
-          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+          <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
@@ -63,13 +63,13 @@ export function StandingsPage() {
                       key={t.team_id}
                       className={
                         'border-b border-slate-100 last:border-0 ' +
-                        (leader ? 'bg-gold-50/70' : '')
+                        (leader ? 'bg-gold-500/10' : '')
                       }
                     >
                       <td
                         className={
                           'px-2 py-2.5 text-center font-bold tabular-nums ' +
-                          (leader ? 'text-gold-600' : 'font-semibold text-slate-500')
+                          (leader ? 'text-gold-400' : 'font-semibold text-slate-500')
                         }
                       >
                         {t.position}
@@ -102,7 +102,7 @@ export function StandingsPage() {
                       <td
                         className={
                           'px-2 py-2.5 text-center font-bold tabular-nums ' +
-                          (leader ? 'text-gold-700' : 'text-slate-900')
+                          (leader ? 'text-gold-400' : 'text-slate-900')
                         }
                       >
                         {t.points}

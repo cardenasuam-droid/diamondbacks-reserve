@@ -6,7 +6,7 @@ export function ComingSoon({ title, note }: { title: string; note?: string }) {
   return (
     <div>
       <PageHeader title={title} />
-      <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
+      <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-100 px-6 py-12 text-center">
         <div className="text-4xl" aria-hidden>
           🚧
         </div>

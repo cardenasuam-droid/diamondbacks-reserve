@@ -73,7 +73,7 @@ export function ResultsPage() {
           ) : (
             <div className="space-y-4">
               {groups.map((g) => (
-                <div key={g.matchupId} className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                <div key={g.matchupId} className="overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm">
                   <MatchupHeader teamA={g.teamA} teamB={g.teamB} />
                   <ul className="divide-y divide-slate-100">
                     {g.matches.map((m) => {

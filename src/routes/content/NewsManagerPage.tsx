@@ -52,12 +52,12 @@ export function NewsManagerPage() {
       {!draft ? (
         <button
           onClick={() => setDraft({ ...EMPTY })}
-          className="w-full rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800"
+          className="w-full rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
         >
           + Nueva noticia
         </button>
       ) : (
-        <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <section className="space-y-3 rounded-xl border border-slate-200 bg-slate-100 p-4 shadow-sm">
           <input
             value={draft.title}
             onChange={(e) => setDraft({ ...draft, title: e.target.value })}
@@ -79,7 +79,7 @@ export function NewsManagerPage() {
             folder="news"
           />
           {save.isError && (
-            <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
+            <p className="rounded-lg bg-rose-500/15 px-3 py-2 text-sm text-rose-200">
               {(save.error as Error).message}
             </p>
           )}
@@ -94,7 +94,7 @@ export function NewsManagerPage() {
             <button
               onClick={() => handleSave(true)}
               disabled={!draft.title.trim() || save.isPending}
-              className="flex-1 rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
+              className="flex-1 rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
             >
               {save.isPending ? 'Guardando…' : 'Publicar'}
             </button>
@@ -112,7 +112,7 @@ export function NewsManagerPage() {
         {(news.data ?? []).map((n) => (
           <li
             key={n.id}
-            className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm"
+            className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-100 p-3 shadow-sm"
           >
             <span className="flex-1">
               <span className="block font-medium text-slate-800">{n.title}</span>
@@ -121,7 +121,7 @@ export function NewsManagerPage() {
             <Badge color={n.published ? 'emerald' : 'slate'}>
               {n.published ? 'Publicada' : 'Borrador'}
             </Badge>
-            <button onClick={() => edit(n)} className="text-sm text-sky-600 underline">
+            <button onClick={() => edit(n)} className="text-sm text-sky-300 underline">
               Editar
             </button>
             <button
@@ -135,7 +135,7 @@ export function NewsManagerPage() {
           </li>
         ))}
         {(news.data ?? []).length === 0 && (
-          <li className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-500">
+          <li className="rounded-xl border border-slate-200 bg-slate-100 p-4 text-sm text-slate-500">
             Aún no hay noticias.
           </li>
         )}

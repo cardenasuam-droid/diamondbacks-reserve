@@ -39,7 +39,7 @@ export function AvisosPage() {
       ) : (
         <ul className="space-y-3">
           {avisos.data.map((n) => (
-            <li key={n.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <li key={n.id} className="rounded-2xl border border-slate-200 bg-slate-100 p-4 shadow-sm">
               <div className="flex items-start gap-2">
                 <span className="flex-1 font-semibold text-slate-800">{n.title}</span>
                 <Badge color="emerald">{audienceTag(n)}</Badge>

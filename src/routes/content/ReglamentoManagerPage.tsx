@@ -32,7 +32,7 @@ export function ReglamentoManagerPage() {
     <div className="space-y-4">
       <PageHeader title="Reglamento" subtitle="Publicar el documento vigente (PDF)" />
 
-      <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <section className="space-y-3 rounded-xl border border-slate-200 bg-slate-100 p-4 shadow-sm">
         <label className="block">
           <span className="block text-sm font-medium text-slate-700">Título</span>
           <input
@@ -59,7 +59,7 @@ export function ReglamentoManagerPage() {
         />
 
         {save.isError && (
-          <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
+          <p className="rounded-lg bg-rose-500/15 px-3 py-2 text-sm text-rose-200">
             {(save.error as Error).message}
           </p>
         )}
@@ -72,7 +72,7 @@ export function ReglamentoManagerPage() {
         <button
           onClick={publish}
           disabled={!title.trim() || !fileUrl.trim() || save.isPending}
-          className="w-full rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
+          className="w-full rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
         >
           {save.isPending ? 'Publicando…' : 'Publicar como vigente'}
         </button>
@@ -84,7 +84,7 @@ export function ReglamentoManagerPage() {
           {(docs.data ?? []).map((d) => (
             <li
               key={d.id}
-              className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm"
+              className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-100 p-3 shadow-sm"
             >
               <span className="flex-1">
                 <span className="block font-medium text-slate-800">{d.title}</span>
@@ -94,13 +94,13 @@ export function ReglamentoManagerPage() {
                 </span>
               </span>
               {d.is_active && <Badge color="emerald">Vigente</Badge>}
-              <a href={d.file_url} target="_blank" rel="noopener noreferrer" className="text-sm text-sky-600 underline">
+              <a href={d.file_url} target="_blank" rel="noopener noreferrer" className="text-sm text-sky-300 underline">
                 Abrir
               </a>
             </li>
           ))}
           {(docs.data ?? []).length === 0 && (
-            <li className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-500">
+            <li className="rounded-xl border border-slate-200 bg-slate-100 p-4 text-sm text-slate-500">
               Aún no hay reglamento publicado.
             </li>
           )}

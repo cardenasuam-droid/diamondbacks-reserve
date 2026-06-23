@@ -51,12 +51,19 @@ export function TeamRosterPage() {
       <BackLink />
 
       <div
-        className="mb-4 rounded-2xl p-5 text-white shadow-sm"
+        className="relative mb-4 overflow-hidden rounded-2xl p-5 text-white shadow-md ring-1 ring-white/10"
         style={{ backgroundColor: teamColor(team.color, '#334155') }}
       >
-        <h1 className="font-heading text-2xl">{team.name}</h1>
-        {team.slogan && <p className="mt-0.5 text-sm text-white/80">{team.slogan}</p>}
-        <p className="mt-2 text-sm text-white/80">{roster.length} jugadores</p>
+        <div
+          className="absolute inset-0 bg-[url(/tex-silk-dark.webp)] bg-cover bg-center opacity-20 mix-blend-overlay"
+          aria-hidden
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-white/5" aria-hidden />
+        <div className="relative">
+          <h1 className="font-heading text-2xl">{team.name}</h1>
+          {team.slogan && <p className="mt-0.5 text-sm text-white/85">{team.slogan}</p>}
+          <p className="mt-2 text-sm text-white/85">{roster.length} jugadores</p>
+        </div>
       </div>
 
       {/* Estadísticas del equipo (tabla de posiciones) */}
@@ -89,7 +96,7 @@ export function TeamRosterPage() {
                 <h2 className="text-sm font-bold uppercase tracking-wide text-slate-700">{g.name}</h2>
                 <Badge color={categoryColor(typeOf.get(g.code))}>{g.code}</Badge>
               </div>
-              <ul className="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+              <ul className="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm">
                 {g.players.map((p) => (
                   <li key={p.id}>
                     <Link
@@ -125,11 +132,11 @@ function Stat({
 }) {
   return (
     <div
-      className="rise-item rounded-xl border border-slate-200/80 bg-gradient-to-b from-white to-stone-50 p-3 shadow-sm"
+      className="rise-item rounded-xl border border-slate-200/80 bg-gradient-to-b from-slate-100 to-slate-50 p-3 shadow-sm"
       style={{ ['--d']: i } as CSSProperties}
     >
       <p className="text-xs font-medium text-slate-500">{label}</p>
-      <p className={'mt-1 text-2xl font-bold tabular-nums ' + (accent ? 'text-gold-600' : 'text-slate-900')}>
+      <p className={'mt-1 text-2xl font-bold tabular-nums ' + (accent ? 'text-gold-400' : 'text-slate-900')}>
         {value}
       </p>
     </div>
@@ -138,7 +145,7 @@ function Stat({
 
 function BackLink() {
   return (
-    <Link to="/equipos" className="mb-4 inline-flex items-center text-sm font-medium text-sky-600">
+    <Link to="/equipos" className="mb-4 inline-flex items-center text-sm font-medium text-sky-300">
       ‹ Equipos
     </Link>
   )

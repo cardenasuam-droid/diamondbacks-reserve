@@ -51,7 +51,7 @@ export function OrganizerLineupsPage() {
           {lineups.data.map((mu) => (
             <div
               key={mu.id}
-              className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
+              className="overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm"
             >
               <TeamRow team={mu.team_a} lineups={mu.lineups} />
               <div className="border-t border-slate-100" />

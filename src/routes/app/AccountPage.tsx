@@ -20,7 +20,7 @@ export function AccountPage() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-2xl border border-slate-200/80 bg-gradient-to-b from-white to-stone-50 p-5 shadow-sm">
+      <section className="rounded-2xl border border-slate-200/80 bg-gradient-to-b from-slate-100 to-slate-50 p-5 shadow-sm">
         <h1 className="font-heading text-xl">Hola{profile?.full_name ? `, ${profile.full_name}` : ''}</h1>
         <dl className="mt-4 grid grid-cols-3 gap-y-2 text-sm">
           {!isSyntheticEmail(user?.email) && (
@@ -41,7 +41,7 @@ export function AccountPage() {
       )}
 
       {isPlayerAuthEmail(user?.email) && !linked && (
-        <section className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+        <section className="rounded-2xl border border-amber-500/30 bg-amber-500/15 p-4 text-sm text-amber-200">
           Tu cuenta entró pero no está enlazada a una ficha de jugador. Avisa al organizador.
         </section>
       )}
@@ -49,9 +49,9 @@ export function AccountPage() {
       {(role === 'captain' || role === 'organizer') && (
         <Link
           to="/app/capitan"
-          className="flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-gradient-to-b from-white to-stone-50 p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-md"
+          className="flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-gradient-to-b from-slate-100 to-slate-50 p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-md"
         >
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600 ring-1 ring-brand-100">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-500/10 text-brand-300 ring-1 ring-brand-500/30">
             <Icon name="captain" size={20} />
           </span>
           <span className="flex-1">
@@ -80,14 +80,14 @@ function PhotoSection({ playerId, name }: { playerId: string; name: string }) {
   }
 
   return (
-    <section className="rounded-2xl border border-slate-200/80 bg-gradient-to-b from-white to-stone-50 p-5 shadow-sm">
+    <section className="rounded-2xl border border-slate-200/80 bg-gradient-to-b from-slate-100 to-slate-50 p-5 shadow-sm">
       <h2 className="text-sm font-bold uppercase tracking-wide text-slate-700">Tu foto</h2>
       <p className="mt-1 text-xs text-slate-500">
         Aparecerá en el roster de tu equipo y en tu perfil de jugador.
       </p>
       <div className="mt-4 flex items-center gap-4">
         <Avatar name={name} photoUrl={photo} size={64} />
-        <label className="cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
+        <label className="cursor-pointer rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
           {setPhoto.isPending ? 'Subiendo…' : photo ? 'Cambiar foto' : 'Subir foto'}
           <input
             type="file"
@@ -99,7 +99,7 @@ function PhotoSection({ playerId, name }: { playerId: string; name: string }) {
         </label>
       </div>
       {setPhoto.isError && (
-        <p className="mt-3 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
+        <p className="mt-3 rounded-lg bg-rose-500/15 px-3 py-2 text-sm text-rose-200">
           {(setPhoto.error as Error).message}
         </p>
       )}

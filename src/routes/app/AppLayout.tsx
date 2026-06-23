@@ -20,7 +20,7 @@ export function AppLayout() {
   return (
     <div className="min-h-full bg-slate-50 text-slate-900">
       <DevBanner />
-      <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/90 pt-safe backdrop-blur">
+      <header className="sticky top-0 z-10 border-b border-slate-200 bg-slate-100/80 pt-safe backdrop-blur">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-3">
           <div className="flex items-center gap-2">
             <button
@@ -45,7 +45,7 @@ export function AppLayout() {
             >
               <Icon name="bell" size={20} />
               {unread > 0 && (
-                <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
+                <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-slate-100" />
               )}
             </Link>
           </div>

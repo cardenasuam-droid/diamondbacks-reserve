@@ -72,7 +72,7 @@ export function DevPage() {
     <div className="space-y-6">
       <PageHeader title="Consola dev" subtitle="Previsualiza pantallas y roles" />
 
-      <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <section className="space-y-3 rounded-xl border border-slate-200 bg-slate-100 p-4 shadow-sm">
         <p className="text-sm font-medium text-slate-800">Ver la app como…</p>
         <p className="text-xs text-slate-500">
           Cambia el rol <strong>solo en la interfaz</strong> para previsualizar. Los datos
@@ -85,7 +85,7 @@ export function DevPage() {
             className={
               'rounded-lg border px-3 py-1.5 text-sm font-medium ' +
               (!active
-                ? 'border-brand-600 bg-brand-50 text-brand-700'
+                ? 'border-brand-600 bg-brand-500/10 text-brand-300'
                 : 'border-slate-300 text-slate-700 hover:bg-slate-100')
             }
           >
@@ -98,7 +98,7 @@ export function DevPage() {
               className={
                 'rounded-lg border px-3 py-1.5 text-sm font-medium ' +
                 (active === r
-                  ? 'border-brand-600 bg-brand-50 text-brand-700'
+                  ? 'border-brand-600 bg-brand-500/10 text-brand-300'
                   : 'border-slate-300 text-slate-700 hover:bg-slate-100')
               }
             >
@@ -120,7 +120,7 @@ export function DevPage() {
               <li key={it.to}>
                 <Link
                   to={it.to}
-                  className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm hover:border-brand-300"
+                  className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-sm text-slate-800 shadow-sm hover:border-brand-300"
                 >
                   <span>{it.label}</span>
                   <span className="font-mono text-xs text-slate-400">{it.to}</span>

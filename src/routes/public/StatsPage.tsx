@@ -43,14 +43,14 @@ export function StatsPage() {
     <div>
       <PageHeader title="Estadísticas" subtitle={season.data.name} />
 
-      <div className="mb-4 inline-flex rounded-lg border border-slate-200 bg-white p-0.5">
+      <div className="mb-4 inline-flex rounded-lg border border-slate-200 bg-slate-100 p-0.5">
         {(['jugadores', 'equipos'] as Tab[]).map((t) => (
           <button
             key={t}
             onClick={() => selectTab(t)}
             className={
               'rounded-md px-4 py-1.5 text-sm font-medium capitalize transition ' +
-              (tab === t ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100')
+              (tab === t ? 'bg-brand-600 text-white' : 'text-slate-600 hover:bg-slate-100')
             }
           >
             {t}
@@ -87,7 +87,7 @@ function PlayersTab({
   const typeOf = new Map((categories.data ?? []).map((c) => [c.code, c.type]))
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+    <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm">
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
@@ -141,7 +141,7 @@ function TeamsTab({ seasonId }: { seasonId: string }) {
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+    <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm">
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">

@@ -96,7 +96,7 @@ export function OrganizerRosterPage() {
 
   return (
     <div className="space-y-4">
-      <Link to="/app/organizador/equipos" className="text-sm text-sky-600 underline">
+      <Link to="/app/organizador/equipos" className="text-sm text-sky-300 underline">
         ‹ Equipos
       </Link>
       <PageHeader title={team?.name ?? 'Jugadores'} subtitle="Roster del equipo" />
@@ -104,12 +104,12 @@ export function OrganizerRosterPage() {
       {!draft ? (
         <button
           onClick={() => setDraft({ ...EMPTY })}
-          className="w-full rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800"
+          className="w-full rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
         >
           + Nuevo jugador
         </button>
       ) : (
-        <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <section className="space-y-3 rounded-xl border border-slate-200 bg-slate-100 p-4 shadow-sm">
           <input
             value={draft.full_name}
             onChange={(e) => setDraft({ ...draft, full_name: e.target.value })}
@@ -121,7 +121,7 @@ export function OrganizerRosterPage() {
             <select
               value={draft.category_code}
               onChange={(e) => setDraft({ ...draft, category_code: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm"
             >
               <option value="">— Elige categoría —</option>
               {rankingCats.map((c) => (
@@ -176,7 +176,7 @@ export function OrganizerRosterPage() {
             </label>
           </div>
           {save.isError && (
-            <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
+            <p className="rounded-lg bg-rose-500/15 px-3 py-2 text-sm text-rose-200">
               {(save.error as Error).message}
             </p>
           )}
@@ -187,7 +187,7 @@ export function OrganizerRosterPage() {
             <button
               onClick={handleSave}
               disabled={!draft.full_name.trim() || !draft.category_code || save.isPending}
-              className="flex-1 rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
+              className="flex-1 rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
             >
               {save.isPending ? 'Guardando…' : 'Guardar jugador'}
             </button>
@@ -207,7 +207,7 @@ export function OrganizerRosterPage() {
             <li
               key={p.id}
               className={
-                'flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-3 shadow-sm ' +
+                'flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-100 p-3 shadow-sm ' +
                 (p.is_active ? '' : 'opacity-60')
               }
             >
@@ -230,7 +230,7 @@ export function OrganizerRosterPage() {
                     season_id: season.data!.id,
                   })
                 }
-                className="text-sm text-sky-600 underline"
+                className="text-sm text-sky-300 underline"
               >
                 {p.is_active ? 'Desactivar' : 'Activar'}
               </button>
@@ -239,7 +239,7 @@ export function OrganizerRosterPage() {
         </ul>
       )}
       {toggle.isError && (
-        <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
+        <p className="rounded-lg bg-rose-500/15 px-3 py-2 text-sm text-rose-200">
           {(toggle.error as Error).message}
         </p>
       )}

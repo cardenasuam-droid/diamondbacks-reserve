@@ -28,7 +28,7 @@ export function MorePage() {
         {ITEMS.map((item, i) => {
           const inner = (
             <div className="flex items-center gap-3 p-3.5">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600 ring-1 ring-brand-100">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-500/10 text-brand-300 ring-1 ring-brand-500/30">
                 <Icon name={item.icon} size={20} />
               </span>
               <span className="flex-1">

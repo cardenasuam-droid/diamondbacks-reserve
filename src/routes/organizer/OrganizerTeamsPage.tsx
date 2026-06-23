@@ -61,12 +61,12 @@ export function OrganizerTeamsPage() {
       {!draft ? (
         <button
           onClick={() => setDraft({ ...EMPTY })}
-          className="w-full rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800"
+          className="w-full rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
         >
           + Nuevo equipo
         </button>
       ) : (
-        <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <section className="space-y-3 rounded-xl border border-slate-200 bg-slate-100 p-4 shadow-sm">
           <input
             value={draft.name}
             onChange={(e) => setDraft({ ...draft, name: e.target.value })}
@@ -102,7 +102,7 @@ export function OrganizerTeamsPage() {
             folder="logos"
           />
           {save.isError && (
-            <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
+            <p className="rounded-lg bg-rose-500/15 px-3 py-2 text-sm text-rose-200">
               {(save.error as Error).message}
             </p>
           )}
@@ -116,7 +116,7 @@ export function OrganizerTeamsPage() {
             <button
               onClick={handleSave}
               disabled={!draft.name.trim() || save.isPending}
-              className="flex-1 rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
+              className="flex-1 rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
             >
               {save.isPending ? 'Guardando…' : 'Guardar equipo'}
             </button>
@@ -135,7 +135,7 @@ export function OrganizerTeamsPage() {
           {(teams.data ?? []).map((t) => (
             <li
               key={t.id}
-              className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm"
+              className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-100 p-3 shadow-sm"
             >
               <span
                 className="inline-block h-3 w-3 shrink-0 rounded-full ring-1 ring-black/5"
@@ -145,7 +145,7 @@ export function OrganizerTeamsPage() {
               <span className="flex-1 truncate font-medium text-slate-800">{t.name}</span>
               <Link
                 to={`/app/organizador/equipos/${t.id}`}
-                className="text-sm text-sky-600 underline"
+                className="text-sm text-sky-300 underline"
               >
                 Jugadores
               </Link>
@@ -165,7 +165,7 @@ export function OrganizerTeamsPage() {
         </ul>
       )}
       {del.isError && (
-        <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
+        <p className="rounded-lg bg-rose-500/15 px-3 py-2 text-sm text-rose-200">
           {(del.error as Error).message}
         </p>
       )}

@@ -16,9 +16,9 @@
     sans-serif;
   --font-heading: "Russo One", var(--font-sans);
 
-  /* Sombras suaves premium (reemplazan shadow-sm/md). */
-  --shadow-sm: 0 1px 2px 0 rgb(28 25 23 / 0.05), 0 6px 16px -6px rgb(28 25 23 / 0.10);
-  --shadow-md: 0 4px 12px -2px rgb(28 25 23 / 0.12), 0 12px 28px -8px rgb(28 25 23 / 0.14);
+  /* Sombras para tema OSCURO (negras, más profundas). */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.4), 0 8px 20px -8px rgb(0 0 0 / 0.55);
+  --shadow-md: 0 6px 18px -4px rgb(0 0 0 / 0.5), 0 16px 36px -10px rgb(0 0 0 / 0.6);
 
   /* Marca — ESMERALDA (serpiente). `brand-*` + remapeo de `sky-*` para que los
      usos existentes (enlaces, nav activa, focus) adopten la marca sin tocar archivos. */
@@ -47,24 +47,27 @@
   --color-gold-800: #713f12;  --color-accent-800: #713f12;  --color-amber-800: #713f12;
   --color-gold-900: #5c3310;  --color-accent-900: #5c3310;  --color-amber-900: #5c3310;
 
-  /* Neutros CÁLIDOS (stone) — combinan mejor con el oro. Remapean `slate-*`
-     (mismos pasos de luminosidad, solo más cálidos): toda la app se calienta
-     sin tocar componentes. Para volver a frío, borra este bloque. */
-  --color-slate-50:  #fafaf9;
-  --color-slate-100: #f5f5f4;
-  --color-slate-200: #e7e5e4;
-  --color-slate-300: #d6d3d1;
-  --color-slate-400: #a8a29e;
-  --color-slate-500: #78716c;
-  --color-slate-600: #57534e;
-  --color-slate-700: #44403c;
-  --color-slate-800: #292524;
-  --color-slate-900: #1c1917;
-  --color-slate-950: #0c0a09;
+  /* Neutros INVERTIDOS para tema OSCURO (carbón con matiz esmeralda). Remapean
+     `slate-*` de modo que TODA la app se vuelve oscura sin tocar componentes:
+       slate-50  = fondo casi negro  ·  slate-900 = tinta casi blanca
+     Las superficies de tarjeta usan slate-100; los bordes slate-200.
+     OJO: `bg-slate-900`/`hover:bg-slate-800` (botón "ink") se convierten a
+     `bg-brand-600`/`hover:bg-brand-700` en los componentes (ver barrido). */
+  --color-slate-50:  #0b1410;  /* fondo de página */
+  --color-slate-100: #15241d;  /* superficie de tarjeta / hover */
+  --color-slate-200: #25382f;  /* bordes */
+  --color-slate-300: #44524a;  /* hints, chevrons, bordes de input */
+  --color-slate-400: #6c736b;
+  --color-slate-500: #9aa39b;  /* texto atenuado (AA sobre el fondo) */
+  --color-slate-600: #b8c0b9;
+  --color-slate-700: #d3dbd4;  /* etiquetas */
+  --color-slate-800: #e9efe9;
+  --color-slate-900: #f4f7f4;  /* tinta / títulos */
+  --color-slate-950: #ffffff;
 }
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 /* Tipografía: títulos con interletraje ajustado y reparto de línea equilibrado;
@@ -94,8 +97,11 @@ html {
 body {
   margin: 0;
   font-family: var(--font-sans);
-  background-color: #fafaf9; /* stone-50 (cálido) */
-  color: #1c1917; /* stone-900 (tinta) */
+  /* Fondo oscuro esmeralda-carbón con un halo sutil arriba. */
+  background-color: #0b1410;
+  background-image: radial-gradient(125% 85% at 50% -10%, #11271d 0%, #0b1410 52%, #070f0b 100%);
+  background-attachment: fixed;
+  color: #f4f7f4; /* tinta casi blanca */
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   -webkit-tap-highlight-color: transparent;
@@ -164,7 +170,7 @@ button:not(:disabled):active {
 
   /* Shimmer de carga para skeletons. */
   .skeleton {
-    background: linear-gradient(100deg, #e7e5e4 30%, #f5f5f4 50%, #e7e5e4 70%);
+    background: linear-gradient(100deg, #15241d 30%, #25382f 50%, #15241d 70%);
     background-size: 200% 100%;
     animation: shimmer 1.4s ease-in-out infinite;
   }

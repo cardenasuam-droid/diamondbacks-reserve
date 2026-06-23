@@ -35,7 +35,7 @@ export function NavDrawer({ open, onClose }: { open: boolean; onClose: () => voi
         onClick={onClose}
         aria-hidden
         className={
-          'fixed inset-0 z-30 bg-slate-900/40 transition-opacity duration-200 ' +
+          'fixed inset-0 z-30 bg-black/60 transition-opacity duration-200 ' +
           (open ? 'opacity-100' : 'pointer-events-none opacity-0')
         }
       />
@@ -46,7 +46,7 @@ export function NavDrawer({ open, onClose }: { open: boolean; onClose: () => voi
         aria-label="Menú de navegación"
         aria-hidden={!open}
         className={
-          'fixed inset-y-0 left-0 z-40 flex w-72 max-w-[85%] flex-col bg-white shadow-xl transition-transform duration-200 ' +
+          'fixed inset-y-0 left-0 z-40 flex w-72 max-w-[85%] flex-col bg-slate-100 shadow-xl transition-transform duration-200 ' +
           (open ? 'translate-x-0' : '-translate-x-full')
         }
       >
@@ -89,7 +89,7 @@ export function NavDrawer({ open, onClose }: { open: boolean; onClose: () => voi
                         className={({ isActive }) =>
                           'flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition ' +
                           (isActive
-                            ? 'bg-brand-50 text-brand-700 ring-1 ring-brand-100'
+                            ? 'bg-brand-500/10 text-brand-300 ring-1 ring-brand-500/30'
                             : 'text-slate-700 hover:bg-slate-100')
                         }
                       >
@@ -123,7 +123,7 @@ export function NavDrawer({ open, onClose }: { open: boolean; onClose: () => voi
             <NavLink
               to="/login"
               onClick={onClose}
-              className="block w-full rounded-lg bg-slate-900 px-3 py-2 text-center text-sm font-semibold text-white hover:bg-slate-800"
+              className="block w-full rounded-lg bg-brand-600 px-3 py-2 text-center text-sm font-semibold text-white hover:bg-brand-700"
             >
               Entrar
             </NavLink>

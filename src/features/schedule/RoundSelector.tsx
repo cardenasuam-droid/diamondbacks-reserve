@@ -19,8 +19,8 @@ export function RoundSelector({ rounds, selectedId, onSelect }: RoundSelectorPro
             className={
               'shrink-0 rounded-full px-4 py-1.5 text-sm font-semibold transition ' +
               (active
-                ? 'bg-slate-900 text-white'
-                : 'border border-slate-300 bg-white text-slate-600 hover:bg-slate-100')
+                ? 'bg-brand-600 text-white'
+                : 'border border-slate-300 bg-slate-100 text-slate-600 hover:bg-slate-100')
             }
           >
             J{r.round_number}

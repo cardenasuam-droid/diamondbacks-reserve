@@ -44,7 +44,7 @@ export function TeamsPage() {
             <li key={t.id}>
               <Link
                 to={`/equipos/${t.id}`}
-                className="flex items-center gap-3 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:border-slate-300 hover:shadow"
+                className="flex items-center gap-3 overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm transition hover:border-slate-300 hover:shadow"
               >
                 <span className="h-14 w-2 shrink-0" style={{ backgroundColor: teamColor(t.color) }} aria-hidden />
                 <span className="flex-1 py-3">

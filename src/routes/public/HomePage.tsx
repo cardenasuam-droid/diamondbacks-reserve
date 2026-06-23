@@ -23,6 +23,11 @@ export function HomePage() {
           className="absolute inset-0 bg-gradient-to-r from-stone-950/85 via-stone-950/55 to-stone-950/10"
           aria-hidden
         />
+        {/* Halo dorado sutil (calidez "oro" del look luxury). */}
+        <div
+          className="pointer-events-none absolute -right-10 -top-14 h-48 w-48 rounded-full bg-gold-500/20 blur-3xl"
+          aria-hidden
+        />
         {/* Recorte del hero (public/hero-player-3.webp). Se cambia a mano cada cierto
             tiempo (rotación manual): solo apunta a otro archivo hero-player*.webp. */}
         <div
@@ -55,7 +60,7 @@ export function HomePage() {
             className="rise-item flex flex-col gap-2 p-4"
             style={{ ['--d']: i } as CSSProperties}
           >
-            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-600 ring-1 ring-brand-100">
+            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-500/10 text-brand-300 ring-1 ring-brand-500/30">
               <Icon name={q.icon} size={22} />
             </span>
             <span className="mt-1 font-semibold text-slate-800">{q.label}</span>

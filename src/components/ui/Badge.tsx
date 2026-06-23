@@ -1,12 +1,14 @@
 import type { ReactNode } from 'react'
 
+// Pills translúcidos para tema oscuro: fondo tenue del color + texto claro del
+// mismo tono. El slate usa el neutro invertido (chip oscuro, texto claro).
 const COLORS = {
-  slate: 'bg-slate-100 text-slate-600',
-  blue: 'bg-blue-100 text-blue-700',
-  rose: 'bg-rose-100 text-rose-700',
-  purple: 'bg-purple-100 text-purple-700',
-  amber: 'bg-amber-100 text-amber-700',
-  emerald: 'bg-emerald-100 text-emerald-700',
+  slate: 'bg-slate-200/70 text-slate-700',
+  blue: 'bg-blue-500/15 text-blue-300',
+  rose: 'bg-rose-500/15 text-rose-300',
+  purple: 'bg-purple-500/15 text-purple-300',
+  amber: 'bg-amber-500/15 text-amber-300',
+  emerald: 'bg-emerald-500/15 text-emerald-300',
 } as const
 
 export type BadgeColor = keyof typeof COLORS
@@ -14,7 +16,7 @@ export type BadgeColor = keyof typeof COLORS
 export function Badge({ children, color = 'slate' }: { children: ReactNode; color?: BadgeColor }) {
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ring-1 ring-inset ring-black/5 ${COLORS[color]}`}
+      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ring-1 ring-inset ring-white/10 ${COLORS[color]}`}
     >
       {children}
     </span>

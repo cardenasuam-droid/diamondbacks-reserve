@@ -51,20 +51,27 @@ export function PlayerDetailPage() {
 
       {/* Encabezado */}
       <div
-        className="mb-5 flex items-center gap-4 rounded-2xl p-5 text-white shadow-sm"
+        className="relative mb-5 overflow-hidden rounded-2xl p-5 text-white shadow-md ring-1 ring-white/10"
         style={{ backgroundColor: teamColor(team?.color, '#334155') }}
       >
-        <Avatar name={player.full_name} photoUrl={player.photo_url} color={team?.color} size={72} />
-        <div className="min-w-0">
-          <h1 className="truncate font-heading text-2xl">{player.full_name}</h1>
-          {team && (
-            <Link to={`/equipos/${team.id}`} className="mt-0.5 inline-block text-sm text-white/85 underline">
-              {team.name}
-            </Link>
-          )}
-          <div className="mt-2 flex flex-wrap items-center gap-2">
-            <Badge color={categoryColor(category?.type)}>{player.category_code}</Badge>
-            {player.is_captain && <Badge color="amber">Capitán</Badge>}
+        <div
+          className="absolute inset-0 bg-[url(/tex-silk-dark.webp)] bg-cover bg-center opacity-20 mix-blend-overlay"
+          aria-hidden
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-white/5" aria-hidden />
+        <div className="relative flex items-center gap-4">
+          <Avatar name={player.full_name} photoUrl={player.photo_url} color={team?.color} size={72} />
+          <div className="min-w-0">
+            <h1 className="truncate font-heading text-2xl">{player.full_name}</h1>
+            {team && (
+              <Link to={`/equipos/${team.id}`} className="mt-0.5 inline-block text-sm text-white/85 underline">
+                {team.name}
+              </Link>
+            )}
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <Badge color={categoryColor(category?.type)}>{player.category_code}</Badge>
+              {player.is_captain && <Badge color="amber">Capitán</Badge>}
+            </div>
           </div>
         </div>
       </div>
@@ -116,11 +123,11 @@ function Stat({
 }) {
   return (
     <div
-      className="rise-item rounded-xl border border-slate-200/80 bg-gradient-to-b from-white to-stone-50 p-3 shadow-sm"
+      className="rise-item rounded-xl border border-slate-200/80 bg-gradient-to-b from-slate-100 to-slate-50 p-3 shadow-sm"
       style={{ ['--d']: i } as CSSProperties}
     >
       <p className="text-xs font-medium text-slate-500">{label}</p>
-      <p className={'mt-1 text-2xl font-bold tabular-nums ' + (accent ? 'text-gold-600' : 'text-slate-900')}>
+      <p className={'mt-1 text-2xl font-bold tabular-nums ' + (accent ? 'text-gold-400' : 'text-slate-900')}>
         {value}
       </p>
     </div>
@@ -129,7 +136,7 @@ function Stat({
 
 function BackLink({ onClick }: { onClick: () => void }) {
   return (
-    <button onClick={onClick} className="mb-4 inline-flex items-center text-sm font-medium text-sky-600">
+    <button onClick={onClick} className="mb-4 inline-flex items-center text-sm font-medium text-sky-300">
       ‹ Volver
     </button>
   )

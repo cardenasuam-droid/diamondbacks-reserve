@@ -7,7 +7,7 @@ export function Skeleton({ className = '' }: { className?: string }) {
 // Bloque típico: varias líneas dentro de una tarjeta.
 export function SkeletonCard({ lines = 3 }: { lines?: number }) {
   return (
-    <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm">
+    <div className="rounded-2xl border border-slate-200/80 bg-slate-100 p-4 shadow-sm">
       <Skeleton className="h-4 w-1/3" />
       <div className="mt-3 space-y-2">
         {Array.from({ length: lines }).map((_, i) => (

@@ -86,14 +86,14 @@ export function OrganizerImportPage() {
     <div>
       <PageHeader title="Importar CSV" subtitle={season.data.name} />
 
-      <div className="mb-4 inline-flex rounded-lg border border-slate-200 bg-white p-0.5">
+      <div className="mb-4 inline-flex rounded-lg border border-slate-200 bg-slate-100 p-0.5">
         {(['equipos', 'jugadores', 'rol'] as Tab[]).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
             className={
               'rounded-md px-4 py-1.5 text-sm font-medium capitalize transition ' +
-              (tab === t ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100')
+              (tab === t ? 'bg-brand-600 text-white' : 'text-slate-600 hover:bg-slate-100')
             }
           >
             {t}
@@ -101,7 +101,7 @@ export function OrganizerImportPage() {
         ))}
       </div>
 
-      <div className="mb-4 rounded-lg bg-sky-50 px-3 py-2 text-xs text-sky-800">
+      <div className="mb-4 rounded-lg bg-brand-500/10 px-3 py-2 text-xs text-brand-200">
         {tab === 'equipos' && 'Crea los equipos de la temporada. El capitán se marca en el CSV de jugadores.'}
         {tab === 'jugadores' && 'Carga los rosters. Importa primero los equipos. El género debe coincidir con la categoría.'}
         {tab === 'rol' && 'Importa el calendario completo. Requiere equipos cargados. Valida 27 partidos por jornada y sin choques de cancha.'}

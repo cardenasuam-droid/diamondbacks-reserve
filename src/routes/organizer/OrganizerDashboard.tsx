@@ -65,7 +65,7 @@ export function OrganizerDashboard() {
           <Link
             key={s.to}
             to={s.to}
-            className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-slate-300"
+            className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-100 p-4 shadow-sm hover:border-slate-300"
           >
             <span className="text-2xl" aria-hidden>
               {s.icon}
@@ -81,7 +81,7 @@ export function OrganizerDashboard() {
         ))}
       </section>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-600 shadow-sm">
+      <section className="rounded-xl border border-slate-200 bg-slate-100 p-4 text-sm text-slate-600 shadow-sm">
         <p className="font-medium text-slate-800">Próximamente</p>
         <p className="mt-1">Avisos/notificaciones internas llegarán en su módulo.</p>
       </section>
@@ -91,7 +91,7 @@ export function OrganizerDashboard() {
 
 function Stat({ value, label }: { value: number | string; label: string }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 text-center shadow-sm">
+    <div className="rounded-xl border border-slate-200 bg-slate-100 p-4 text-center shadow-sm">
       <div className="text-2xl font-bold text-slate-900">{value}</div>
       <div className="text-xs text-slate-500">{label}</div>
     </div>
