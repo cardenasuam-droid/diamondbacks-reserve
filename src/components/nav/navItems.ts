@@ -94,4 +94,9 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: '/app/contenido/avisos', label: 'Avisos', icon: '📣', requires: 'content' },
     ],
   },
+  {
+    title: 'Desarrollo',
+    requires: 'organizer',
+    items: [{ to: '/dev', label: 'Consola dev', icon: '🧪', requires: 'organizer' }],
+  },
 ]

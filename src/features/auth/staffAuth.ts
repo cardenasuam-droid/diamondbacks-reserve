@@ -2,7 +2,8 @@ import { supabase } from '@/lib/supabase'
 
 // Email sintético del staff, derivado del staff_member.id público. Debe coincidir
 // con lo que espera el trigger handle_new_user (0009).
-const STAFF_EMAIL_DOMAIN = 'staff.local'
+// TLD real: Supabase Auth rechaza `.local`. No se envía correo (Confirm email OFF).
+const STAFF_EMAIL_DOMAIN = 'staff.diamondbackspadel.org'
 
 export function staffAuthEmail(staffId: string): string {
   return `${staffId}@${STAFF_EMAIL_DOMAIN}`

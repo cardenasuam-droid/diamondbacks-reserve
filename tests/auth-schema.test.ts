@@ -28,19 +28,19 @@ describe('auth schema', () => {
 describe('emails sintéticos', () => {
   it('jugador: deriva del player_id y lo reconoce', () => {
     const email = playerAuthEmail('abc-123')
-    expect(email).toBe('abc-123@players.local')
+    expect(email).toBe('abc-123@players.diamondbackspadel.org')
     expect(isPlayerAuthEmail(email)).toBe(true)
     expect(isPlayerAuthEmail('real@gmail.com')).toBe(false)
     expect(isPlayerAuthEmail(null)).toBe(false)
   })
 
   it('staff: deriva del staff_id', () => {
-    expect(staffAuthEmail('s-1')).toBe('s-1@staff.local')
+    expect(staffAuthEmail('s-1')).toBe('s-1@staff.diamondbackspadel.org')
   })
 
   it('isSyntheticEmail reconoce jugador y staff, no correos reales', () => {
-    expect(isSyntheticEmail('abc@players.local')).toBe(true)
-    expect(isSyntheticEmail('s-1@staff.local')).toBe(true)
+    expect(isSyntheticEmail('abc@players.diamondbackspadel.org')).toBe(true)
+    expect(isSyntheticEmail('s-1@staff.diamondbackspadel.org')).toBe(true)
     expect(isSyntheticEmail('real@gmail.com')).toBe(false)
     expect(isSyntheticEmail(undefined)).toBe(false)
   })

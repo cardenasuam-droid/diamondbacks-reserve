@@ -17,6 +17,9 @@ dist-ssr
 # MCP local: contiene el token de Netlify, NO commitear
 .mcp.json
 
+# Estado local del CLI de Netlify (deploys), no compartir
+.netlify
+
 # Claude Code: ajustes locales personales (no compartir)
 .claude/settings.local.json
 

@@ -3,7 +3,9 @@ import { supabase } from '@/lib/supabase'
 // El email de Supabase Auth es sintético, derivado del player_id público. El
 // jugador nunca lo ve ni lo escribe. Debe coincidir con lo que espera el trigger
 // handle_new_user (0008).
-const PLAYER_EMAIL_DOMAIN = 'players.local'
+// TLD real: Supabase Auth rechaza dominios reservados como `.local`. No se
+// envía correo a esta dirección (Confirm email OFF); es solo un identificador.
+const PLAYER_EMAIL_DOMAIN = 'players.diamondbackspadel.org'
 
 export function playerAuthEmail(playerId: string): string {
   return `${playerId}@${PLAYER_EMAIL_DOMAIN}`
@@ -16,7 +18,7 @@ export function isPlayerAuthEmail(email: string | null | undefined): boolean {
 
 /** ¿Es un email sintético (jugador o staff)? La UI muestra el nombre, no esto. */
 export function isSyntheticEmail(email: string | null | undefined): boolean {
-  return Boolean(email && /@(players|staff)\.local$/.test(email))
+  return Boolean(email && /@(players|staff)\.diamondbackspadel\.org$/.test(email))
 }
 
 export async function playerHasAccount(playerId: string): Promise<boolean> {

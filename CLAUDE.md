@@ -56,8 +56,8 @@ después entra con nombre + contraseña desde cualquier dispositivo. La sesión 
 Supabase persiste hasta cerrar sesión.
 
 Por debajo es email+password de Supabase, pero el email es **sintético** y se
-deriva del `player_id` público (`<player_id>@players.local`): el jugador nunca ve
-ni escribe un email. La verificación del teléfono se hace en el **servidor**
+deriva del `player_id` público (`<player_id>@players.diamondbackspadel.org`): el
+jugador nunca ve ni escribe un email. (TLD real: Supabase Auth rechaza `.local`.) La verificación del teléfono se hace en el **servidor**
 (trigger `handle_new_user` + RPC `verify_player_claim`, migración 0008); el
 teléfono nunca se expone al cliente. Un índice único `profiles.player_id` impide
 reclamar la misma ficha dos veces.
@@ -67,7 +67,7 @@ reclamar la misma ficha dos veces.
 semilla `staff_members` (full_name, role, `access_code`); aparece en el mismo
 selector y su verificación de primer acceso es el **código** (no tiene teléfono).
 Esto resuelve el arranque: alguien sube los jugadores reales antes de que existan
-jugadores. Email sintético `<staff_id>@staff.local`; migración 0009. Bootstrap:
+jugadores. Email sintético `<staff_id>@staff.diamondbackspadel.org`; migración 0009. Bootstrap:
 insertar la primera fila de `staff_members` a mano (SQL) para arrancar; la lista
 completa se carga después. Queda además un **login por correo** oculto como
 respaldo de emergencia (cuenta creada en el panel de Supabase). Requiere en
