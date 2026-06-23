@@ -225,7 +225,7 @@ export function LineupEditorPage() {
           </span>
           <span className="text-slate-600">
             {validation?.valid ? (
-              <span className="font-medium text-emerald-600">Alineación válida</span>
+              <span className="font-medium text-emerald-300">Alineación válida</span>
             ) : (
               <span className="font-medium text-amber-600">
                 {validation?.completeCategories.length ?? 0}/9 categorías listas
@@ -240,7 +240,7 @@ export function LineupEditorPage() {
           </p>
         )}
         {savedMsg && (
-          <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{savedMsg}</p>
+          <p className="rounded-lg bg-emerald-500/15 px-3 py-2 text-sm text-emerald-300">{savedMsg}</p>
         )}
 
         <div className="flex gap-2">
@@ -298,7 +298,7 @@ function CategoryRow({
       <div className="flex items-center gap-2 border-b border-slate-100 px-3 py-2">
         <Badge color={categoryColor(cat.type)}>{cat.code}</Badge>
         <span className="text-sm font-medium text-slate-800">{cat.name}</span>
-        {complete && <span className="ml-auto text-sm text-emerald-500">✓</span>}
+        {complete && <span className="ml-auto text-sm text-emerald-400">✓</span>}
       </div>
 
       <div className="grid grid-cols-1 gap-2 p-3 sm:grid-cols-2">

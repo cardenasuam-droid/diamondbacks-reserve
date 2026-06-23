@@ -54,11 +54,7 @@ export function PlayerDetailPage() {
         className="relative mb-5 overflow-hidden rounded-2xl p-5 text-white shadow-md ring-1 ring-white/10"
         style={{ backgroundColor: teamColor(team?.color, '#334155') }}
       >
-        <div
-          className="absolute inset-0 bg-[url(/tex-silk-dark.webp)] bg-cover bg-center opacity-20 mix-blend-overlay"
-          aria-hidden
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-white/5" aria-hidden />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-white/5" aria-hidden />
         <div className="relative flex items-center gap-4">
           <Avatar name={player.full_name} photoUrl={player.photo_url} color={team?.color} size={72} />
           <div className="min-w-0">

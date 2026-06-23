@@ -56,11 +56,7 @@ export function TeamRosterPage() {
         className="relative mb-4 overflow-hidden rounded-2xl p-5 text-white shadow-md ring-1 ring-white/10"
         style={{ backgroundColor: teamColor(team.color, '#334155') }}
       >
-        <div
-          className="absolute inset-0 bg-[url(/tex-silk-dark.webp)] bg-cover bg-center opacity-20 mix-blend-overlay"
-          aria-hidden
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-white/5" aria-hidden />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-white/5" aria-hidden />
         <div className="relative">
           <h1 className="font-heading text-2xl">{team.name}</h1>
           {team.slogan && <p className="mt-0.5 text-sm text-white/85">{team.slogan}</p>}

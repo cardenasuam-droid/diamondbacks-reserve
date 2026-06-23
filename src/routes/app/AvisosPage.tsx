@@ -52,7 +52,7 @@ export function AvisosPage() {
                 href={whatsappShareUrl(n.title, n.body)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-emerald-600 hover:text-emerald-700"
+                className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-emerald-300 hover:text-emerald-300"
               >
                 Compartir por WhatsApp ↗
               </a>

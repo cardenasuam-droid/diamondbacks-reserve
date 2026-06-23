@@ -88,7 +88,7 @@ export function AvisosManagerPage() {
           </p>
         )}
         {done && (
-          <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">✅ Aviso enviado.</p>
+          <p className="rounded-lg bg-emerald-500/15 px-3 py-2 text-sm text-emerald-300">✅ Aviso enviado.</p>
         )}
 
         <button
@@ -120,7 +120,7 @@ export function AvisosManagerPage() {
                     href={whatsappShareUrl(n.title, n.body)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs font-medium text-emerald-600 hover:text-emerald-700"
+                    className="text-xs font-medium text-emerald-300 hover:text-emerald-300"
                   >
                     WhatsApp ↗
                   </a>

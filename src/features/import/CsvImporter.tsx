@@ -92,7 +92,7 @@ export function CsvImporter<T>({ sample, validate, onImport }: CsvImporterProps<
             <span className="rounded-full bg-slate-100 px-2.5 py-1 font-medium text-slate-600">
               {result.count} filas leídas
             </span>
-            <span className="rounded-full bg-emerald-100 px-2.5 py-1 font-medium text-emerald-700">
+            <span className="rounded-full bg-emerald-500/15 px-2.5 py-1 font-medium text-emerald-300">
               {result.valid.length} válidas
             </span>
             {result.errors.length > 0 && (
@@ -131,7 +131,7 @@ export function CsvImporter<T>({ sample, validate, onImport }: CsvImporterProps<
       )}
 
       {error && <p className="rounded-lg bg-rose-500/15 px-3 py-2 text-sm text-rose-200">{error}</p>}
-      {done && <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{done}</p>}
+      {done && <p className="rounded-lg bg-emerald-500/15 px-3 py-2 text-sm text-emerald-300">{done}</p>}
 
       <button
         onClick={handleImport}

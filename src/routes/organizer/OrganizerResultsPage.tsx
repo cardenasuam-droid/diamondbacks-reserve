@@ -238,7 +238,7 @@ function ResultEditor({
         <p className="text-xs text-rose-600">{derived.error}</p>
       )}
       {winnerName && (
-        <p className="text-sm text-emerald-700">
+        <p className="text-sm text-emerald-300">
           Ganador: <span className="font-semibold">{winnerName}</span>
           {walkover ? ' (6-0, 6-0)' : ''}
         </p>
