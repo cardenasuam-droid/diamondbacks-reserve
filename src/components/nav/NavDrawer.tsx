@@ -8,7 +8,7 @@ import { NAV_GROUPS, navAllows } from './navItems'
 // Menú lateral (off-canvas) con TODA la navegación, agrupada y filtrada por rol.
 // Es la fuente completa; la barra inferior solo lleva los accesos rápidos.
 export function NavDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { session, role, user, profile, signOut } = useAuth()
+  const { session, role, user, profile, isDev, signOut } = useAuth()
   const navigate = useNavigate()
   const hasSession = Boolean(session)
   // Para jugadores el email es sintético: mostramos su nombre.
@@ -20,10 +20,12 @@ export function NavDrawer({ open, onClose }: { open: boolean; onClose: () => voi
     navigate('/', { replace: true })
   }
 
-  const groups = NAV_GROUPS.filter((g) => navAllows(g.requires, role, hasSession)).map((g) => ({
-    ...g,
-    items: g.items.filter((i) => navAllows(i.requires, role, hasSession)),
-  }))
+  const groups = NAV_GROUPS.filter((g) => navAllows(g.requires, role, hasSession, isDev)).map(
+    (g) => ({
+      ...g,
+      items: g.items.filter((i) => navAllows(i.requires, role, hasSession, isDev)),
+    }),
+  )
 
   return (
     <>

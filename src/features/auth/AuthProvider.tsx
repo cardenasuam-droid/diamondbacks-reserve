@@ -4,7 +4,7 @@ import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import type { Profile } from '@/lib/types'
 import { AuthContext, type AuthContextValue } from './context'
-import { getDevRole, DEV_ROLE_EVENT } from './devRole'
+import { getDevRole, DEV_ROLE_EVENT, isDevUser } from './devRole'
 
 async function fetchProfile(userId: string): Promise<Profile | null> {
   const { data, error } = await supabase
@@ -101,6 +101,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // El override dev solo aplica con sesión iniciada (la UI lo respeta; RLS no).
       role: session && devRole ? devRole : (profile?.role ?? null),
       devRole: session ? devRole : null,
+      // Acceso al conmutador /dev: Bruja, un organizador real, o si ya hay un
+      // override activo (para poder volver a "Real"). Se evalúa sobre el rol REAL.
+      isDev:
+        Boolean(session) &&
+        (isDevUser(profile?.full_name) || profile?.role === 'organizer' || devRole != null),
       signOut,
       refreshProfile,
     }),

@@ -26,3 +26,12 @@ export function setDevRole(role: UserRole | null): void {
   }
   window.dispatchEvent(new Event(DEV_ROLE_EVENT))
 }
+
+// Usuarios con acceso a la consola /dev (el conmutador de pantallas) aunque su
+// rol real sea otro. Permite a "Bruja" previsualizar toda la app sin tener una
+// cuenta de organizador. No afecta a la seguridad: los datos siguen bajo RLS.
+const DEV_USER_NAMES = ['bruja']
+
+export function isDevUser(fullName: string | null | undefined): boolean {
+  return Boolean(fullName && DEV_USER_NAMES.includes(fullName.trim().toLowerCase()))
+}

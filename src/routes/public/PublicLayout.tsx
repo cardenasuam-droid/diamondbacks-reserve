@@ -1,22 +1,12 @@
 import { useState } from 'react'
 import { Outlet, Link } from 'react-router-dom'
 import { useAuth } from '@/features/auth/context'
-import { BottomNav } from '@/components/nav/BottomNav'
 import { NavDrawer } from '@/components/nav/NavDrawer'
 import { Brand } from '@/components/ui/Brand'
 import { DevBanner } from '@/components/dev/DevBanner'
-import type { NavItem } from '@/components/nav/navItems'
 
-// Accesos rápidos públicos en la barra inferior. El resto (Equipos, Estadísticas,
-// Noticias, Reglamento, cuenta…) vive en el menú ☰.
-const PRIMARY: NavItem[] = [
-  { to: '/', label: 'Inicio', icon: '🏠', end: true },
-  { to: '/rol', label: 'Rol', icon: '📅' },
-  { to: '/resultados', label: 'Resultados', icon: '📊' },
-  { to: '/tabla', label: 'Tabla', icon: '🏆' },
-]
-
-// Layout público mobile-first: header con ☰, navegación inferior y drawer (spec §19.2).
+// Layout público mobile-first: header con ☰ que abre el drawer. Toda la
+// navegación vive en el drawer (sin barra inferior).
 export function PublicLayout() {
   const { session } = useAuth()
   const [menuOpen, setMenuOpen] = useState(false)
@@ -47,12 +37,10 @@ export function PublicLayout() {
         </div>
       </header>
 
-      {/* pb extra para que el contenido no quede tapado por la nav inferior */}
-      <main className="mx-auto max-w-3xl px-4 py-6 pb-24">
+      <main className="mx-auto max-w-3xl px-4 py-6 pb-12">
         <Outlet />
       </main>
 
-      <BottomNav items={PRIMARY} onMenu={() => setMenuOpen(true)} />
       <NavDrawer open={menuOpen} onClose={() => setMenuOpen(false)} />
     </div>
   )

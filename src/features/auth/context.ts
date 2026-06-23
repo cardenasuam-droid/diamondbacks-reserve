@@ -15,6 +15,8 @@ export interface AuthContextValue {
   role: UserRole | null
   /** Rol forzado por la consola /dev (solo UI), o null. */
   devRole: UserRole | null
+  /** Acceso a la consola /dev (Bruja u organizador), aunque el rol real sea otro. */
+  isDev: boolean
   signOut: () => Promise<void>
   /** Vuelve a leer el perfil desde la BD (p. ej. tras enlazar la cuenta). */
   refreshProfile: () => Promise<void>

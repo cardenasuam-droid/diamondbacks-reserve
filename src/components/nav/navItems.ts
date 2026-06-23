@@ -5,7 +5,9 @@ import type { UserRole } from '@/lib/types'
 //   session   -> con sesión iniciada
 //   captain   -> capitán u organizador
 //   organizer -> solo organizador
-export type NavGate = 'public' | 'session' | 'captain' | 'organizer' | 'content'
+//   content   -> organizador o gestor web
+//   dev       -> usuarios con acceso a la consola /dev (Bruja u organizador)
+export type NavGate = 'public' | 'session' | 'captain' | 'organizer' | 'content' | 'dev'
 
 export interface NavItem {
   to: string
@@ -27,6 +29,7 @@ export function navAllows(
   gate: NavGate | undefined,
   role: UserRole | null,
   hasSession: boolean,
+  isDev = false,
 ): boolean {
   switch (gate) {
     case undefined:
@@ -40,6 +43,8 @@ export function navAllows(
       return role === 'organizer'
     case 'content':
       return role === 'organizer' || role === 'web_manager'
+    case 'dev':
+      return isDev
   }
 }
 
@@ -96,7 +101,7 @@ export const NAV_GROUPS: NavGroup[] = [
   },
   {
     title: 'Desarrollo',
-    requires: 'organizer',
-    items: [{ to: '/dev', label: 'Consola dev', icon: '🧪', requires: 'organizer' }],
+    requires: 'dev',
+    items: [{ to: '/dev', label: 'Consola dev', icon: '🧪', requires: 'dev' }],
   },
 ]
