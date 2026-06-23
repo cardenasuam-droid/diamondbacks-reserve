@@ -14,6 +14,11 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'icon-192.png', 'icon-512.png', 'logo-mark.png'],
       workbox: {
+        // El SW nuevo toma control de inmediato y `autoUpdate` recarga la página
+        // sola → el usuario siempre ve la última versión sin refresh manual.
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -36,8 +41,8 @@ export default defineConfig({
         short_name: 'Liga Pádel',
         description: 'Rol, alineaciones, resultados y tabla de la liga de pádel por equipos.',
         lang: 'es',
-        theme_color: '#047857',
-        background_color: '#f8fafc',
+        theme_color: '#064e3b',
+        background_color: '#0b1410',
         display: 'standalone',
         start_url: '/',
         icons: [

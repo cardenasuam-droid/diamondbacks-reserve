@@ -13,9 +13,25 @@
   to = "/index.html"
   status = 200
 
-# El service worker no debe quedar cacheado: así las actualizaciones llegan.
+# El service worker y su registro NO deben cachearse: así las actualizaciones llegan.
 [[headers]]
   for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/registerSW.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+# El shell HTML siempre se revalida → apunta a los assets con hash más recientes.
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/manifest.webmanifest"
   [headers.values]
     Cache-Control = "no-cache"
 
