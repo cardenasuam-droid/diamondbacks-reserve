@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useActiveSeason } from '@/features/season/useActiveSeason'
 import { useTeams } from '@/features/teams/useTeams'
@@ -35,7 +36,7 @@ export function TeamRosterPage() {
     return (
       <div>
         <BackLink />
-        <EmptyState icon="🔍" title="Equipo no encontrado" />
+        <EmptyState icon="search" title="Equipo no encontrado" />
       </div>
     )
   }
@@ -63,20 +64,20 @@ export function TeamRosterPage() {
         <section className="mb-5">
           <h2 className="mb-2 text-sm font-bold uppercase tracking-wide text-slate-700">Estadísticas</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <Stat label="Posición" value={`#${standing.position}`} accent />
-            <Stat label="Puntos" value={standing.points} accent />
-            <Stat label="Jugados" value={standing.played} />
-            <Stat label="Ganados" value={standing.won} />
-            <Stat label="Perdidos" value={standing.lost} />
-            <Stat label="Dif. sets" value={signed(standing.set_diff)} />
-            <Stat label="Dif. juegos" value={signed(standing.game_diff)} />
-            <Stat label="Sets G-P" value={`${standing.sets_won}-${standing.sets_lost}`} />
+            <Stat label="Posición" value={`#${standing.position}`} accent i={0} />
+            <Stat label="Puntos" value={standing.points} accent i={1} />
+            <Stat label="Jugados" value={standing.played} i={2} />
+            <Stat label="Ganados" value={standing.won} i={3} />
+            <Stat label="Perdidos" value={standing.lost} i={4} />
+            <Stat label="Dif. sets" value={signed(standing.set_diff)} i={5} />
+            <Stat label="Dif. juegos" value={signed(standing.game_diff)} i={6} />
+            <Stat label="Sets G-P" value={`${standing.sets_won}-${standing.sets_lost}`} i={7} />
           </div>
         </section>
       )}
 
       {groups.length === 0 ? (
-        <EmptyState icon="👥" title="Sin jugadores" description="Este equipo aún no tiene roster cargado." />
+        <EmptyState icon="teams" title="Sin jugadores" description="Este equipo aún no tiene roster cargado." />
       ) : (
         <div className="space-y-5">
           {groups.map((g) => (
@@ -108,9 +109,22 @@ export function TeamRosterPage() {
   )
 }
 
-function Stat({ label, value, accent }: { label: string; value: string | number; accent?: boolean }) {
+function Stat({
+  label,
+  value,
+  accent,
+  i = 0,
+}: {
+  label: string
+  value: string | number
+  accent?: boolean
+  i?: number
+}) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+    <div
+      className="rise-item rounded-xl border border-slate-200/80 bg-gradient-to-b from-white to-stone-50 p-3 shadow-sm"
+      style={{ ['--d']: i } as CSSProperties}
+    >
       <p className="text-xs font-medium text-slate-500">{label}</p>
       <p className={'mt-1 text-2xl font-bold tabular-nums ' + (accent ? 'text-gold-600' : 'text-slate-900')}>
         {value}

@@ -18,7 +18,7 @@ export function TeamsPage() {
     return (
       <div>
         <PageHeader title="Equipos" />
-        <EmptyState icon="👥" title="Aún no hay equipos" description="Aparecerán cuando se cree la temporada." />
+        <EmptyState icon="teams" title="Aún no hay equipos" description="Aparecerán cuando se cree la temporada." />
       </div>
     )
   }
@@ -37,7 +37,7 @@ export function TeamsPage() {
       ) : teams.isError ? (
         <ErrorState onRetry={() => teams.refetch()} />
       ) : !teams.data || teams.data.length === 0 ? (
-        <EmptyState icon="👥" title="Sin equipos todavía" />
+        <EmptyState icon="teams" title="Sin equipos todavía" />
       ) : (
         <ul className="space-y-3">
           {teams.data.map((t) => (

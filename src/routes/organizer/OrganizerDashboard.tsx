@@ -43,7 +43,7 @@ export function OrganizerDashboard() {
     return (
       <div>
         <PageHeader title="Panel organizador" />
-        <EmptyState icon="🛠️" title="No hay temporada activa" description="Crea o activa una temporada para empezar." />
+        <EmptyState icon="organizer" title="No hay temporada activa" description="Crea o activa una temporada para empezar." />
       </div>
     )
   }

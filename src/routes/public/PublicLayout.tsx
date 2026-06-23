@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { Outlet, Link } from 'react-router-dom'
+import { Outlet, Link, useLocation } from 'react-router-dom'
 import { useAuth } from '@/features/auth/context'
 import { NavDrawer } from '@/components/nav/NavDrawer'
 import { Brand } from '@/components/ui/Brand'
+import { Icon } from '@/components/ui/Icon'
 import { DevBanner } from '@/components/dev/DevBanner'
 
 // Layout público mobile-first: header con ☰ que abre el drawer. Toda la
@@ -10,6 +11,7 @@ import { DevBanner } from '@/components/dev/DevBanner'
 export function PublicLayout() {
   const { session } = useAuth()
   const [menuOpen, setMenuOpen] = useState(false)
+  const location = useLocation()
 
   return (
     <div className="min-h-full bg-slate-50 text-slate-900">
@@ -20,9 +22,9 @@ export function PublicLayout() {
             <button
               onClick={() => setMenuOpen(true)}
               aria-label="Abrir menú"
-              className="rounded-lg p-1.5 text-lg leading-none text-slate-600 hover:bg-slate-100"
+              className="rounded-lg p-1.5 text-slate-600 hover:bg-slate-100"
             >
-              ☰
+              <Icon name="menu" size={22} />
             </button>
             <Link to="/" aria-label="Inicio">
               <Brand />
@@ -38,7 +40,9 @@ export function PublicLayout() {
       </header>
 
       <main className="mx-auto max-w-3xl px-4 py-6 pb-12">
-        <Outlet />
+        <div key={location.pathname} className="rise">
+          <Outlet />
+        </div>
       </main>
 
       <NavDrawer open={menuOpen} onClose={() => setMenuOpen(false)} />

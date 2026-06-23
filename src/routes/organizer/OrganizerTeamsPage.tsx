@@ -49,7 +49,7 @@ export function OrganizerTeamsPage() {
     return (
       <div>
         <PageHeader title="Equipos y jugadores" />
-        <EmptyState icon="👥" title="No hay temporada activa" />
+        <EmptyState icon="teams" title="No hay temporada activa" />
       </div>
     )
   }
@@ -129,7 +129,7 @@ export function OrganizerTeamsPage() {
       ) : teams.isError ? (
         <ErrorState onRetry={() => teams.refetch()} />
       ) : (teams.data ?? []).length === 0 ? (
-        <EmptyState icon="👥" title="Aún no hay equipos" description="Crea el primero o impórtalos por CSV." />
+        <EmptyState icon="teams" title="Aún no hay equipos" description="Crea el primero o impórtalos por CSV." />
       ) : (
         <ul className="space-y-2">
           {(teams.data ?? []).map((t) => (

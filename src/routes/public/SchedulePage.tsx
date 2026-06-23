@@ -32,7 +32,7 @@ export function SchedulePage() {
     return (
       <div>
         <PageHeader title="Rol de juegos" />
-        <EmptyState icon="📅" title="Aún no hay rol" description="El calendario aparecerá cuando el organizador publique las jornadas." />
+        <EmptyState icon="schedule" title="Aún no hay rol" description="El calendario aparecerá cuando el organizador publique las jornadas." />
       </div>
     )
   }
@@ -47,7 +47,7 @@ export function SchedulePage() {
       {rounds.isLoading ? (
         <Loader label="Cargando jornadas…" />
       ) : !rounds.data || rounds.data.length === 0 ? (
-        <EmptyState icon="📅" title="Sin jornadas publicadas" />
+        <EmptyState icon="schedule" title="Sin jornadas publicadas" />
       ) : (
         <>
           <RoundSelector rounds={rounds.data} selectedId={roundId} onSelect={setRoundId} />
@@ -60,7 +60,7 @@ export function SchedulePage() {
           ) : matches.isError ? (
             <ErrorState onRetry={() => matches.refetch()} />
           ) : groups.length === 0 ? (
-            <EmptyState icon="📅" title="Esta jornada no tiene partidos" />
+            <EmptyState icon="schedule" title="Esta jornada no tiene partidos" />
           ) : (
             <div className="space-y-4">
               {groups.map((g) => (

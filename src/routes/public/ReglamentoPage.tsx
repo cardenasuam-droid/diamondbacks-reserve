@@ -15,7 +15,7 @@ export function ReglamentoPage() {
     <div>
       <PageHeader title="Reglamento" subtitle="Documento oficial de la liga" />
       {!doc.data ? (
-        <EmptyState icon="📄" title="Aún no hay reglamento" description="Cuando se publique, podrás abrirlo aquí." />
+        <EmptyState icon="rules" title="Aún no hay reglamento" description="Cuando se publique, podrás abrirlo aquí." />
       ) : (
         <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
           <div>

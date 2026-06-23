@@ -85,7 +85,7 @@ export function LineupEditorPage() {
       <div>
         <PageHeader title="Alineación" />
         <EmptyState
-          icon="🚫"
+          icon="ban"
           title="Tu cuenta no está enlazada a un equipo"
           description="Solo el capitán de un equipo puede armar alineaciones. Avisa al organizador si crees que es un error."
         />
@@ -100,7 +100,7 @@ export function LineupEditorPage() {
       <div>
         <PageHeader title="Alineación" subtitle={team.data.name} />
         <EmptyState
-          icon="📅"
+          icon="schedule"
           title="Sin enfrentamiento publicado"
           description="Cuando el organizador publique el rol, aquí podrás armar tu alineación."
         />

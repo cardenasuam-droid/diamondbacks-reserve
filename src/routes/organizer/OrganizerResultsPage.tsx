@@ -30,7 +30,7 @@ export function OrganizerResultsPage() {
     return (
       <div>
         <PageHeader title="Resultados" />
-        <EmptyState icon="📝" title="No hay temporada activa" />
+        <EmptyState icon="results-edit" title="No hay temporada activa" />
       </div>
     )
   }
@@ -44,7 +44,7 @@ export function OrganizerResultsPage() {
       {rounds.data && rounds.data.length > 0 ? (
         <RoundSelector rounds={rounds.data} selectedId={selected} onSelect={setRoundId} />
       ) : (
-        <EmptyState icon="📅" title="No hay jornadas" />
+        <EmptyState icon="schedule" title="No hay jornadas" />
       )}
 
       {matches.isLoading ? (
@@ -52,7 +52,7 @@ export function OrganizerResultsPage() {
       ) : matches.isError ? (
         <ErrorState onRetry={() => matches.refetch()} />
       ) : groups.length === 0 ? (
-        <EmptyState icon="📝" title="Sin partidos en esta jornada" />
+        <EmptyState icon="results-edit" title="Sin partidos en esta jornada" />
       ) : (
         <div className="space-y-4">
           {groups.map((g) => (

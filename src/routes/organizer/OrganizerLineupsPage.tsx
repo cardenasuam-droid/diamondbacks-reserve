@@ -25,7 +25,7 @@ export function OrganizerLineupsPage() {
     return (
       <div>
         <PageHeader title="Estado de alineaciones" />
-        <EmptyState icon="✅" title="No hay temporada activa" />
+        <EmptyState icon="lineups-status" title="No hay temporada activa" />
       </div>
     )
   }
@@ -37,7 +37,7 @@ export function OrganizerLineupsPage() {
       {rounds.data && rounds.data.length > 0 ? (
         <RoundSelector rounds={rounds.data} selectedId={selected} onSelect={setRoundId} />
       ) : (
-        <EmptyState icon="📅" title="No hay jornadas" />
+        <EmptyState icon="schedule" title="No hay jornadas" />
       )}
 
       {lineups.isLoading ? (
@@ -45,7 +45,7 @@ export function OrganizerLineupsPage() {
       ) : lineups.isError ? (
         <ErrorState onRetry={() => lineups.refetch()} />
       ) : !lineups.data || lineups.data.length === 0 ? (
-        <EmptyState icon="✅" title="Sin enfrentamientos en esta jornada" />
+        <EmptyState icon="lineups-status" title="Sin enfrentamientos en esta jornada" />
       ) : (
         <div className="space-y-2">
           {lineups.data.map((mu) => (

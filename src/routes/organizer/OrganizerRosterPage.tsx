@@ -89,7 +89,7 @@ export function OrganizerRosterPage() {
     return (
       <div>
         <PageHeader title="Jugadores" />
-        <EmptyState icon="👥" title="No hay temporada activa" />
+        <EmptyState icon="teams" title="No hay temporada activa" />
       </div>
     )
   }
@@ -200,7 +200,7 @@ export function OrganizerRosterPage() {
       ) : roster.isError ? (
         <ErrorState onRetry={() => roster.refetch()} />
       ) : (roster.data ?? []).length === 0 ? (
-        <EmptyState icon="🎾" title="Sin jugadores" description="Agrega el primero o impórtalos por CSV." />
+        <EmptyState icon="medal" title="Sin jugadores" description="Agrega el primero o impórtalos por CSV." />
       ) : (
         <ul className="space-y-2">
           {(roster.data ?? []).map((p) => (

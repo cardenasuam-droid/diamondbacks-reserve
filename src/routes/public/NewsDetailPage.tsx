@@ -12,7 +12,7 @@ export function NewsDetailPage() {
   if (post.isLoading) return <Loader label="Cargando…" />
   if (post.isError) return <ErrorState onRetry={() => post.refetch()} />
   if (!post.data) {
-    return <EmptyState icon="📰" title="Noticia no encontrada" />
+    return <EmptyState icon="news" title="Noticia no encontrada" />
   }
 
   const n = post.data

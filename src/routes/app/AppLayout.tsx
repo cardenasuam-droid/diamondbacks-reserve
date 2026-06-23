@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { Outlet, Link } from 'react-router-dom'
+import { Outlet, Link, useLocation } from 'react-router-dom'
 import { useAuth } from '@/features/auth/context'
 import { roleLabel } from '@/features/auth/roles'
 import { NavDrawer } from '@/components/nav/NavDrawer'
 import { Brand } from '@/components/ui/Brand'
+import { Icon } from '@/components/ui/Icon'
 import { DevBanner } from '@/components/dev/DevBanner'
 import { useUnreadAvisos } from '@/features/notifications/useNotifications'
 
@@ -14,6 +15,7 @@ export function AppLayout() {
   const [menuOpen, setMenuOpen] = useState(false)
   const who = profile?.full_name ?? user?.email
   const unread = useUnreadAvisos()
+  const location = useLocation()
 
   return (
     <div className="min-h-full bg-slate-50 text-slate-900">
@@ -24,9 +26,9 @@ export function AppLayout() {
             <button
               onClick={() => setMenuOpen(true)}
               aria-label="Abrir menú"
-              className="rounded-lg p-1.5 text-lg leading-none text-slate-600 hover:bg-slate-100"
+              className="rounded-lg p-1.5 text-slate-600 hover:bg-slate-100"
             >
-              ☰
+              <Icon name="menu" size={22} />
             </button>
             <Link to="/app" aria-label="Mi cuenta">
               <Brand />
@@ -39,9 +41,9 @@ export function AppLayout() {
             <Link
               to="/app/avisos"
               aria-label={unread > 0 ? `Avisos (${unread} sin leer)` : 'Avisos'}
-              className="relative rounded-lg p-1.5 text-lg leading-none text-slate-600 hover:bg-slate-100"
+              className="relative rounded-lg p-1.5 text-slate-600 hover:bg-slate-100"
             >
-              🔔
+              <Icon name="bell" size={20} />
               {unread > 0 && (
                 <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
               )}
@@ -51,7 +53,9 @@ export function AppLayout() {
       </header>
 
       <main className="mx-auto max-w-3xl px-4 py-6 pb-12">
-        <Outlet />
+        <div key={location.pathname} className="rise">
+          <Outlet />
+        </div>
       </main>
 
       <NavDrawer open={menuOpen} onClose={() => setMenuOpen(false)} />

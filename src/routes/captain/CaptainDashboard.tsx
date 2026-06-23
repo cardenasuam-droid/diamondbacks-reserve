@@ -25,7 +25,7 @@ export function CaptainDashboard() {
       <div>
         <PageHeader title="Panel de capitán" />
         <EmptyState
-          icon="🚫"
+          icon="ban"
           title="Tu cuenta no está enlazada a un equipo"
           description="Solo el capitán de un equipo puede usar este panel. Avisa al organizador si crees que es un error."
         />

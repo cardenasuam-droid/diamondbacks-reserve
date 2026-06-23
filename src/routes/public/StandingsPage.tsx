@@ -18,7 +18,7 @@ export function StandingsPage() {
       <div>
         <PageHeader title="Tabla de posiciones" />
         <EmptyState
-          icon="🏆"
+          icon="standings"
           title="Aún no hay temporada"
           description="Cuando el organizador cree la temporada y cargue resultados, la tabla aparecerá aquí."
         />
@@ -36,7 +36,7 @@ export function StandingsPage() {
         <ErrorState onRetry={() => standings.refetch()} />
       ) : !standings.data || standings.data.length === 0 ? (
         <EmptyState
-          icon="🏆"
+          icon="standings"
           title="Sin equipos todavía"
           description="La tabla se llenará en cuanto haya equipos y resultados validados."
         />

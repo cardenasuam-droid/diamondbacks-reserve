@@ -74,7 +74,7 @@ export function OrganizerImportPage() {
     return (
       <div>
         <PageHeader title="Importar CSV" />
-        <EmptyState icon="📥" title="No hay temporada activa" description="Activa una temporada para importar datos." />
+        <EmptyState icon="import" title="No hay temporada activa" description="Activa una temporada para importar datos." />
       </div>
     )
   }

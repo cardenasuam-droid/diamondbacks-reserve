@@ -3,6 +3,7 @@ import { useAuth } from '@/features/auth/context'
 import { roleLabel } from '@/features/auth/roles'
 import { isSyntheticEmail } from '@/features/auth/playerAuth'
 import { Brand } from '@/components/ui/Brand'
+import { Icon } from '@/components/ui/Icon'
 import { NAV_GROUPS, navAllows } from './navItems'
 
 // Menú lateral (off-canvas) con TODA la navegación, agrupada y filtrada por rol.
@@ -56,7 +57,7 @@ export function NavDrawer({ open, onClose }: { open: boolean; onClose: () => voi
             aria-label="Cerrar menú"
             className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100"
           >
-            ✕
+            <Icon name="close" size={18} />
           </button>
         </div>
 
@@ -71,11 +72,9 @@ export function NavDrawer({ open, onClose }: { open: boolean; onClose: () => voi
                   item.soon ? (
                     <li
                       key={item.to}
-                      className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-300"
+                      className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-slate-400"
                     >
-                      <span className="text-lg" aria-hidden>
-                        {item.icon}
-                      </span>
+                      <Icon name={item.icon} size={18} />
                       <span className="flex-1">{item.label}</span>
                       <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500">
                         Pronto
@@ -88,15 +87,13 @@ export function NavDrawer({ open, onClose }: { open: boolean; onClose: () => voi
                         end={item.end}
                         onClick={onClose}
                         className={({ isActive }) =>
-                          'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition ' +
+                          'flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition ' +
                           (isActive
-                            ? 'bg-sky-50 text-sky-700'
+                            ? 'bg-brand-50 text-brand-700 ring-1 ring-brand-100'
                             : 'text-slate-700 hover:bg-slate-100')
                         }
                       >
-                        <span className="text-lg" aria-hidden>
-                          {item.icon}
-                        </span>
+                        <Icon name={item.icon} size={18} />
                         {item.label}
                       </NavLink>
                     </li>

@@ -13,7 +13,9 @@ export type BadgeColor = keyof typeof COLORS
 
 export function Badge({ children, color = 'slate' }: { children: ReactNode; color?: BadgeColor }) {
   return (
-    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${COLORS[color]}`}>
+    <span
+      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ring-1 ring-inset ring-black/5 ${COLORS[color]}`}
+    >
       {children}
     </span>
   )

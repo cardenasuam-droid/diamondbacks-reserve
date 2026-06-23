@@ -34,7 +34,7 @@ export function StatsPage() {
     return (
       <div>
         <PageHeader title="Estadísticas" />
-        <EmptyState icon="📈" title="Aún no hay estadísticas" description="Aparecerán cuando haya resultados." />
+        <EmptyState icon="stats" title="Aún no hay estadísticas" description="Aparecerán cuando haya resultados." />
       </div>
     )
   }
@@ -80,7 +80,7 @@ function PlayersTab({
   if (ranking.isLoading || teams.isLoading) return <Loader label="Cargando ranking…" />
   if (ranking.isError) return <ErrorState onRetry={() => ranking.refetch()} />
   if (!ranking.data || ranking.data.length === 0) {
-    return <EmptyState icon="🎾" title="Sin ranking todavía" description="Se llena cuando hay alineaciones y resultados." />
+    return <EmptyState icon="medal" title="Sin ranking todavía" description="Se llena cuando hay alineaciones y resultados." />
   }
 
   const teamById = new Map((teams.data ?? []).map((t) => [t.id, t]))
@@ -137,7 +137,7 @@ function TeamsTab({ seasonId }: { seasonId: string }) {
   if (standings.isLoading) return <Loader label="Cargando equipos…" />
   if (standings.isError) return <ErrorState onRetry={() => standings.refetch()} />
   if (!standings.data || standings.data.length === 0) {
-    return <EmptyState icon="📈" title="Sin datos de equipo" />
+    return <EmptyState icon="stats" title="Sin datos de equipo" />
   }
 
   return (

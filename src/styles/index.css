@@ -67,6 +67,20 @@
   color-scheme: light;
 }
 
+/* Tipografía: títulos con interletraje ajustado y reparto de línea equilibrado;
+   prosa larga sin huérfanos. */
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+p {
+  text-wrap: pretty;
+}
+.font-heading {
+  letter-spacing: -0.01em;
+}
+
 html,
 body,
 #root {
@@ -134,5 +148,44 @@ button:not(:disabled):active {
   }
   .no-scrollbar::-webkit-scrollbar {
     display: none;
+  }
+
+  /* Aparición sutil al montar (entra de abajo con fundido). fill-mode both
+     garantiza que el contenido quede visible aunque la animación no corra
+     (p. ej. con prefers-reduced-motion el guardado global la vuelve instantánea). */
+  .rise {
+    animation: rise 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  /* Escalonado: en una lista, asigna inline `style={{ ['--d']: i }}` a cada hijo. */
+  .rise-item {
+    animation: rise 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--d, 0) * 55ms);
+  }
+
+  /* Shimmer de carga para skeletons. */
+  .skeleton {
+    background: linear-gradient(100deg, #e7e5e4 30%, #f5f5f4 50%, #e7e5e4 70%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
   }
 }

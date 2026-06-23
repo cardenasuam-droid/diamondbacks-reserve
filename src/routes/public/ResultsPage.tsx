@@ -41,7 +41,7 @@ export function ResultsPage() {
     return (
       <div>
         <PageHeader title="Resultados" />
-        <EmptyState icon="📊" title="Aún no hay resultados" description="Los marcadores aparecerán conforme se validen." />
+        <EmptyState icon="results" title="Aún no hay resultados" description="Los marcadores aparecerán conforme se validen." />
       </div>
     )
   }
@@ -56,7 +56,7 @@ export function ResultsPage() {
       {rounds.isLoading ? (
         <Loader label="Cargando jornadas…" />
       ) : !rounds.data || rounds.data.length === 0 ? (
-        <EmptyState icon="📊" title="Sin jornadas publicadas" />
+        <EmptyState icon="results" title="Sin jornadas publicadas" />
       ) : (
         <>
           <RoundSelector rounds={rounds.data} selectedId={roundId} onSelect={setRoundId} />
@@ -69,7 +69,7 @@ export function ResultsPage() {
           ) : matches.isError ? (
             <ErrorState onRetry={() => matches.refetch()} />
           ) : groups.length === 0 ? (
-            <EmptyState icon="📊" title="Esta jornada no tiene partidos" />
+            <EmptyState icon="results" title="Esta jornada no tiene partidos" />
           ) : (
             <div className="space-y-4">
               {groups.map((g) => (

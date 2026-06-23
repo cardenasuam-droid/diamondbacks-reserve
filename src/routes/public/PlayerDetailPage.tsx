@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useActiveSeason } from '@/features/season/useActiveSeason'
 import { useTeams } from '@/features/teams/useTeams'
@@ -35,7 +36,7 @@ export function PlayerDetailPage() {
     return (
       <div>
         <BackLink onClick={() => navigate(-1)} />
-        <EmptyState icon="🔍" title="Jugador no encontrado" />
+        <EmptyState icon="search" title="Jugador no encontrado" />
       </div>
     )
   }
@@ -73,14 +74,14 @@ export function PlayerDetailPage() {
         <section className="space-y-3">
           <h2 className="text-sm font-bold uppercase tracking-wide text-slate-700">Estadísticas</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <Stat label="Posición" value={`#${stats.position}`} accent />
-            <Stat label="Puntos aportados" value={stats.points_contributed} accent />
-            <Stat label="Partidos" value={stats.matches_played} />
-            <Stat label="% Victorias" value={`${stats.win_percentage}%`} />
-            <Stat label="Ganados" value={stats.matches_won} />
-            <Stat label="Perdidos" value={stats.matches_lost} />
-            <Stat label="Dif. sets" value={signed(stats.set_diff)} />
-            <Stat label="Dif. juegos" value={signed(stats.game_diff)} />
+            <Stat label="Posición" value={`#${stats.position}`} accent i={0} />
+            <Stat label="Puntos aportados" value={stats.points_contributed} accent i={1} />
+            <Stat label="Partidos" value={stats.matches_played} i={2} />
+            <Stat label="% Victorias" value={`${stats.win_percentage}%`} i={3} />
+            <Stat label="Ganados" value={stats.matches_won} i={4} />
+            <Stat label="Perdidos" value={stats.matches_lost} i={5} />
+            <Stat label="Dif. sets" value={signed(stats.set_diff)} i={6} />
+            <Stat label="Dif. juegos" value={signed(stats.game_diff)} i={7} />
           </div>
           <p className="text-xs text-slate-500">
             Cada jugador recibe los puntos que ganó su pareja. Posición dentro del ranking
@@ -89,7 +90,7 @@ export function PlayerDetailPage() {
         </section>
       ) : (
         <EmptyState
-          icon="🎾"
+          icon="medal"
           title="Aún no ha jugado partidos"
           description="Sus estadísticas aparecerán cuando dispute partidos con resultado validado."
         />
@@ -98,9 +99,22 @@ export function PlayerDetailPage() {
   )
 }
 
-function Stat({ label, value, accent }: { label: string; value: string | number; accent?: boolean }) {
+function Stat({
+  label,
+  value,
+  accent,
+  i = 0,
+}: {
+  label: string
+  value: string | number
+  accent?: boolean
+  i?: number
+}) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+    <div
+      className="rise-item rounded-xl border border-slate-200/80 bg-gradient-to-b from-white to-stone-50 p-3 shadow-sm"
+      style={{ ['--d']: i } as CSSProperties}
+    >
       <p className="text-xs font-medium text-slate-500">{label}</p>
       <p className={'mt-1 text-2xl font-bold tabular-nums ' + (accent ? 'text-gold-600' : 'text-slate-900')}>
         {value}

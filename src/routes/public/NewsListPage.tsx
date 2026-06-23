@@ -16,7 +16,7 @@ export function NewsListPage() {
     <div>
       <PageHeader title="Noticias" subtitle="Avisos y comunicados de la liga" />
       {!news.data || news.data.length === 0 ? (
-        <EmptyState icon="📰" title="Aún no hay noticias" description="Cuando se publiquen, aparecerán aquí." />
+        <EmptyState icon="news" title="Aún no hay noticias" description="Cuando se publiquen, aparecerán aquí." />
       ) : (
         <ul className="space-y-3">
           {news.data.map((n) => (

@@ -35,7 +35,7 @@ export function AvisosPage() {
     <div>
       <PageHeader title="Avisos" subtitle="Comunicados de la liga" />
       {!avisos.data || avisos.data.length === 0 ? (
-        <EmptyState icon="🔔" title="No tienes avisos" description="Aquí aparecerán los comunicados que te lleguen." />
+        <EmptyState icon="bell" title="No tienes avisos" description="Aquí aparecerán los comunicados que te lleguen." />
       ) : (
         <ul className="space-y-3">
           {avisos.data.map((n) => (
