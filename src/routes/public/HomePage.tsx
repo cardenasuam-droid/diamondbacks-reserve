@@ -23,9 +23,10 @@ export function HomePage() {
           className="absolute inset-0 bg-gradient-to-r from-stone-950/85 via-stone-950/55 to-stone-950/10"
           aria-hidden
         />
-        {/* Jugador recortado (public/hero-player.webp). Opcional; si falta, no se ve. */}
+        {/* Recorte del hero (public/hero-player-3.webp). Se cambia a mano cada cierto
+            tiempo (rotación manual): solo apunta a otro archivo hero-player*.webp. */}
         <div
-          className="pointer-events-none absolute inset-y-0 right-0 w-3/5 bg-[url(/hero-player.webp)] bg-contain bg-right-bottom bg-no-repeat"
+          className="pointer-events-none absolute inset-y-0 right-0 w-3/5 bg-[url(/hero-player-3.webp)] bg-contain bg-right-bottom bg-no-repeat"
           aria-hidden
         />
         <div className="relative max-w-[64%] p-7">
