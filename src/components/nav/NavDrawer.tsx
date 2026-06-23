@@ -46,7 +46,7 @@ export function NavDrawer({ open, onClose }: { open: boolean; onClose: () => voi
         aria-label="Menú de navegación"
         aria-hidden={!open}
         className={
-          'fixed inset-y-0 left-0 z-40 flex w-72 max-w-[85%] flex-col bg-slate-100 shadow-xl transition-transform duration-200 ' +
+          'glass fixed inset-y-0 left-0 z-40 flex w-72 max-w-[85%] flex-col border-r border-white/10 bg-slate-100/80 shadow-xl transition-transform duration-200 ' +
           (open ? 'translate-x-0' : '-translate-x-full')
         }
       >

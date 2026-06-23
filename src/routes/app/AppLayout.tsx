@@ -20,7 +20,7 @@ export function AppLayout() {
   return (
     <div className="min-h-full bg-slate-50 text-slate-900">
       <DevBanner />
-      <header className="sticky top-0 z-10 border-b border-slate-200 bg-slate-100/80 pt-safe backdrop-blur">
+      <header className="glass sticky top-0 z-10 border-b border-white/10 bg-slate-100/55 pt-safe">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-3">
           <div className="flex items-center gap-2">
             <button

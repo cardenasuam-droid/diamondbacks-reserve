@@ -41,16 +41,17 @@ export function HomePage() {
           <h1 className="mt-1 font-heading text-3xl leading-tight">
             Liga de Pádel <span className="text-amber-400">por Equipos</span>
           </h1>
-          <p className="mt-2 text-sm text-white/85">
-            {season ? (
-              <>
-                Temporada <span className="font-semibold">{season.name}</span>
-                {season.status === 'active' && ' · en curso'}
-              </>
-            ) : (
-              'Bienvenido. Pronto verás aquí el rol, la tabla y las estadísticas.'
-            )}
-          </p>
+          {season ? (
+            <span className="glass mt-3 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium text-white/90">
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-400" aria-hidden />
+              {season.name}
+              {season.status === 'active' && ' · en curso'}
+            </span>
+          ) : (
+            <p className="mt-2 text-sm text-white/85">
+              Bienvenido. Pronto verás aquí el rol, la tabla y las estadísticas.
+            </p>
+          )}
         </div>
       </section>
 
