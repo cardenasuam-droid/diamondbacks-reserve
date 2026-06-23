@@ -15,25 +15,35 @@ export function HomePage() {
 
   return (
     <div className="space-y-6">
-      <section className="rise relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-800 via-emerald-900 to-stone-950 p-7 text-white shadow-md ring-1 ring-gold-500/30">
-        <div className="pointer-events-none absolute -right-10 -top-12 h-44 w-44 rounded-full bg-gold-500/10" aria-hidden />
-        <div className="pointer-events-none absolute -bottom-16 -left-10 h-40 w-40 rounded-full bg-emerald-400/10" aria-hidden />
-        <p className="relative text-[11px] font-semibold uppercase tracking-[0.2em] text-gold-300">
-          Temporada
-        </p>
-        <h1 className="relative mt-1 font-heading text-3xl leading-tight">
-          Liga de Pádel <span className="text-gold-400">por Equipos</span>
-        </h1>
-        <p className="relative mt-2 text-sm text-emerald-100/90">
-          {season ? (
-            <>
-              Temporada <span className="font-semibold">{season.name}</span>
-              {season.status === 'active' && ' · en curso'}
-            </>
-          ) : (
-            'Bienvenido. Pronto verás aquí el rol, la tabla y las estadísticas.'
-          )}
-        </p>
+      <section className="rise relative min-h-[230px] overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-800 via-emerald-900 to-stone-950 text-white shadow-md ring-1 ring-gold-500/30">
+        {/* Textura de seda esmeralda (public/hero-silk.webp). Si falta, queda el degradado. */}
+        <div className="absolute inset-0 bg-[url(/hero-silk.webp)] bg-cover bg-center" aria-hidden />
+        {/* Velo para el contraste del texto a la izquierda. */}
+        <div
+          className="absolute inset-0 bg-gradient-to-r from-stone-950/85 via-stone-950/55 to-stone-950/10"
+          aria-hidden
+        />
+        {/* Jugador recortado (public/hero-player.webp). Opcional; si falta, no se ve. */}
+        <div
+          className="pointer-events-none absolute inset-y-0 right-0 w-3/5 bg-[url(/hero-player.webp)] bg-contain bg-right-bottom bg-no-repeat"
+          aria-hidden
+        />
+        <div className="relative max-w-[64%] p-7">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gold-300">Temporada</p>
+          <h1 className="mt-1 font-heading text-3xl leading-tight">
+            Liga de Pádel <span className="text-gold-400">por Equipos</span>
+          </h1>
+          <p className="mt-2 text-sm text-emerald-100/90">
+            {season ? (
+              <>
+                Temporada <span className="font-semibold">{season.name}</span>
+                {season.status === 'active' && ' · en curso'}
+              </>
+            ) : (
+              'Bienvenido. Pronto verás aquí el rol, la tabla y las estadísticas.'
+            )}
+          </p>
+        </div>
       </section>
 
       <section className="grid grid-cols-2 gap-3">

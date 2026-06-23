@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+import { uploadMedia } from '@/features/news/contentMutations'
 import type { Gender } from '@/lib/types'
 
 export interface SavePlayerVars {
@@ -68,6 +69,24 @@ export function useTogglePlayerActive() {
       if (error) throw new Error(friendly(error.message))
     },
     onSuccess: (_d, v) => invalidate(qc, v),
+  })
+}
+
+// El propio jugador sube su foto desde "Mi cuenta": sube al bucket y la RPC
+// set_my_photo (0013) actualiza solo su ficha. Devuelve la URL pública.
+export function useSetMyPhoto() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (file: File) => {
+      const url = await uploadMedia(file, 'players')
+      const { error } = await supabase.rpc('set_my_photo', { p_url: url })
+      if (error) throw new Error(friendly(error.message))
+      return url
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['players_public'] })
+      void qc.invalidateQueries({ queryKey: ['player-rankings'] })
+    },
   })
 }
 
