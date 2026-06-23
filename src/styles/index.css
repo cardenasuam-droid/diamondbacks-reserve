@@ -131,6 +131,17 @@ button:not(:disabled):active {
   border-radius: 2px;
 }
 
+/* iOS hace zoom al enfocar un control con fuente <16px. Forzamos >=16px en
+   móvil para que el enfoque no descuadre la pantalla (los tamaños de diseño se
+   mantienen en pantallas grandes). */
+@media (max-width: 640px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
 /* prefers-reduced-motion (WCAG): apaga transiciones/animaciones globales. */
 @media (prefers-reduced-motion: reduce) {
   *,

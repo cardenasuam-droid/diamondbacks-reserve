@@ -26,7 +26,7 @@ export function AppLayout() {
             <button
               onClick={() => setMenuOpen(true)}
               aria-label="Abrir menú"
-              className="rounded-lg p-1.5 text-slate-600 hover:bg-slate-100"
+              className="-ml-1.5 flex h-11 w-11 items-center justify-center rounded-lg text-slate-700 hover:bg-white/10"
             >
               <Icon name="menu" size={22} />
             </button>
@@ -41,11 +41,11 @@ export function AppLayout() {
             <Link
               to="/app/avisos"
               aria-label={unread > 0 ? `Avisos (${unread} sin leer)` : 'Avisos'}
-              className="relative rounded-lg p-1.5 text-slate-600 hover:bg-slate-100"
+              className="relative -mr-1.5 flex h-11 w-11 items-center justify-center rounded-lg text-slate-700 hover:bg-white/10"
             >
               <Icon name="bell" size={20} />
               {unread > 0 && (
-                <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-slate-100" />
+                <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-slate-100" />
               )}
             </Link>
           </div>

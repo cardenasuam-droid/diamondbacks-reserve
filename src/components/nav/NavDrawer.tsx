@@ -72,7 +72,7 @@ export function NavDrawer({ open, onClose }: { open: boolean; onClose: () => voi
                   item.soon ? (
                     <li
                       key={item.to}
-                      className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-slate-400"
+                      className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-400"
                     >
                       <Icon name={item.icon} size={18} />
                       <span className="flex-1">{item.label}</span>
@@ -87,7 +87,7 @@ export function NavDrawer({ open, onClose }: { open: boolean; onClose: () => voi
                         end={item.end}
                         onClick={onClose}
                         className={({ isActive }) =>
-                          'flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition ' +
+                          'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ' +
                           (isActive
                             ? 'bg-brand-500/10 text-brand-300 ring-1 ring-brand-500/30'
                             : 'text-slate-700 hover:bg-slate-100')

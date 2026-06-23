@@ -22,7 +22,7 @@ export function PublicLayout() {
             <button
               onClick={() => setMenuOpen(true)}
               aria-label="Abrir menú"
-              className="rounded-lg p-1.5 text-slate-600 hover:bg-slate-100"
+              className="-ml-1.5 flex h-11 w-11 items-center justify-center rounded-lg text-slate-700 hover:bg-white/10"
             >
               <Icon name="menu" size={22} />
             </button>
@@ -32,7 +32,7 @@ export function PublicLayout() {
           </div>
           <Link
             to={session ? '/app' : '/login'}
-            className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
+            className="inline-flex min-h-11 items-center rounded-lg border border-slate-300 px-4 text-sm font-medium text-slate-700 hover:bg-white/10"
           >
             {session ? 'Mi cuenta' : 'Entrar'}
           </Link>
