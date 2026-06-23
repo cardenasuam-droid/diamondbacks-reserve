@@ -69,9 +69,12 @@ export function TeamRosterPage() {
             <Stat label="Jugados" value={standing.played} i={2} />
             <Stat label="Ganados" value={standing.won} i={3} />
             <Stat label="Perdidos" value={standing.lost} i={4} />
-            <Stat label="Dif. sets" value={signed(standing.set_diff)} i={5} />
-            <Stat label="Dif. juegos" value={signed(standing.game_diff)} i={6} />
-            <Stat label="Sets G-P" value={`${standing.sets_won}-${standing.sets_lost}`} i={7} />
+            <Stat label="Sets ganados" value={standing.sets_won} i={5} />
+            <Stat label="Sets perdidos" value={standing.sets_lost} i={6} />
+            <Stat label="Dif. sets" value={signed(standing.set_diff)} i={7} />
+            <Stat label="Juegos ganados" value={standing.games_won} i={8} />
+            <Stat label="Juegos perdidos" value={standing.games_lost} i={9} />
+            <Stat label="Dif. juegos" value={signed(standing.game_diff)} i={10} />
           </div>
         </section>
       )}

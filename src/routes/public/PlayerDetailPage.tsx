@@ -80,8 +80,12 @@ export function PlayerDetailPage() {
             <Stat label="% Victorias" value={`${stats.win_percentage}%`} i={3} />
             <Stat label="Ganados" value={stats.matches_won} i={4} />
             <Stat label="Perdidos" value={stats.matches_lost} i={5} />
-            <Stat label="Dif. sets" value={signed(stats.set_diff)} i={6} />
-            <Stat label="Dif. juegos" value={signed(stats.game_diff)} i={7} />
+            <Stat label="Sets ganados" value={stats.sets_won} i={6} />
+            <Stat label="Sets perdidos" value={stats.sets_lost} i={7} />
+            <Stat label="Dif. sets" value={signed(stats.set_diff)} i={8} />
+            <Stat label="Juegos ganados" value={stats.games_won} i={9} />
+            <Stat label="Juegos perdidos" value={stats.games_lost} i={10} />
+            <Stat label="Dif. juegos" value={signed(stats.game_diff)} i={11} />
           </div>
           <p className="text-xs text-slate-500">
             Cada jugador recibe los puntos que ganó su pareja. Posición dentro del ranking
