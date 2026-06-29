@@ -8,6 +8,12 @@ import { Loader } from '@/components/ui/Loader'
 
 const SECTIONS = [
   {
+    to: '/app/organizador/inscripciones',
+    icon: '📨',
+    title: 'Inscripciones',
+    desc: 'Revisar y aprobar jugadores nuevos',
+  },
+  {
     to: '/app/organizador/equipos',
     icon: '👥',
     title: 'Equipos y jugadores',

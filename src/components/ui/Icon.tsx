@@ -50,6 +50,7 @@ const REGISTRY = {
   lineup: ListChecks,
   organizer: LayoutDashboard,
   'lineups-status': CircleCheckBig,
+  check: CircleCheckBig,
   'results-edit': SquarePen,
   import: FileUp,
   announce: Megaphone,

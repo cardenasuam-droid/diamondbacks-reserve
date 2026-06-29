@@ -15,6 +15,7 @@ import { MorePage } from './public/MorePage'
 import { DevPage } from './dev/DevPage'
 import { NotFoundPage } from './NotFoundPage'
 import { LoginPage } from './auth/LoginPage'
+import { RegisterPage } from './registro/RegisterPage'
 import { RequireAuth, RequireRole } from './guards'
 import { AppLayout } from './app/AppLayout'
 import { AccountPage } from './app/AccountPage'
@@ -27,6 +28,7 @@ import { OrganizerResultsPage } from './organizer/OrganizerResultsPage'
 import { OrganizerImportPage } from './organizer/OrganizerImportPage'
 import { OrganizerTeamsPage } from './organizer/OrganizerTeamsPage'
 import { OrganizerRosterPage } from './organizer/OrganizerRosterPage'
+import { OrganizerRegistrationsPage } from './organizer/OrganizerRegistrationsPage'
 import { NewsManagerPage } from './content/NewsManagerPage'
 import { ReglamentoManagerPage } from './content/ReglamentoManagerPage'
 import { AvisosManagerPage } from './content/AvisosManagerPage'
@@ -36,6 +38,10 @@ import { AvisosManagerPage } from './content/AvisosManagerPage'
 //   '/login' alta/entrada por OTP
 //   '/app'   área autenticada (RequireAuth). Paneles por rol llegan en su módulo.
 export const router = createBrowserRouter([
+  // Inscripción pública AISLADA: su propia pantalla, sin el shell con menú ni
+  // login. Un link aparte (/registro) que comparte la base de datos pero no da
+  // acceso a la app.
+  { path: '/registro', element: <RegisterPage /> },
   {
     path: '/',
     element: <PublicLayout />,
@@ -79,6 +85,7 @@ export const router = createBrowserRouter([
             element: <RequireRole roles={['organizer']} />,
             children: [
               { index: true, element: <OrganizerDashboard /> },
+              { path: 'inscripciones', element: <OrganizerRegistrationsPage /> },
               { path: 'alineaciones', element: <OrganizerLineupsPage /> },
               { path: 'resultados', element: <OrganizerResultsPage /> },
               { path: 'importar', element: <OrganizerImportPage /> },
