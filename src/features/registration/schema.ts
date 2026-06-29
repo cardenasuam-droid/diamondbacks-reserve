@@ -32,7 +32,6 @@ export const registrationSchema = z.object({
   phone: phoneSchema,
   categoryCode: z.string().min(1, 'Elige una categoría'),
   position: z.string().refine((v) => POSITION_VALUES.includes(v), 'Elige tu posición de juego'),
-  comment: z.string().trim().max(500, 'Máximo 500 caracteres').optional(),
 })
 
 export type RegistrationInput = z.infer<typeof registrationSchema>

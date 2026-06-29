@@ -8,7 +8,7 @@ import { useSubmitRegistration } from '@/features/registration/useSubmitRegistra
 import { Brand } from '@/components/ui/Brand'
 import { Icon } from '@/components/ui/Icon'
 
-type FieldErrors = Partial<Record<'fullName' | 'phone' | 'categoryCode' | 'position' | 'comment', string>>
+type FieldErrors = Partial<Record<'fullName' | 'phone' | 'categoryCode' | 'position', string>>
 
 // Página de inscripción PÚBLICA y AISLADA (ruta /registro, fuera del shell con
 // menú y de /app). Quien entra solo ve este formulario: no hay forma de navegar
@@ -22,7 +22,6 @@ export function RegisterPage() {
   const [phone, setPhone] = useState('')
   const [categoryCode, setCategoryCode] = useState('')
   const [position, setPosition] = useState('')
-  const [comment, setComment] = useState('')
   const [website, setWebsite] = useState('') // honeypot
   const [errors, setErrors] = useState<FieldErrors>({})
   const [done, setDone] = useState(false)
@@ -34,7 +33,6 @@ export function RegisterPage() {
     setPhone('')
     setCategoryCode('')
     setPosition('')
-    setComment('')
     setWebsite('')
     setErrors({})
     submit.reset()
@@ -48,7 +46,6 @@ export function RegisterPage() {
       phone,
       categoryCode,
       position,
-      comment: comment.trim() || undefined,
     })
     if (!parsed.success) {
       const next: FieldErrors = {}
@@ -68,9 +65,8 @@ export function RegisterPage() {
   return (
     <div className="min-h-full">
       <div className="mx-auto flex min-h-full max-w-md flex-col px-4 pb-12 pt-safe">
-        <header className="flex items-center justify-between py-4">
-          <Brand />
-          <span className="text-xs font-medium tracking-wide text-slate-500">Inscripción</span>
+        <header className="py-5">
+          <Brand size="lg" />
         </header>
 
         <main className="rise flex-1">
@@ -184,17 +180,6 @@ export function RegisterPage() {
                   {errors.position && <p className="mt-1 text-xs text-red-600">{errors.position}</p>}
                 </div>
 
-                <Field label="Comentario (opcional)" error={errors.comment}>
-                  <textarea
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                    rows={3}
-                    maxLength={500}
-                    placeholder="¿Con quién te gustaría jugar? ¿Disponibilidad?"
-                    className={inputCls(errors.comment)}
-                  />
-                </Field>
-
                 {/* Honeypot anti-bot: oculto para humanos, tentador para bots. */}
                 <div aria-hidden className="pointer-events-none absolute left-[-9999px] h-0 w-0 overflow-hidden">
                   <label>
@@ -223,7 +208,7 @@ export function RegisterPage() {
         </main>
 
         <footer className="pt-6 text-center text-xs text-slate-600">
-          Diamondbacks Reserve{season.data?.name ? ` · ${season.data.name}` : ''}
+          Diamondbacks Reserve · Team League
         </footer>
       </div>
     </div>

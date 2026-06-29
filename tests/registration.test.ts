@@ -7,18 +7,11 @@ const valid = {
   phone: '55 1234 5678',
   categoryCode: 'VAR_5',
   position: 'ambas',
-  comment: 'Quiero jugar con Luis',
 }
 
 describe('registrationSchema', () => {
   it('acepta una inscripción completa', () => {
     expect(registrationSchema.safeParse(valid).success).toBe(true)
-  })
-
-  it('acepta sin comentario (opcional)', () => {
-    const { comment, ...rest } = valid
-    void comment
-    expect(registrationSchema.safeParse(rest).success).toBe(true)
   })
 
   it('rechaza nombre demasiado corto', () => {
@@ -46,10 +39,6 @@ describe('registrationSchema', () => {
     }
     expect(registrationSchema.safeParse({ ...valid, position: 'zurda' }).success).toBe(false)
     expect(registrationSchema.safeParse({ ...valid, position: '' }).success).toBe(false)
-  })
-
-  it('limita el comentario a 500 caracteres', () => {
-    expect(registrationSchema.safeParse({ ...valid, comment: 'x'.repeat(501) }).success).toBe(false)
   })
 })
 
