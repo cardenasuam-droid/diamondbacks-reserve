@@ -59,6 +59,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: '/resultados', label: 'Resultados', icon: 'results' },
       { to: '/tabla', label: 'Tabla de posiciones', icon: 'standings' },
       { to: '/equipos', label: 'Equipos y rosters', icon: 'teams' },
+      { to: '/draft', label: 'Draft en vivo', icon: 'medal' },
       { to: '/estadisticas', label: 'Estadísticas', icon: 'stats' },
       { to: '/noticias', label: 'Noticias', icon: 'news' },
       { to: '/reglamento', label: 'Reglamento', icon: 'rules' },
@@ -85,6 +86,9 @@ export const NAV_GROUPS: NavGroup[] = [
     requires: 'organizer',
     items: [
       { to: '/app/organizador', label: 'Panel organizador', icon: 'organizer', end: true, requires: 'organizer' },
+      { to: '/app/organizador/inscripciones', label: 'Inscripciones', icon: 'account', requires: 'organizer' },
+      { to: '/app/organizador/pool', label: 'Pool de jugadores', icon: 'teams', requires: 'organizer' },
+      { to: '/app/organizador/draft', label: 'Draft', icon: 'medal', requires: 'organizer' },
       { to: '/app/organizador/alineaciones', label: 'Estado de alineaciones', icon: 'lineups-status', requires: 'organizer' },
       { to: '/app/organizador/resultados', label: 'Resultados', icon: 'results-edit', requires: 'organizer' },
       { to: '/app/organizador/equipos', label: 'Equipos y jugadores', icon: 'teams', requires: 'organizer' },
