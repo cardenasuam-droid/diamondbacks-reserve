@@ -71,7 +71,7 @@ export function RegisterPage() {
 
         <main className="rise flex-1">
           {done ? (
-            <SuccessCard seasonName={season.data?.name} onAgain={reset} />
+            <SuccessCard onAgain={reset} />
           ) : (
             <>
               <section className="mb-5">
@@ -215,7 +215,7 @@ export function RegisterPage() {
   )
 }
 
-function SuccessCard({ seasonName, onAgain }: { seasonName?: string; onAgain: () => void }) {
+function SuccessCard({ onAgain }: { onAgain: () => void }) {
   return (
     <div className="rounded-3xl bg-slate-50 p-6 text-center shadow-md">
       <span className="neu-raised mx-auto flex h-16 w-16 items-center justify-center rounded-full text-brand-300">
@@ -223,8 +223,8 @@ function SuccessCard({ seasonName, onAgain }: { seasonName?: string; onAgain: ()
       </span>
       <h1 className="mt-4 font-heading text-xl text-slate-900">¡Listo! Recibimos tu inscripción</h1>
       <p className="mt-2 text-sm leading-relaxed text-slate-500">
-        El comité revisará tu categoría y te avisará cuando tengas equipo asignado
-        {seasonName ? ` para ${seasonName}` : ''}.
+        El comité revisará tu categoría y confirmará tu inscripción. Tu equipo será asignado
+        mediante Draft el día 13 de julio.
       </p>
       <button
         onClick={onAgain}
