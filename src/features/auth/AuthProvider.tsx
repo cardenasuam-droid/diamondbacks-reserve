@@ -20,9 +20,18 @@ async function fetchProfile(userId: string): Promise<Profile | null> {
   return (data as Profile | null) ?? null
 }
 
+// ¿Es capitana EN VIVO? Lee players.is_captain de su propia ficha (RLS self-read).
+// El rol efectivo se deriva de aquí, no solo de profiles.role (que se fija al
+// crear la cuenta): así, marcar capitana DESPUÉS da acceso sin re-registrarse.
+async function fetchIsCaptain(playerId: string): Promise<boolean> {
+  const { data } = await supabase.from('players').select('is_captain').eq('id', playerId).maybeSingle()
+  return Boolean((data as { is_captain?: boolean } | null)?.is_captain)
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
+  const [isCaptainLive, setIsCaptainLive] = useState(false)
   const [loading, setLoading] = useState(true)
   const [profileLoading, setProfileLoading] = useState(true)
   const [devRole, setDevRoleState] = useState(() => getDevRole())
@@ -42,11 +51,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loadProfile = useCallback(async (user: User | null) => {
     if (!user) {
       setProfile(null)
+      setIsCaptainLive(false)
       setProfileLoading(false)
       return
     }
     setProfileLoading(true)
-    setProfile(await fetchProfile(user.id))
+    const p = await fetchProfile(user.id)
+    setProfile(p)
+    setIsCaptainLive(p?.player_id ? await fetchIsCaptain(p.player_id) : false)
     setProfileLoading(false)
   }, [])
 
@@ -91,6 +103,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await loadProfile(session?.user ?? null)
   }, [loadProfile, session])
 
+  // Rol EFECTIVO: si la ficha es capitana en vivo, sube de 'player' a 'captain'
+  // (no toca 'organizer'/'web_manager'). Desacopla el acceso de profiles.role.
+  const baseRole = profile?.role ?? null
+  const effectiveRole = baseRole === 'player' && isCaptainLive ? 'captain' : baseRole
+
   const value = useMemo<AuthContextValue>(
     () => ({
       session,
@@ -99,7 +116,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading,
       profileLoading,
       // El override dev solo aplica con sesión iniciada (la UI lo respeta; RLS no).
-      role: session && devRole ? devRole : (profile?.role ?? null),
+      role: session && devRole ? devRole : effectiveRole,
       devRole: session ? devRole : null,
       // Acceso al conmutador /dev: Bruja, un organizador real, o si ya hay un
       // override activo (para poder volver a "Real"). Se evalúa sobre el rol REAL.
@@ -109,7 +126,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signOut,
       refreshProfile,
     }),
-    [session, profile, loading, profileLoading, devRole, signOut, refreshProfile],
+    [session, profile, loading, profileLoading, devRole, effectiveRole, signOut, refreshProfile],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

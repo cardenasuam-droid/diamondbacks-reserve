@@ -31,6 +31,7 @@ import { OrganizerTeamsPage } from './organizer/OrganizerTeamsPage'
 import { OrganizerRosterPage } from './organizer/OrganizerRosterPage'
 import { OrganizerRegistrationsPage } from './organizer/OrganizerRegistrationsPage'
 import { OrganizerDraftPage } from './organizer/OrganizerDraftPage'
+import { OrganizerPoolPage } from './organizer/OrganizerPoolPage'
 import { NewsManagerPage } from './content/NewsManagerPage'
 import { ReglamentoManagerPage } from './content/ReglamentoManagerPage'
 import { AvisosManagerPage } from './content/AvisosManagerPage'
@@ -90,6 +91,7 @@ export const router = createBrowserRouter([
             children: [
               { index: true, element: <OrganizerDashboard /> },
               { path: 'inscripciones', element: <OrganizerRegistrationsPage /> },
+              { path: 'pool', element: <OrganizerPoolPage /> },
               { path: 'draft', element: <OrganizerDraftPage /> },
               { path: 'alineaciones', element: <OrganizerLineupsPage /> },
               { path: 'resultados', element: <OrganizerResultsPage /> },

@@ -79,6 +79,7 @@ export function useMakePick() {
       void qc.invalidateQueries({ queryKey: ['draft', v.seasonId] })
       void qc.invalidateQueries({ queryKey: ['draft-board', v.draftId] })
       void qc.invalidateQueries({ queryKey: ['players_public', v.seasonId] })
+      void qc.invalidateQueries({ queryKey: ['pool-players', v.seasonId] })
     },
   })
 }
@@ -96,6 +97,7 @@ export function useAutoPick() {
       void qc.invalidateQueries({ queryKey: ['draft', v.seasonId] })
       void qc.invalidateQueries({ queryKey: ['draft-board', v.draftId] })
       void qc.invalidateQueries({ queryKey: ['players_public', v.seasonId] })
+      void qc.invalidateQueries({ queryKey: ['pool-players', v.seasonId] })
     },
   })
 }

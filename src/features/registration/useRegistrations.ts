@@ -78,7 +78,7 @@ export function useApproveRegistration() {
     },
     onSuccess: (_d, v) => {
       void qc.invalidateQueries({ queryKey: ['registrations'] })
-      void qc.invalidateQueries({ queryKey: ['draft-pool', v.seasonId] })
+      void qc.invalidateQueries({ queryKey: ['pool-players', v.seasonId] })
       void qc.invalidateQueries({ queryKey: ['players_public', v.seasonId] })
     },
   })

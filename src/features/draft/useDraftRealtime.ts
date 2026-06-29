@@ -16,6 +16,7 @@ export function useDraftRealtime(draftId: string | undefined, seasonId: string |
       void qc.invalidateQueries({ queryKey: ['draft-board', draftId] })
       void qc.invalidateQueries({ queryKey: ['draft-teams', draftId] })
       void qc.invalidateQueries({ queryKey: ['players_public', seasonId] })
+      void qc.invalidateQueries({ queryKey: ['pool-players', seasonId] })
     }
     const channel = supabase
       .channel(`draft:${draftId}`)
