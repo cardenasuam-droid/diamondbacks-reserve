@@ -21,6 +21,14 @@ export function NavDrawer({ open, onClose }: { open: boolean; onClose: () => voi
     navigate('/', { replace: true })
   }
 
+  // Refresco manual (el equivalente al "recargar" de escritorio): fuerza el SW
+  // nuevo y recarga, trayendo código + datos frescos. Útil en móvil/PWA.
+  function handleRefresh() {
+    onClose()
+    if (window.updateApp) window.updateApp()
+    else window.location.reload()
+  }
+
   const groups = NAV_GROUPS.filter((g) => navAllows(g.requires, role, hasSession, isDev)).map(
     (g) => ({
       ...g,
@@ -104,7 +112,13 @@ export function NavDrawer({ open, onClose }: { open: boolean; onClose: () => voi
           ))}
         </nav>
 
-        <div className="border-t border-slate-200 p-3">
+        <div className="space-y-2 border-t border-slate-200 p-3">
+          <button
+            onClick={handleRefresh}
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+          >
+            <Icon name="refresh" size={16} /> Actualizar
+          </button>
           {hasSession ? (
             <div className="space-y-2">
               <p className="px-1 text-xs text-slate-500">

@@ -9,3 +9,8 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv
 }
+
+interface Window {
+  // Fuerza la actualización de la PWA (SW nuevo + recarga). La define main.tsx.
+  updateApp?: () => void
+}

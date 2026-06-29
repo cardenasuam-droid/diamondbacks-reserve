@@ -30,6 +30,7 @@ import {
   Ban,
   Lock,
   Share2,
+  RefreshCw,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -70,6 +71,7 @@ const REGISTRY = {
   ban: Ban,
   lock: Lock,
   share: Share2,
+  refresh: RefreshCw,
 } satisfies Record<string, LucideIcon>
 
 export type IconName = keyof typeof REGISTRY

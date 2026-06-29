@@ -12,6 +12,9 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      // Registramos el SW manualmente en main.tsx (con chequeo periódico de
+      // actualización), así que no inyectamos el registro automático.
+      injectRegister: false,
       includeAssets: ['favicon.svg', 'icon-192.png', 'icon-512.png', 'logo-mark.png'],
       workbox: {
         // El SW nuevo toma control de inmediato y `autoUpdate` recarga la página
