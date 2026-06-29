@@ -53,6 +53,7 @@ const REGISTRY = {
   'lineups-status': CircleCheckBig,
   check: CircleCheckBig,
   'results-edit': SquarePen,
+  edit: SquarePen,
   import: FileUp,
   announce: Megaphone,
   dev: FlaskConical,
