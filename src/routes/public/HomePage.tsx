@@ -15,19 +15,19 @@ export function HomePage() {
 
   return (
     <div className="space-y-6">
-      <section className="rise relative min-h-[240px] overflow-hidden rounded-3xl bg-gradient-to-br from-[#5c2e0e] via-[#16161b] to-[#0c0c0f] text-white shadow-md ring-1 ring-amber-500/25">
+      <section className="rise relative min-h-[240px] overflow-hidden rounded-3xl bg-gradient-to-br from-[#0a3d29] via-[#131a12] to-[#10160f] text-white shadow-md ring-1 ring-gold-500/25">
         {/* Velo para el contraste del texto a la izquierda. */}
         <div
           className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/10"
           aria-hidden
         />
-        {/* Halos: ámbar (cálido, arriba-dcha) + azul frío (abajo-izq) para el "pop". */}
+        {/* Halos: oro (cálido, arriba-dcha) + esmeralda (abajo-izq) para el "pop". */}
         <div
-          className="pointer-events-none absolute -right-10 -top-14 h-48 w-48 rounded-full bg-amber-500/25 blur-3xl"
+          className="pointer-events-none absolute -right-10 -top-14 h-48 w-48 rounded-full bg-gold-500/25 blur-3xl"
           aria-hidden
         />
         <div
-          className="pointer-events-none absolute -bottom-16 left-1/4 h-44 w-44 rounded-full bg-blue-500/15 blur-3xl"
+          className="pointer-events-none absolute -bottom-16 left-1/4 h-44 w-44 rounded-full bg-brand-500/20 blur-3xl"
           aria-hidden
         />
         {/* Recorte de jugadora transparente (public/hero-player.webp). Para rotar,
@@ -37,13 +37,13 @@ export function HomePage() {
           aria-hidden
         />
         <div className="relative max-w-[62%] p-7">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-300">Temporada</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gold-300">Temporada</p>
           <h1 className="mt-1 font-heading text-3xl leading-tight">
-            Liga de Pádel <span className="text-amber-400">por Equipos</span>
+            Diamondbacks <span className="text-gold-400">Reserve</span>
           </h1>
           {season ? (
             <span className="glass mt-3 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium text-white/90">
-              <span className="h-1.5 w-1.5 rounded-full bg-amber-400" aria-hidden />
+              <span className="h-1.5 w-1.5 rounded-full bg-gold-400" aria-hidden />
               {season.name}
               {season.status === 'active' && ' · en curso'}
             </span>

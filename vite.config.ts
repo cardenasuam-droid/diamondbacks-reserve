@@ -41,8 +41,8 @@ export default defineConfig({
         short_name: 'Liga Pádel',
         description: 'Rol, alineaciones, resultados y tabla de la liga de pádel por equipos.',
         lang: 'es',
-        theme_color: '#0c0c0f',
-        background_color: '#0c0c0f',
+        theme_color: '#10160f',
+        background_color: '#10160f',
         display: 'standalone',
         start_url: '/',
         icons: [

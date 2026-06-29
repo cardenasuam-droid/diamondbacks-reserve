@@ -21,8 +21,8 @@ export function Brand({ compact = false }: { compact?: boolean }) {
         </span>
       )}
       {!compact && (
-        <span className="font-heading text-sm tracking-wide text-stone-900">
-          Liga de Pádel
+        <span className="font-heading text-sm tracking-wide text-slate-900">
+          Diamondbacks Reserve
         </span>
       )}
     </span>

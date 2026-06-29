@@ -40,7 +40,7 @@ export function LoginPage() {
       <div className="text-center">
         <img
           src="/logo-mark.png"
-          alt="Liga de Pádel"
+          alt="Diamondbacks Reserve"
           className="mx-auto h-16 w-16 rounded-2xl object-contain ring-1 ring-gold-500/30"
         />
         <h1 className="mt-3 font-heading text-xl">Entrar</h1>

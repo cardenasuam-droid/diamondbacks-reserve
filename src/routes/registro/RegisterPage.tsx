@@ -88,7 +88,7 @@ export function RegisterPage() {
                   Inscríbete a la liga
                 </h1>
                 <p className="mt-2 text-sm leading-relaxed text-slate-500">
-                  Déjanos tus datos y el comité te asignará categoría y equipo.
+                  Ingresa tus datos para inscribirte; tu equipo será asignado el día del Draft.
                 </p>
               </section>
 
@@ -100,7 +100,7 @@ export function RegisterPage() {
 
               <form
                 onSubmit={onSubmit}
-                className="space-y-4 rounded-2xl border border-slate-200 bg-slate-100 p-5 shadow-sm"
+                className="space-y-4 rounded-3xl bg-slate-50 p-5 shadow-md"
               >
                 {submit.isError && (
                   <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
@@ -146,7 +146,7 @@ export function RegisterPage() {
                     value={categoryCode}
                     onChange={(e) => setCategoryCode(e.target.value)}
                     disabled={categories.isLoading}
-                    className={`${inputCls(errors.categoryCode)} bg-slate-100 text-slate-800`}
+                    className={inputCls(errors.categoryCode)}
                   >
                     <option value="" disabled>
                       {categories.isLoading ? 'Cargando categorías…' : 'Elige una categoría'}
@@ -172,8 +172,8 @@ export function RegisterPage() {
                           onClick={() => setPosition(p.value)}
                           className={
                             active
-                              ? 'rounded-lg border border-transparent bg-brand-400 px-3 py-2.5 text-sm font-semibold text-[#0c0c0f]'
-                              : 'rounded-lg border border-slate-300 px-3 py-2.5 text-sm font-medium text-slate-700 hover:border-slate-400'
+                              ? 'neu-pressed rounded-xl px-3 py-2.5 text-sm font-semibold text-brand-300'
+                              : 'neu-raised rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700'
                           }
                         >
                           {p.label}
@@ -212,7 +212,7 @@ export function RegisterPage() {
                 <button
                   type="submit"
                   disabled={submit.isPending || !isSupabaseConfigured}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-400 px-4 py-3 font-semibold text-[#0c0c0f] disabled:opacity-50"
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gold-300 px-4 py-3.5 font-semibold text-[#1a1405] shadow-sm disabled:opacity-50"
                 >
                   {submit.isPending ? 'Enviando…' : 'Enviar inscripción'}
                   {!submit.isPending && <Icon name="chevron-right" size={18} />}
@@ -223,7 +223,7 @@ export function RegisterPage() {
         </main>
 
         <footer className="pt-6 text-center text-xs text-slate-600">
-          Liga de Pádel por Equipos{season.data?.name ? ` · ${season.data.name}` : ''}
+          Diamondbacks Reserve{season.data?.name ? ` · ${season.data.name}` : ''}
         </footer>
       </div>
     </div>
@@ -232,8 +232,8 @@ export function RegisterPage() {
 
 function SuccessCard({ seasonName, onAgain }: { seasonName?: string; onAgain: () => void }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-slate-100 p-6 text-center shadow-sm">
-      <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand-500/15 text-brand-300 ring-1 ring-brand-500/30">
+    <div className="rounded-3xl bg-slate-50 p-6 text-center shadow-md">
+      <span className="neu-raised mx-auto flex h-16 w-16 items-center justify-center rounded-full text-brand-300">
         <Icon name="check" size={32} />
       </span>
       <h1 className="mt-4 font-heading text-xl text-slate-900">¡Listo! Recibimos tu inscripción</h1>
@@ -243,7 +243,7 @@ function SuccessCard({ seasonName, onAgain }: { seasonName?: string; onAgain: ()
       </p>
       <button
         onClick={onAgain}
-        className="mt-5 inline-flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:border-slate-400"
+        className="neu-raised mt-5 inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-700"
       >
         <Icon name="plus" size={16} /> Inscribir a otra persona
       </button>
@@ -252,11 +252,10 @@ function SuccessCard({ seasonName, onAgain }: { seasonName?: string; onAgain: ()
 }
 
 function inputCls(error?: string): string {
-  const base =
-    'mt-1 w-full rounded-lg border px-3 py-2 text-base outline-none focus:ring-2 focus:ring-sky-200'
-  return error
-    ? `${base} border-red-400 focus:border-red-500`
-    : `${base} border-slate-300 focus:border-sky-500`
+  // El relieve "inset" (pozo) lo da la regla global de inputs en index.css; aquí
+  // solo el layout, la tinta nítida y el aro de error.
+  const base = 'mt-1 w-full rounded-xl px-3 py-2.5 text-base text-slate-900'
+  return error ? `${base} ring-2 ring-red-500/70` : base
 }
 
 function Field({

@@ -19,7 +19,7 @@ describe('HomePage', () => {
   it('renderiza el título de la liga', () => {
     renderWithProviders(<HomePage />)
     expect(
-      screen.getByRole('heading', { name: /liga de pádel por equipos/i }),
+      screen.getByRole('heading', { name: /diamondbacks reserve/i }),
     ).toBeInTheDocument()
   })
 })

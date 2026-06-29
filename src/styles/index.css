@@ -19,24 +19,28 @@
 
   /* "Dark-elevated": caída suave para profundidad (sólido + hairline + sombra),
      no neumórfico. Las superficies que usan shadow-sm/md lo adoptan solas. */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5), 0 10px 22px -10px rgb(0 0 0 / 0.55);
-  --shadow-md: 0 2px 6px 0 rgb(0 0 0 / 0.45), 0 16px 34px -12px rgb(0 0 0 / 0.6);
+  /* Neumorfismo (soft-UI oscuro): sombra DUAL — oscura abajo-derecha + luz
+     arriba-izquierda — sobre la base ónix-esmeralda. Las superficies que usan
+     shadow-sm/md adoptan el relieve solas (cards, tiles, paneles). */
+  --shadow-sm: 4px 4px 9px #080b07, -4px -4px 9px #1b2419;
+  --shadow-md: 7px 7px 16px #070a06, -7px -7px 16px #1e271c;
 
-  /* Marca — ÁMBAR. `brand-*` + remapeo de `sky-*` para que los usos existentes
-     (enlaces, nav activa, focus, botones) adopten la marca sin tocar archivos.
-     Los 600/700 son ámbar PROFUNDO (pasan AA con texto blanco en los CTA);
-     los 300/400 son ámbar BRILLANTE (iconos, enlaces, nav activa sobre oscuro). */
-  --color-brand-50:  #fef3c7;  --color-sky-50:  #fef3c7;
-  --color-brand-100: #fde68a;  --color-sky-100: #fde68a;
-  --color-brand-200: #fcd34d;  --color-sky-200: #fcd34d;
-  --color-brand-300: #fbbf24;  --color-sky-300: #fbbf24;
-  --color-brand-400: #f59e0b;  --color-sky-400: #f59e0b;
-  --color-brand-500: #d97706;  --color-sky-500: #d97706;
-  --color-brand-600: #b45309;  --color-sky-600: #b45309;
-  --color-brand-700: #92400e;  --color-sky-700: #92400e;
-  --color-brand-800: #78350f;  --color-sky-800: #78350f;
-  --color-brand-900: #5c2e0e;  --color-sky-900: #5c2e0e;
-  --color-brand-950: #3a1c08;  --color-sky-950: #3a1c08;
+  /* Marca — ESMERALDA (del escudo Diamondbacks Reserve). `brand-*` + remapeo de
+     `sky-*` para que los usos existentes (enlaces, nav activa, focus, botones)
+     adopten la marca sin tocar archivos. Los 600/700 son esmeralda PROFUNDA
+     (pasan AA con texto blanco en los CTA); los 300/400 son esmeralda BRILLANTE
+     (iconos, enlaces, nav activa sobre oscuro). */
+  --color-brand-50:  #d9f5e7;  --color-sky-50:  #d9f5e7;
+  --color-brand-100: #ade9cd;  --color-sky-100: #ade9cd;
+  --color-brand-200: #7fdbb1;  --color-sky-200: #7fdbb1;
+  --color-brand-300: #4fcd95;  --color-sky-300: #4fcd95;
+  --color-brand-400: #2bb87e;  --color-sky-400: #2bb87e;
+  --color-brand-500: #199e69;  --color-sky-500: #199e69;
+  --color-brand-600: #127f50;  --color-sky-600: #127f50;
+  --color-brand-700: #0e6340;  --color-sky-700: #0e6340;
+  --color-brand-800: #0b4d33;  --color-sky-800: #0b4d33;
+  --color-brand-900: #0a3d29;  --color-sky-900: #0a3d29;
+  --color-brand-950: #062619;  --color-sky-950: #062619;
 
   /* Acento — ORO (trofeo, filos, lettering). Para destacados, ganador, trims.
      `accent-*` también remapea `amber-*` para coherencia. */
@@ -51,19 +55,19 @@
   --color-gold-800: #713f12;  --color-accent-800: #713f12;  --color-amber-800: #713f12;
   --color-gold-900: #5c3310;  --color-accent-900: #5c3310;  --color-amber-900: #5c3310;
 
-  /* Neutros ÓNIX (negro casi puro, neutro). Remapean `slate-*` de modo que TODA
-     la app es oscura sin tocar componentes:
-       slate-50 = fondo casi negro  ·  slate-100 = superficie  ·  slate-900 = tinta. */
-  --color-slate-50:  #0c0c0f;  /* fondo de página */
-  --color-slate-100: #16161b;  /* superficie de tarjeta / hover */
-  --color-slate-200: #2a2a31;  /* bordes / hairline */
-  --color-slate-300: #45454e;  /* hints, chevrons, bordes de input */
-  --color-slate-400: #6a6a73;
-  --color-slate-500: #8b8b93;  /* texto atenuado (AA sobre el fondo) */
-  --color-slate-600: #b0b0b8;
-  --color-slate-700: #d6d6db;  /* etiquetas */
-  --color-slate-800: #ececef;
-  --color-slate-900: #f5f5f7;  /* tinta / títulos */
+  /* Neutros ÓNIX-ESMERALDA (verde-carbón muy oscuro). Base no-negra para que el
+     relieve neumórfico "lea". Remapean `slate-*` → TODA la app sin tocar componentes:
+       slate-50 = fondo  ·  slate-100 = superficie  ·  slate-900 = tinta. */
+  --color-slate-50:  #10160f;  /* fondo de página (ónix-esmeralda) */
+  --color-slate-100: #161d14;  /* superficie de tarjeta / hover */
+  --color-slate-200: #232c20;  /* bordes / hairline */
+  --color-slate-300: #36422f;  /* hints, chevrons, bordes de input */
+  --color-slate-400: #5c6a54;
+  --color-slate-500: #94a28d;  /* texto atenuado (AA sobre el fondo) */
+  --color-slate-600: #b1bdaa;
+  --color-slate-700: #ced8c9;  /* etiquetas */
+  --color-slate-800: #e6ece3;
+  --color-slate-900: #f1f6f0;  /* tinta / títulos */
   --color-slate-950: #ffffff;
 }
 
@@ -98,11 +102,11 @@ html {
 body {
   margin: 0;
   font-family: var(--font-sans);
-  /* Fondo ÓNIX con un halo neutro sutil arriba. */
-  background-color: #0c0c0f;
-  background-image: radial-gradient(120% 80% at 50% -8%, #1b1a1f 0%, #0c0c0f 55%, #08080a 100%);
+  /* Fondo ÓNIX-ESMERALDA con un halo verde sutil arriba. */
+  background-color: #10160f;
+  background-image: radial-gradient(120% 80% at 50% -8%, #1a241b 0%, #10160f 55%, #0b0f0a 100%);
   background-attachment: fixed;
-  color: #f5f5f7; /* tinta casi blanca */
+  color: #f1f6f0; /* tinta casi blanca, leve verde */
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   -webkit-tap-highlight-color: transparent;
@@ -126,7 +130,7 @@ button:not(:disabled):active {
 /* Foco visible accesible para teclado en toda la app. :where() mantiene
    especificidad 0 para que los componentes puedan sobreescribir. */
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
-  outline: 2px solid #f59e0b; /* ámbar */
+  outline: 2px solid #34c98a; /* esmeralda */
   outline-offset: 2px;
   border-radius: 2px;
 }
@@ -142,6 +146,20 @@ button:not(:disabled):active {
   }
 }
 
+/* Neumorfismo: los campos de texto son "pozos" hundidos (inset). El relieve vive
+   en la sombra; el texto se mantiene nítido. Las utilidades de color/borde de
+   cada componente siguen mandando encima (capa utilities). */
+input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']):not([type='color']),
+select,
+textarea {
+  background-color: #131a12;
+  border-color: transparent;
+  border-radius: 0.75rem;
+  box-shadow:
+    inset 3px 3px 7px #080b07,
+    inset -3px -3px 7px #1b2419;
+}
+
 /* prefers-reduced-motion (WCAG): apaga transiciones/animaciones globales. */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -155,6 +173,28 @@ button:not(:disabled):active {
 }
 
 @layer utilities {
+  /* Neumorfismo (soft-UI oscuro): superficies extruidas con sombra dual sobre la
+     base ónix-esmeralda. El relieve vive en la sombra; el TEXTO siempre va en
+     alto contraste (AA) — nunca el gris lavado del neumorfismo clásico.
+       .neu-raised  → elevado (tarjetas, botones, chips)
+       .neu-inset   → hundido (campos, pozos)
+       .neu-pressed → estado activo/seleccionado (presionado) */
+  .neu-raised {
+    background-color: #131a12;
+    box-shadow: 5px 5px 12px #080b07, -5px -5px 12px #1b2419;
+  }
+  .neu-inset {
+    background-color: #131a12;
+    box-shadow:
+      inset 4px 4px 8px #080b07,
+      inset -4px -4px 8px #1b2419;
+  }
+  .neu-pressed {
+    box-shadow:
+      inset 3px 3px 7px #080b07,
+      inset -3px -3px 7px #1b2419;
+  }
+
   .pt-safe {
     padding-top: env(safe-area-inset-top);
   }
@@ -192,7 +232,7 @@ button:not(:disabled):active {
 
   /* Shimmer de carga para skeletons. */
   .skeleton {
-    background: linear-gradient(100deg, #16161b 30%, #2a2a31 50%, #16161b 70%);
+    background: linear-gradient(100deg, #161d14 30%, #232c20 50%, #161d14 70%);
     background-size: 200% 100%;
     animation: shimmer 1.4s ease-in-out infinite;
   }
