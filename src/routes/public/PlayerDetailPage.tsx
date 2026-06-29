@@ -1,4 +1,3 @@
-import type { CSSProperties } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useActiveSeason } from '@/features/season/useActiveSeason'
 import { useTeams } from '@/features/teams/useTeams'
@@ -12,6 +11,7 @@ import { Badge } from '@/components/ui/Badge'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { Loader } from '@/components/ui/Loader'
+import { StatTile } from '@/components/ui/StatTile'
 
 const signed = (n: number) => (n > 0 ? `+${n}` : String(n))
 
@@ -77,18 +77,18 @@ export function PlayerDetailPage() {
         <section className="space-y-3">
           <h2 className="text-sm font-bold uppercase tracking-wide text-slate-700">Estadísticas</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <Stat label="Posición" value={`#${stats.position}`} accent i={0} />
-            <Stat label="Puntos aportados" value={stats.points_contributed} accent i={1} />
-            <Stat label="Partidos" value={stats.matches_played} i={2} />
-            <Stat label="% Victorias" value={`${stats.win_percentage}%`} i={3} />
-            <Stat label="Ganados" value={stats.matches_won} i={4} />
-            <Stat label="Perdidos" value={stats.matches_lost} i={5} />
-            <Stat label="Sets ganados" value={stats.sets_won} i={6} />
-            <Stat label="Sets perdidos" value={stats.sets_lost} i={7} />
-            <Stat label="Dif. sets" value={signed(stats.set_diff)} i={8} />
-            <Stat label="Juegos ganados" value={stats.games_won} i={9} />
-            <Stat label="Juegos perdidos" value={stats.games_lost} i={10} />
-            <Stat label="Dif. juegos" value={signed(stats.game_diff)} i={11} />
+            <StatTile label="Posición" value={`#${stats.position}`} accent i={0} />
+            <StatTile label="Puntos aportados" value={stats.points_contributed} accent i={1} />
+            <StatTile label="Partidos" value={stats.matches_played} i={2} />
+            <StatTile label="% Victorias" value={`${stats.win_percentage}%`} i={3} />
+            <StatTile label="Ganados" value={stats.matches_won} i={4} />
+            <StatTile label="Perdidos" value={stats.matches_lost} i={5} />
+            <StatTile label="Sets ganados" value={stats.sets_won} i={6} />
+            <StatTile label="Sets perdidos" value={stats.sets_lost} i={7} />
+            <StatTile label="Dif. sets" value={signed(stats.set_diff)} i={8} />
+            <StatTile label="Juegos ganados" value={stats.games_won} i={9} />
+            <StatTile label="Juegos perdidos" value={stats.games_lost} i={10} />
+            <StatTile label="Dif. juegos" value={signed(stats.game_diff)} i={11} />
           </div>
           <p className="text-xs text-slate-500">
             Cada jugador recibe los puntos que ganó su pareja. Posición dentro del ranking
@@ -102,30 +102,6 @@ export function PlayerDetailPage() {
           description="Sus estadísticas aparecerán cuando dispute partidos con resultado validado."
         />
       )}
-    </div>
-  )
-}
-
-function Stat({
-  label,
-  value,
-  accent,
-  i = 0,
-}: {
-  label: string
-  value: string | number
-  accent?: boolean
-  i?: number
-}) {
-  return (
-    <div
-      className="rise-item rounded-xl border border-slate-200/80 bg-gradient-to-b from-slate-100 to-slate-50 p-3 shadow-sm"
-      style={{ ['--d']: i } as CSSProperties}
-    >
-      <p className="text-xs font-medium text-slate-500">{label}</p>
-      <p className={'mt-1 text-2xl font-bold tabular-nums ' + (accent ? 'text-gold-400' : 'text-slate-900')}>
-        {value}
-      </p>
     </div>
   )
 }
