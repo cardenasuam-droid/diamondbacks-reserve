@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react'
 import { useActiveSeason } from '@/features/season/useActiveSeason'
-import { useTeams } from '@/features/teams/useTeams'
 import { useCategories } from '@/features/categories/useCategories'
 import { rankingCategories } from '@/features/registration/category'
 import {
@@ -9,7 +8,7 @@ import {
   useRejectRegistration,
 } from '@/features/registration/useRegistrations'
 import type { PlayerRegistration, PlayerPosition } from '@/features/registration/types'
-import type { MatchCategory, Team } from '@/lib/types'
+import type { MatchCategory } from '@/lib/types'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
@@ -25,7 +24,6 @@ const POSITION_LABEL: Record<PlayerPosition, string> = {
 export function OrganizerRegistrationsPage() {
   const season = useActiveSeason()
   const registrations = usePendingRegistrations(season.data?.id)
-  const teams = useTeams(season.data?.id)
   const categories = useCategories()
   const ranking = useMemo(() => rankingCategories(categories.data ?? []), [categories.data])
 
@@ -73,7 +71,6 @@ export function OrganizerRegistrationsPage() {
             <ReviewCard
               key={r.id}
               registration={r}
-              teams={teams.data ?? []}
               categories={ranking}
               seasonId={season.data!.id}
             />
@@ -120,18 +117,15 @@ function ShareLink() {
 
 function ReviewCard({
   registration,
-  teams,
   categories,
   seasonId,
 }: {
   registration: PlayerRegistration
-  teams: Team[]
   categories: MatchCategory[]
   seasonId: string
 }) {
   const approve = useApproveRegistration()
   const reject = useRejectRegistration()
-  const [teamId, setTeamId] = useState('')
   const [categoryCode, setCategoryCode] = useState(registration.requested_category_code)
   const [localError, setLocalError] = useState<string | null>(null)
   const [rejecting, setRejecting] = useState(false)
@@ -145,10 +139,9 @@ function ReviewCard({
 
   function onApprove() {
     setLocalError(null)
-    if (!teamId) return setLocalError('Elige un equipo para asignar.')
     const cat = categories.find((c) => c.code === categoryCode)
     if (!cat) return setLocalError('Elige una categoría válida.')
-    approve.mutate({ registration, teamId, categoryCode, categoryType: cat.type, seasonId })
+    approve.mutate({ registration, categoryCode, categoryType: cat.type, seasonId })
   }
 
   return (
@@ -209,39 +202,22 @@ function ReviewCard({
         </div>
       ) : (
         <>
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            <label className="block">
-              <span className="block text-xs font-medium text-slate-600">Equipo</span>
-              <select
-                value={teamId}
-                onChange={(e) => setTeamId(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 bg-slate-100 px-2 py-2 text-sm text-slate-800 outline-none focus:border-sky-500"
-              >
-                <option value="" disabled>
-                  Elegir…
+          <label className="mt-3 block">
+            <span className="block text-xs font-medium text-slate-600">
+              Categoría · el equipo se asigna en el Draft
+            </span>
+            <select
+              value={categoryCode}
+              onChange={(e) => setCategoryCode(e.target.value)}
+              className="mt-1 w-full rounded-lg border border-slate-300 bg-slate-100 px-2 py-2 text-sm text-slate-800 outline-none focus:border-sky-500"
+            >
+              {categories.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.name}
                 </option>
-                {teams.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="block">
-              <span className="block text-xs font-medium text-slate-600">Categoría</span>
-              <select
-                value={categoryCode}
-                onChange={(e) => setCategoryCode(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 bg-slate-100 px-2 py-2 text-sm text-slate-800 outline-none focus:border-sky-500"
-              >
-                {categories.map((c) => (
-                  <option key={c.code} value={c.code}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
+              ))}
+            </select>
+          </label>
 
           <div className="mt-3 flex gap-2">
             <button
@@ -250,7 +226,7 @@ function ReviewCard({
               className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-brand-400 px-3 py-2 text-sm font-semibold text-[#0c0c0f] disabled:opacity-50"
             >
               <Icon name="check" size={16} />
-              {approve.isPending ? 'Creando ficha…' : 'Aprobar y crear jugador'}
+              {approve.isPending ? 'Aprobando…' : 'Aprobar al pool'}
             </button>
             <button
               onClick={() => setRejecting(true)}

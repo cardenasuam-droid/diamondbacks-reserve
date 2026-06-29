@@ -16,6 +16,7 @@ import { DevPage } from './dev/DevPage'
 import { NotFoundPage } from './NotFoundPage'
 import { LoginPage } from './auth/LoginPage'
 import { RegisterPage } from './registro/RegisterPage'
+import { DraftPage } from './draft/DraftPage'
 import { RequireAuth, RequireRole } from './guards'
 import { AppLayout } from './app/AppLayout'
 import { AccountPage } from './app/AccountPage'
@@ -29,6 +30,7 @@ import { OrganizerImportPage } from './organizer/OrganizerImportPage'
 import { OrganizerTeamsPage } from './organizer/OrganizerTeamsPage'
 import { OrganizerRosterPage } from './organizer/OrganizerRosterPage'
 import { OrganizerRegistrationsPage } from './organizer/OrganizerRegistrationsPage'
+import { OrganizerDraftPage } from './organizer/OrganizerDraftPage'
 import { NewsManagerPage } from './content/NewsManagerPage'
 import { ReglamentoManagerPage } from './content/ReglamentoManagerPage'
 import { AvisosManagerPage } from './content/AvisosManagerPage'
@@ -42,6 +44,8 @@ export const router = createBrowserRouter([
   // login. Un link aparte (/registro) que comparte la base de datos pero no da
   // acceso a la app.
   { path: '/registro', element: <RegisterPage /> },
+  // Draft en vivo: board público + participante (capitanas eligen en su turno).
+  { path: '/draft', element: <DraftPage /> },
   {
     path: '/',
     element: <PublicLayout />,
@@ -86,6 +90,7 @@ export const router = createBrowserRouter([
             children: [
               { index: true, element: <OrganizerDashboard /> },
               { path: 'inscripciones', element: <OrganizerRegistrationsPage /> },
+              { path: 'draft', element: <OrganizerDraftPage /> },
               { path: 'alineaciones', element: <OrganizerLineupsPage /> },
               { path: 'resultados', element: <OrganizerResultsPage /> },
               { path: 'importar', element: <OrganizerImportPage /> },

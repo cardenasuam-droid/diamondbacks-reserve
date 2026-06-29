@@ -31,14 +31,14 @@ function friendly(msg: string): string {
 
 export interface ApproveVars {
   registration: PlayerRegistration
-  teamId: string
   categoryCode: string
   categoryType: CategoryType
   seasonId: string
 }
 
-// Aprobar = crear la ficha en players (fuente de verdad) y enlazar la inscripción.
-// El comité elige equipo y confirma/ajusta la categoría; el género se deriva de ella.
+// Aprobar = crear la ficha en players SIN equipo (free agent del pool); el DRAFT
+// asignará el equipo después. El comité confirma/ajusta la categoría; el género
+// se deriva de ella.
 export function useApproveRegistration() {
   const qc = useQueryClient()
   return useMutation({
@@ -50,7 +50,7 @@ export function useApproveRegistration() {
         .from('players')
         .insert({
           season_id: v.seasonId,
-          team_id: v.teamId,
+          team_id: null, // pool: sin equipo hasta el draft
           full_name: v.registration.full_name.trim(),
           email: null,
           phone: v.registration.phone.trim(),
@@ -78,8 +78,7 @@ export function useApproveRegistration() {
     },
     onSuccess: (_d, v) => {
       void qc.invalidateQueries({ queryKey: ['registrations'] })
-      void qc.invalidateQueries({ queryKey: ['manage-roster', v.teamId] })
-      void qc.invalidateQueries({ queryKey: ['teams', v.seasonId] })
+      void qc.invalidateQueries({ queryKey: ['draft-pool', v.seasonId] })
       void qc.invalidateQueries({ queryKey: ['players_public', v.seasonId] })
     },
   })

@@ -14,6 +14,12 @@ const SECTIONS = [
     desc: 'Revisar y aprobar jugadores nuevos',
   },
   {
+    to: '/app/organizador/draft',
+    icon: '🏆',
+    title: 'Draft',
+    desc: 'Armar y dirigir el draft en vivo',
+  },
+  {
     to: '/app/organizador/equipos',
     icon: '👥',
     title: 'Equipos y jugadores',
