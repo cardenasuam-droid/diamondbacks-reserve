@@ -4,11 +4,12 @@ import type { IconName } from '@/components/ui/Icon'
 // Quién puede ver un item/grupo:
 //   public    -> todos
 //   session   -> con sesión iniciada
-//   captain   -> capitán u organizador
-//   organizer -> solo organizador
-//   content   -> organizador o gestor web
-//   dev       -> usuarios con acceso a la consola /dev (Bruja u organizador)
-export type NavGate = 'public' | 'session' | 'captain' | 'organizer' | 'content' | 'dev'
+//   captain      -> capitán u organizador
+//   captain-only -> solo capitán (no organizador; evita duplicar items)
+//   organizer    -> solo organizador
+//   content      -> organizador o gestor web
+//   dev          -> usuarios con acceso a la consola /dev (Bruja u organizador)
+export type NavGate = 'public' | 'session' | 'captain' | 'captain-only' | 'organizer' | 'content' | 'dev'
 
 export interface NavItem {
   to: string
@@ -40,6 +41,8 @@ export function navAllows(
       return hasSession
     case 'captain':
       return role === 'captain' || role === 'organizer'
+    case 'captain-only':
+      return role === 'captain'
     case 'organizer':
       return role === 'organizer'
     case 'content':
@@ -79,6 +82,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { to: '/app/capitan', label: 'Panel de capitán', icon: 'captain', end: true, requires: 'captain' },
       { to: '/app/capitan/alineacion', label: 'Armar alineación', icon: 'lineup', requires: 'captain' },
+      { to: '/app/pool', label: 'Pool de jugadores', icon: 'teams', requires: 'captain-only' },
     ],
   },
   {
@@ -87,7 +91,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { to: '/app/organizador', label: 'Panel organizador', icon: 'organizer', end: true, requires: 'organizer' },
       { to: '/app/organizador/inscripciones', label: 'Inscripciones', icon: 'account', requires: 'organizer' },
-      { to: '/app/organizador/pool', label: 'Pool de jugadores', icon: 'teams', requires: 'organizer' },
+      { to: '/app/pool', label: 'Pool de jugadores', icon: 'teams', requires: 'organizer' },
       { to: '/app/organizador/draft', label: 'Draft', icon: 'medal', requires: 'organizer' },
       { to: '/app/organizador/alineaciones', label: 'Estado de alineaciones', icon: 'lineups-status', requires: 'organizer' },
       { to: '/app/organizador/resultados', label: 'Resultados', icon: 'results-edit', requires: 'organizer' },

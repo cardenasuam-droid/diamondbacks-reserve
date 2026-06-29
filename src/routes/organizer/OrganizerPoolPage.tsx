@@ -1,12 +1,15 @@
 import { useMemo, useState } from 'react'
+import { useAuth } from '@/features/auth/context'
 import { useActiveSeason } from '@/features/season/useActiveSeason'
 import { useCategories } from '@/features/categories/useCategories'
 import { rankingCategories, genderForCategoryType } from '@/features/registration/category'
 import {
   usePoolPlayers,
+  usePoolRegistrations,
   useUpdatePoolPlayer,
   useDeletePoolPlayer,
   type PoolPlayer,
+  type PoolRegistration,
 } from '@/features/teams/usePoolPlayers'
 import type { MatchCategory } from '@/lib/types'
 import { PageHeader } from '@/components/ui/PageHeader'
@@ -15,11 +18,24 @@ import { ErrorState } from '@/components/ui/ErrorState'
 import { Loader } from '@/components/ui/Loader'
 import { Icon } from '@/components/ui/Icon'
 
-// Pantalla del organizador: todo el POOL de jugadores aprobados sin equipo,
-// agrupado por categoría. Cada jugador se puede editar (mover de categoría, etc.).
+function fmtWhen(iso: string): string {
+  return new Date(iso).toLocaleString('es-MX', {
+    day: '2-digit',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+// Pool de jugadores aprobados sin equipo, agrupado por categoría. Consciente del
+// rol: el ORGANIZADOR ve fecha/hora de inscripción + teléfono y puede editar; las
+// CAPITANAS lo ven de solo lectura (la fecha/teléfono son privados, RLS).
 export function OrganizerPoolPage() {
+  const { role } = useAuth()
+  const isOrganizer = role === 'organizer'
   const season = useActiveSeason()
   const pool = usePoolPlayers(season.data?.id)
+  const regs = usePoolRegistrations(season.data?.id, isOrganizer)
   const cats = useCategories()
   const ranking = useMemo(() => rankingCategories(cats.data ?? []), [cats.data])
 
@@ -33,9 +49,24 @@ export function OrganizerPoolPage() {
     )
   }
   const seasonId = season.data.id
+  const regMap = regs.data ?? {}
   const players = pool.data ?? []
+
+  // Orden dentro de cada categoría: por solicitud de ingreso (organizador, que
+  // tiene la fecha) o alfabético (capitanas).
+  const sortInCategory = (a: PoolPlayer, b: PoolPlayer) => {
+    if (isOrganizer) {
+      const ta = regMap[a.id]?.created_at ?? ''
+      const tb = regMap[b.id]?.created_at ?? ''
+      if (ta && tb) return ta.localeCompare(tb)
+      if (ta) return -1
+      if (tb) return 1
+    }
+    return a.full_name.localeCompare(b.full_name, 'es')
+  }
+
   const byCategory = ranking
-    .map((c) => ({ cat: c, players: players.filter((p) => p.category_code === c.code) }))
+    .map((c) => ({ cat: c, players: players.filter((p) => p.category_code === c.code).sort(sortInCategory) }))
     .filter((g) => g.players.length > 0)
 
   return (
@@ -53,7 +84,7 @@ export function OrganizerPoolPage() {
         <EmptyState
           icon="account"
           title="El pool está vacío"
-          description="Aprueba inscripciones en Inscripciones y aparecerán aquí, listas para el draft."
+          description="Cuando se aprueben inscripciones aparecerán aquí, listas para el draft."
         />
       ) : (
         <div className="space-y-3">
@@ -65,7 +96,14 @@ export function OrganizerPoolPage() {
               </div>
               <ul className="mt-2 divide-y divide-slate-200">
                 {list.map((p) => (
-                  <PoolRow key={p.id} player={p} seasonId={seasonId} categories={ranking} />
+                  <PoolRow
+                    key={p.id}
+                    player={p}
+                    reg={regMap[p.id]}
+                    seasonId={seasonId}
+                    categories={ranking}
+                    canEdit={isOrganizer}
+                  />
                 ))}
               </ul>
             </section>
@@ -78,45 +116,67 @@ export function OrganizerPoolPage() {
 
 function PoolRow({
   player,
+  reg,
   seasonId,
   categories,
+  canEdit,
 }: {
   player: PoolPlayer
+  reg: PoolRegistration | undefined
   seasonId: string
   categories: MatchCategory[]
+  canEdit: boolean
 }) {
   const [editing, setEditing] = useState(false)
 
-  if (editing) {
-    return <PoolEditForm player={player} seasonId={seasonId} categories={categories} onDone={() => setEditing(false)} />
+  if (editing && canEdit) {
+    return (
+      <PoolEditForm
+        player={player}
+        phone={reg?.phone ?? ''}
+        seasonId={seasonId}
+        categories={categories}
+        onDone={() => setEditing(false)}
+      />
+    )
   }
 
   return (
     <li className="flex items-center gap-3 py-2">
-      <span className="flex-1 truncate text-sm font-medium text-slate-800">{player.full_name}</span>
-      {player.phone && (
-        <a href={`tel:${player.phone}`} className="shrink-0 text-xs text-sky-300 underline">
-          {player.phone}
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium text-slate-800">{player.full_name}</p>
+        {/* Fecha/hora de inscripción: SOLO el organizador (RLS la restringe). */}
+        {canEdit && reg?.created_at && (
+          <p className="text-[11px] text-slate-500">Inscrito: {fmtWhen(reg.created_at)}</p>
+        )}
+      </div>
+      {canEdit && reg?.phone && (
+        <a href={`tel:${reg.phone}`} className="shrink-0 text-xs text-sky-300 underline">
+          {reg.phone}
         </a>
       )}
-      <button
-        onClick={() => setEditing(true)}
-        aria-label="Editar"
-        className="shrink-0 rounded-lg p-1.5 text-slate-500 hover:text-slate-300"
-      >
-        <Icon name="edit" size={16} />
-      </button>
+      {canEdit && (
+        <button
+          onClick={() => setEditing(true)}
+          aria-label="Editar"
+          className="shrink-0 rounded-lg p-1.5 text-slate-500 hover:text-slate-300"
+        >
+          <Icon name="edit" size={16} />
+        </button>
+      )}
     </li>
   )
 }
 
 function PoolEditForm({
   player,
+  phone: initialPhone,
   seasonId,
   categories,
   onDone,
 }: {
   player: PoolPlayer
+  phone: string
   seasonId: string
   categories: MatchCategory[]
   onDone: () => void
@@ -124,7 +184,7 @@ function PoolEditForm({
   const update = useUpdatePoolPlayer()
   const del = useDeletePoolPlayer()
   const [name, setName] = useState(player.full_name)
-  const [phone, setPhone] = useState(player.phone ?? '')
+  const [phone, setPhone] = useState(initialPhone)
   const [categoryCode, setCategoryCode] = useState(player.category_code)
   const [confirmDel, setConfirmDel] = useState(false)
 

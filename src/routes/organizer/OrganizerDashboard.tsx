@@ -14,7 +14,7 @@ const SECTIONS = [
     desc: 'Revisar y aprobar jugadores nuevos',
   },
   {
-    to: '/app/organizador/pool',
+    to: '/app/pool',
     icon: '🎾',
     title: 'Pool de jugadores',
     desc: 'Jugadores aprobados sin equipo (para el draft)',
