@@ -9,11 +9,12 @@ import {
   useUpdatePoolPlayer,
   useDeletePoolPlayer,
   usePoolShirtSizes,
+  useInactivePoolPlayers,
   type PoolPlayer,
   type PoolRegistration,
 } from '@/features/teams/usePoolPlayers'
 import { useTeams } from '@/features/teams/useTeams'
-import { useAssignPlayerTeam } from '@/features/teams/playerMutations'
+import { useAssignPlayerTeam, useTogglePlayerActive } from '@/features/teams/playerMutations'
 import { TeamPicker } from '@/features/teams/TeamPicker'
 import type { MatchCategory, Team } from '@/lib/types'
 import { PageHeader } from '@/components/ui/PageHeader'
@@ -120,7 +121,81 @@ export function OrganizerPoolPage() {
           ))}
         </div>
       )}
+
+      {isOrganizer && <InactivePoolSection seasonId={seasonId} categories={ranking} />}
     </div>
+  )
+}
+
+// Jugadores inhabilitados sin equipo: al desactivar a alguien desde el roster
+// del equipo, regresa aquí (en vez de desaparecer de toda la app) para poder
+// reactivarlo o borrarlo definitivamente. Solo el organizador la ve.
+function InactivePoolSection({ seasonId, categories }: { seasonId: string; categories: MatchCategory[] }) {
+  const inactive = useInactivePoolPlayers(seasonId, true)
+  const toggle = useTogglePlayerActive()
+  const del = useDeletePoolPlayer()
+  const [confirmId, setConfirmId] = useState<string | null>(null)
+  const players = [...(inactive.data ?? [])].sort((a, b) => a.full_name.localeCompare(b.full_name, 'es'))
+  const catName = (code: string) => categories.find((c) => c.code === code)?.name ?? code
+
+  if (inactive.isLoading || players.length === 0) return null
+
+  return (
+    <section className="rounded-2xl bg-slate-50 p-4 shadow-md">
+      <div className="flex items-center justify-between">
+        <p className="font-heading text-sm text-slate-900">Inactivos</p>
+        <span className="text-xs text-slate-500">{players.length}</span>
+      </div>
+      <p className="mt-1 text-xs text-slate-500">Inhabilitados sin equipo. Reactiva para volver a asignarlos.</p>
+      <ul className="mt-2 divide-y divide-slate-200">
+        {players.map((p) => (
+          <li key={p.id} className="flex items-center gap-2 py-2 opacity-75">
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-medium text-slate-800">{p.full_name}</p>
+              <p className="text-[11px] text-slate-500">{catName(p.category_code)}</p>
+            </div>
+            {confirmId === p.id ? (
+              <>
+                <span className="text-xs text-slate-600">¿Borrar?</span>
+                <button
+                  onClick={() => del.mutate({ id: p.id, seasonId }, { onSuccess: () => setConfirmId(null) })}
+                  disabled={del.isPending}
+                  className="shrink-0 rounded-lg bg-red-600 px-2.5 py-1 text-xs font-medium text-white disabled:opacity-50"
+                >
+                  Sí
+                </button>
+                <button onClick={() => setConfirmId(null)} className="shrink-0 text-xs text-slate-500">
+                  No
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => toggle.mutate({ id: p.id, is_active: true, team_id: null, season_id: seasonId })}
+                  disabled={toggle.isPending}
+                  className="shrink-0 rounded-lg bg-brand-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
+                >
+                  Reactivar
+                </button>
+                <button
+                  onClick={() => setConfirmId(p.id)}
+                  aria-label="Borrar"
+                  className="shrink-0 rounded-lg p-1.5 text-slate-500 hover:text-red-400"
+                >
+                  <Icon name="ban" size={16} />
+                </button>
+              </>
+            )}
+          </li>
+        ))}
+      </ul>
+      {toggle.isError && (
+        <p className="mt-2 rounded-lg bg-rose-500/15 px-3 py-2 text-sm text-rose-200">{(toggle.error as Error).message}</p>
+      )}
+      {del.isError && (
+        <p className="mt-2 rounded-lg bg-rose-500/15 px-3 py-2 text-sm text-rose-200">{(del.error as Error).message}</p>
+      )}
+    </section>
   )
 }
 

@@ -36,6 +36,28 @@ export function usePoolPlayers(seasonId: string | undefined) {
   })
 }
 
+// Jugadores INHABILITADOS sin equipo (is_active=false, team_id null). Al
+// inhabilitar un jugador desde el roster (useTogglePlayerActive) se le quita el
+// team_id automáticamente, así "regresa" aquí en vez de desaparecer de toda la
+// app (players_public los excluye por is_active=false). SOLO el organizador los
+// ve (lee `players` directo, RLS "organizer all"); las capitanas no llaman esto.
+export function useInactivePoolPlayers(seasonId: string | undefined, enabled: boolean) {
+  return useQuery({
+    queryKey: ['inactive-pool-players', seasonId],
+    queryFn: async (): Promise<PoolPlayer[]> => {
+      const { data, error } = await supabase
+        .from('players')
+        .select('id, full_name, gender, category_code')
+        .eq('season_id', seasonId as string)
+        .is('team_id', null)
+        .eq('is_active', false)
+      if (error) throw error
+      return (data ?? []) as PoolPlayer[]
+    },
+    enabled: Boolean(seasonId) && enabled,
+  })
+}
+
 export interface PoolRegistration {
   created_at: string // fecha/hora de inscripción (solicitud de ingreso)
   phone: string | null
@@ -134,6 +156,7 @@ export function useDeletePoolPlayer() {
 
 function invalidatePool(qc: ReturnType<typeof useQueryClient>, seasonId: string) {
   void qc.invalidateQueries({ queryKey: ['pool-players', seasonId] })
+  void qc.invalidateQueries({ queryKey: ['inactive-pool-players', seasonId] })
   void qc.invalidateQueries({ queryKey: ['pool-registrations', seasonId] })
   void qc.invalidateQueries({ queryKey: ['pool-shirt-sizes', seasonId] })
   void qc.invalidateQueries({ queryKey: ['players_public', seasonId] })

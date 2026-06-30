@@ -7,6 +7,7 @@ import { categoryColor } from '@/features/categories/categoryColor'
 import { genderForCategoryType } from '@/features/categories/eligibility'
 import { useManageRoster, type ManagedPlayer } from '@/features/teams/useManageRoster'
 import { useSavePlayer, useTogglePlayerActive, useAssignPlayerTeam } from '@/features/teams/playerMutations'
+import { usePoolPlayers } from '@/features/teams/usePoolPlayers'
 import { TeamPicker } from '@/features/teams/TeamPicker'
 import { MediaField } from '@/features/news/MediaField'
 import { PageHeader } from '@/components/ui/PageHeader'
@@ -52,6 +53,10 @@ export function OrganizerRosterPage() {
   const assign = useAssignPlayerTeam()
   const [draft, setDraft] = useState<Draft | null>(null)
 
+  const pool = usePoolPlayers(season.data?.id)
+  const [addFromPool, setAddFromPool] = useState(false)
+  const [poolPick, setPoolPick] = useState('')
+
   const team = (teams.data ?? []).find((t) => t.id === teamId)
   // Categorías de ranking (no mixtas): las que puede tener un jugador.
   const rankingCats = useMemo(
@@ -62,6 +67,23 @@ export function OrganizerRosterPage() {
     () => new Map((categories.data ?? []).map((c) => [c.code, c.type])),
     [categories.data],
   )
+  const poolSorted = useMemo(
+    () => [...(pool.data ?? [])].sort((a, b) => a.full_name.localeCompare(b.full_name, 'es')),
+    [pool.data],
+  )
+
+  function addPicked() {
+    if (!poolPick || !teamId || !season.data) return
+    assign.mutate(
+      { playerId: poolPick, teamId, seasonId: season.data.id },
+      {
+        onSuccess: () => {
+          setAddFromPool(false)
+          setPoolPick('')
+        },
+      },
+    )
+  }
 
   function edit(p: ManagedPlayer) {
     setDraft({
@@ -108,13 +130,66 @@ export function OrganizerRosterPage() {
       </Link>
       <PageHeader title={team?.name ?? 'Jugadores'} subtitle="Roster del equipo" />
 
-      {!draft ? (
-        <button
-          onClick={() => setDraft({ ...EMPTY })}
-          className="w-full rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
-        >
-          + Nuevo jugador
-        </button>
+      {!draft && !addFromPool ? (
+        <div className="flex gap-2">
+          <button
+            onClick={() => setDraft({ ...EMPTY })}
+            className="flex-1 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
+          >
+            + Nuevo jugador
+          </button>
+          <button
+            onClick={() => setAddFromPool(true)}
+            className="flex-1 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-200"
+          >
+            Agregar del pool
+          </button>
+        </div>
+      ) : addFromPool ? (
+        <section className="space-y-3 rounded-xl border border-slate-200 bg-slate-100 p-4 shadow-sm">
+          <p className="text-sm font-medium text-slate-700">Agregar jugador del pool</p>
+          {pool.isLoading ? (
+            <Loader label="Cargando pool…" />
+          ) : poolSorted.length === 0 ? (
+            <p className="text-sm text-slate-500">El pool está vacío: no hay jugadores sin equipo.</p>
+          ) : (
+            <select
+              value={poolPick}
+              onChange={(e) => setPoolPick(e.target.value)}
+              className="w-full rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm"
+            >
+              <option value="">— Elige jugador —</option>
+              {poolSorted.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.full_name} ({p.category_code})
+                </option>
+              ))}
+            </select>
+          )}
+          {assign.isError && (
+            <p className="rounded-lg bg-rose-500/15 px-3 py-2 text-sm text-rose-200">
+              {(assign.error as Error).message}
+            </p>
+          )}
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                setAddFromPool(false)
+                setPoolPick('')
+              }}
+              className="rounded-lg px-3 py-2 text-sm text-slate-500"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={addPicked}
+              disabled={!poolPick || assign.isPending}
+              className="flex-1 rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
+            >
+              {assign.isPending ? 'Agregando…' : 'Agregar al equipo'}
+            </button>
+          </div>
+        </section>
       ) : (
         <section className="space-y-3 rounded-xl border border-slate-200 bg-slate-100 p-4 shadow-sm">
           <input

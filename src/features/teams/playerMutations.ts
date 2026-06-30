@@ -29,8 +29,8 @@ function friendly(msg: string): string {
   return msg
 }
 
-function invalidate(qc: ReturnType<typeof useQueryClient>, v: { team_id: string; season_id: string }) {
-  void qc.invalidateQueries({ queryKey: ['manage-roster', v.team_id] })
+function invalidate(qc: ReturnType<typeof useQueryClient>, v: { team_id: string | null; season_id: string }) {
+  if (v.team_id) void qc.invalidateQueries({ queryKey: ['manage-roster', v.team_id] })
   void qc.invalidateQueries({ queryKey: ['teams', v.season_id] })
   void qc.invalidateQueries({ queryKey: ['players_public', v.season_id] })
 }
@@ -67,11 +67,20 @@ export function useSavePlayer() {
 export function useTogglePlayerActive() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (v: { id: string; is_active: boolean; team_id: string; season_id: string }) => {
-      const { error } = await supabase.from('players').update({ is_active: v.is_active }).eq('id', v.id)
+    mutationFn: async (v: { id: string; is_active: boolean; team_id: string | null; season_id: string }) => {
+      // Al inhabilitar, regresa al pool (team_id null): de lo contrario
+      // players_public (is_active=false) lo esconde de TODAS las pantallas,
+      // incluido el pool, y queda invisible salvo en este roster.
+      const patch: { is_active: boolean; team_id?: null } = { is_active: v.is_active }
+      if (!v.is_active) patch.team_id = null
+      const { error } = await supabase.from('players').update(patch).eq('id', v.id)
       if (error) throw new Error(friendly(error.message))
     },
-    onSuccess: (_d, v) => invalidate(qc, v),
+    onSuccess: (_d, v) => {
+      invalidate(qc, v)
+      void qc.invalidateQueries({ queryKey: ['pool-players', v.season_id] })
+      void qc.invalidateQueries({ queryKey: ['inactive-pool-players', v.season_id] })
+    },
   })
 }
 
@@ -140,6 +149,7 @@ export function useAssignPlayerTeam() {
     },
     onSuccess: (_d, v) => {
       void qc.invalidateQueries({ queryKey: ['pool-players', v.seasonId] })
+      void qc.invalidateQueries({ queryKey: ['inactive-pool-players', v.seasonId] })
       void qc.invalidateQueries({ queryKey: ['pool-registrations', v.seasonId] })
       void qc.invalidateQueries({ queryKey: ['players_public', v.seasonId] })
       void qc.invalidateQueries({ queryKey: ['teams', v.seasonId] })
