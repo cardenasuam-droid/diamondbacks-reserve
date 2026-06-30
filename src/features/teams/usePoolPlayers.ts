@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import type { Gender } from '@/lib/types'
+import type { ShirtSize } from '@/lib/shirtSize'
 
 // PoolPlayer base: viene de players_public (vista pública), así lo pueden leer
 // TANTO el organizador COMO las capitanas. Sin teléfono (privado).
@@ -64,6 +65,29 @@ export function usePoolRegistrations(seasonId: string | undefined, enabled: bool
   })
 }
 
+// Tallas de los jugadores del POOL, SOLO para el organizador (lee players directo;
+// la talla NO está en players_public). Mapeado por id de jugador. Las capitanas no
+// lo llaman (enabled=false) y por RLS solo verían su propio equipo, no el pool.
+export function usePoolShirtSizes(seasonId: string | undefined, enabled: boolean) {
+  return useQuery({
+    queryKey: ['pool-shirt-sizes', seasonId],
+    queryFn: async (): Promise<Record<string, ShirtSize | null>> => {
+      const { data, error } = await supabase
+        .from('players')
+        .select('id, shirt_size')
+        .eq('season_id', seasonId as string)
+        .is('team_id', null)
+      if (error) throw error
+      const map: Record<string, ShirtSize | null> = {}
+      for (const r of (data ?? []) as { id: string; shirt_size: ShirtSize | null }[]) {
+        map[r.id] = r.shirt_size
+      }
+      return map
+    },
+    enabled: Boolean(seasonId) && enabled,
+  })
+}
+
 export interface UpdatePoolVars {
   id: string
   seasonId: string
@@ -71,6 +95,7 @@ export interface UpdatePoolVars {
   phone: string
   gender: Gender
   category_code: string
+  shirt_size: ShirtSize | null
 }
 
 // Edita un jugador del pool (nombre/teléfono/categoría; el género se deriva de la
@@ -86,6 +111,7 @@ export function useUpdatePoolPlayer() {
           phone: v.phone.trim() || null,
           gender: v.gender,
           category_code: v.category_code,
+          shirt_size: v.shirt_size,
         })
         .eq('id', v.id)
       if (error) throw new Error(friendly(error.message))
@@ -109,5 +135,6 @@ export function useDeletePoolPlayer() {
 function invalidatePool(qc: ReturnType<typeof useQueryClient>, seasonId: string) {
   void qc.invalidateQueries({ queryKey: ['pool-players', seasonId] })
   void qc.invalidateQueries({ queryKey: ['pool-registrations', seasonId] })
+  void qc.invalidateQueries({ queryKey: ['pool-shirt-sizes', seasonId] })
   void qc.invalidateQueries({ queryKey: ['players_public', seasonId] })
 }

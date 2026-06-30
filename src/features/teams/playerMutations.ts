@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { uploadMedia } from '@/features/news/contentMutations'
 import type { Gender } from '@/lib/types'
+import type { ShirtSize } from '@/lib/shirtSize'
 
 export interface SavePlayerVars {
   id?: string
@@ -12,6 +13,7 @@ export interface SavePlayerVars {
   phone: string
   gender: Gender
   category_code: string
+  shirt_size: ShirtSize | null
   is_captain: boolean
   is_active: boolean
   photo_url: string
@@ -43,6 +45,7 @@ export function useSavePlayer() {
         phone: v.phone.trim() || null,
         gender: v.gender,
         category_code: v.category_code,
+        shirt_size: v.shirt_size,
         is_captain: v.is_captain,
         is_active: v.is_active,
         photo_url: v.photo_url.trim() || null,
@@ -86,6 +89,21 @@ export function useSetMyPhoto() {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['players_public'] })
       void qc.invalidateQueries({ queryKey: ['player-rankings'] })
+    },
+  })
+}
+
+// El propio jugador fija SU talla de playera desde "Mi cuenta" (RPC set_my_shirt_size,
+// 0017), sin abrir un UPDATE general sobre players.
+export function useSetMyShirtSize() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (size: ShirtSize) => {
+      const { error } = await supabase.rpc('set_my_shirt_size', { p_size: size })
+      if (error) throw new Error(friendly(error.message))
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['my-player'] })
     },
   })
 }

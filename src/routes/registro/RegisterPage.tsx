@@ -7,8 +7,10 @@ import { registrationSchema, POSITION_OPTIONS } from '@/features/registration/sc
 import { useSubmitRegistration } from '@/features/registration/useSubmitRegistration'
 import { Brand } from '@/components/ui/Brand'
 import { Icon } from '@/components/ui/Icon'
+import { ShirtSizePicker } from '@/components/ui/ShirtSizePicker'
+import type { ShirtSize } from '@/lib/shirtSize'
 
-type FieldErrors = Partial<Record<'fullName' | 'phone' | 'categoryCode' | 'position', string>>
+type FieldErrors = Partial<Record<'fullName' | 'phone' | 'categoryCode' | 'position' | 'shirtSize', string>>
 
 // Página de inscripción PÚBLICA y AISLADA (ruta /registro, fuera del shell con
 // menú y de /app). Quien entra solo ve este formulario: no hay forma de navegar
@@ -22,6 +24,7 @@ export function RegisterPage() {
   const [phone, setPhone] = useState('')
   const [categoryCode, setCategoryCode] = useState('')
   const [position, setPosition] = useState('')
+  const [shirtSize, setShirtSize] = useState<ShirtSize | ''>('')
   const [website, setWebsite] = useState('') // honeypot
   const [errors, setErrors] = useState<FieldErrors>({})
   const [done, setDone] = useState(false)
@@ -33,6 +36,7 @@ export function RegisterPage() {
     setPhone('')
     setCategoryCode('')
     setPosition('')
+    setShirtSize('')
     setWebsite('')
     setErrors({})
     submit.reset()
@@ -46,6 +50,7 @@ export function RegisterPage() {
       phone,
       categoryCode,
       position,
+      shirtSize,
     })
     if (!parsed.success) {
       const next: FieldErrors = {}
@@ -178,6 +183,14 @@ export function RegisterPage() {
                     })}
                   </div>
                   {errors.position && <p className="mt-1 text-xs text-red-600">{errors.position}</p>}
+                </div>
+
+                <div>
+                  <span className="block text-sm font-medium text-slate-700">Talla de playera</span>
+                  <div className="mt-1.5">
+                    <ShirtSizePicker value={shirtSize || null} onChange={(s) => setShirtSize(s)} />
+                  </div>
+                  {errors.shirtSize && <p className="mt-1 text-xs text-red-600">{errors.shirtSize}</p>}
                 </div>
 
                 {/* Honeypot anti-bot: oculto para humanos, tentador para bots. */}

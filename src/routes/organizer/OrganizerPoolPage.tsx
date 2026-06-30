@@ -8,6 +8,7 @@ import {
   usePoolRegistrations,
   useUpdatePoolPlayer,
   useDeletePoolPlayer,
+  usePoolShirtSizes,
   type PoolPlayer,
   type PoolRegistration,
 } from '@/features/teams/usePoolPlayers'
@@ -20,6 +21,8 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { Loader } from '@/components/ui/Loader'
 import { Icon } from '@/components/ui/Icon'
+import { ShirtSizePicker } from '@/components/ui/ShirtSizePicker'
+import type { ShirtSize } from '@/lib/shirtSize'
 
 function fmtWhen(iso: string): string {
   return new Date(iso).toLocaleString('es-MX', {
@@ -41,6 +44,7 @@ export function OrganizerPoolPage() {
   const regs = usePoolRegistrations(season.data?.id, isOrganizer)
   const cats = useCategories()
   const teams = useTeams(season.data?.id)
+  const shirtSizes = usePoolShirtSizes(season.data?.id, isOrganizer)
   const ranking = useMemo(() => rankingCategories(cats.data ?? []), [cats.data])
 
   if (season.isLoading) return <Loader label="Cargando…" />
@@ -108,6 +112,7 @@ export function OrganizerPoolPage() {
                     teams={teams.data ?? []}
                     categories={ranking}
                     canEdit={isOrganizer}
+                    currentShirtSize={shirtSizes.data?.[p.id] ?? null}
                   />
                 ))}
               </ul>
@@ -126,6 +131,7 @@ function PoolRow({
   teams,
   categories,
   canEdit,
+  currentShirtSize,
 }: {
   player: PoolPlayer
   reg: PoolRegistration | undefined
@@ -133,6 +139,7 @@ function PoolRow({
   teams: Team[]
   categories: MatchCategory[]
   canEdit: boolean
+  currentShirtSize: ShirtSize | null
 }) {
   const [mode, setMode] = useState<'view' | 'edit' | 'assign'>('view')
 
@@ -143,6 +150,7 @@ function PoolRow({
         phone={reg?.phone ?? ''}
         seasonId={seasonId}
         categories={categories}
+        currentShirtSize={currentShirtSize}
         onDone={() => setMode('view')}
       />
     )
@@ -229,12 +237,14 @@ function PoolEditForm({
   phone: initialPhone,
   seasonId,
   categories,
+  currentShirtSize,
   onDone,
 }: {
   player: PoolPlayer
   phone: string
   seasonId: string
   categories: MatchCategory[]
+  currentShirtSize: ShirtSize | null
   onDone: () => void
 }) {
   const update = useUpdatePoolPlayer()
@@ -242,6 +252,7 @@ function PoolEditForm({
   const [name, setName] = useState(player.full_name)
   const [phone, setPhone] = useState(initialPhone)
   const [categoryCode, setCategoryCode] = useState(player.category_code)
+  const [shirtSize, setShirtSize] = useState<ShirtSize | null>(currentShirtSize)
   const [confirmDel, setConfirmDel] = useState(false)
 
   function save() {
@@ -249,7 +260,7 @@ function PoolEditForm({
     const gender = cat ? genderForCategoryType(cat.type) : null
     if (!gender || !name.trim()) return
     update.mutate(
-      { id: player.id, seasonId, full_name: name, phone, gender, category_code: categoryCode },
+      { id: player.id, seasonId, full_name: name, phone, gender, category_code: categoryCode, shirt_size: shirtSize },
       { onSuccess: onDone },
     )
   }
@@ -275,6 +286,13 @@ function PoolEditForm({
             ))}
           </select>
         </label>
+      </div>
+
+      <div>
+        <span className="block text-xs font-medium text-slate-600">Talla de playera</span>
+        <div className="mt-1.5">
+          <ShirtSizePicker value={shirtSize} onChange={setShirtSize} />
+        </div>
       </div>
 
       {update.isError && (

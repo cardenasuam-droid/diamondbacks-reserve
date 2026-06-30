@@ -1,5 +1,8 @@
 import { z } from 'zod'
+import { SHIRT_SIZES } from '@/lib/shirtSize'
 import type { PlayerPosition } from './types'
+
+const SHIRT_SIZE_VALUES: readonly string[] = SHIRT_SIZES
 
 // Opciones de posición para el control segmentado del formulario.
 export const POSITION_OPTIONS: ReadonlyArray<{ value: PlayerPosition; label: string }> = [
@@ -32,6 +35,7 @@ export const registrationSchema = z.object({
   phone: phoneSchema,
   categoryCode: z.string().min(1, 'Elige una categoría'),
   position: z.string().refine((v) => POSITION_VALUES.includes(v), 'Elige tu posición de juego'),
+  shirtSize: z.string().refine((v) => SHIRT_SIZE_VALUES.includes(v), 'Elige tu talla de playera'),
 })
 
 export type RegistrationInput = z.infer<typeof registrationSchema>

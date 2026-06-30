@@ -6,9 +6,10 @@ import { isPlayerAuthEmail } from '@/features/auth/playerAuth'
 import { useActiveSeason } from '@/features/season/useActiveSeason'
 import { useTeams } from '@/features/teams/useTeams'
 import { usePublicPlayers } from '@/features/teams/usePublicPlayers'
+import { useMyPlayer } from '@/features/teams/useMyPlayer'
 import { usePlayerRankings } from '@/features/stats/usePlayerRankings'
 import { useTeamUpcomingMatchups, type UpcomingMatchup } from '@/features/schedule/useTeamUpcomingMatchups'
-import { useSetMyPhoto } from '@/features/teams/playerMutations'
+import { useSetMyPhoto, useSetMyShirtSize } from '@/features/teams/playerMutations'
 import { teamColor } from '@/lib/color'
 import { formatRoundDate } from '@/lib/date'
 import type { UserRole } from '@/lib/types'
@@ -19,6 +20,7 @@ import { Icon } from '@/components/ui/Icon'
 import { Loader } from '@/components/ui/Loader'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { StatTile } from '@/components/ui/StatTile'
+import { ShirtSizePicker } from '@/components/ui/ShirtSizePicker'
 
 const signed = (n: number) => (n > 0 ? `+${n}` : String(n))
 
@@ -48,6 +50,7 @@ export function AccountPage() {
           <NextGamesSection playerId={playerId} />
           <MyStatsSection playerId={playerId} />
           <PhotoSection playerId={playerId} name={profile?.full_name ?? 'Jugador'} />
+          <ShirtSizeSection playerId={playerId} />
         </>
       )}
 
@@ -278,6 +281,36 @@ function PhotoSection({ playerId, name }: { playerId: string; name: string }) {
       {setPhoto.isError && (
         <p className="mt-3 rounded-lg bg-rose-500/15 px-3 py-2 text-sm text-rose-200">
           {(setPhoto.error as Error).message}
+        </p>
+      )}
+    </section>
+  )
+}
+
+// Talla de playera del propio jugador (self-service). Útil para quienes se
+// inscribieron antes de que el campo existiera.
+function ShirtSizeSection({ playerId }: { playerId: string }) {
+  const me = useMyPlayer(playerId)
+  const setSize = useSetMyShirtSize()
+  const current = me.data?.shirt_size ?? null
+
+  return (
+    <section className="rounded-2xl border border-slate-200/80 bg-gradient-to-b from-slate-100 to-slate-50 p-5 shadow-sm">
+      <h2 className="text-sm font-bold uppercase tracking-wide text-slate-700">Talla de playera</h2>
+      <p className="mt-1 text-xs text-slate-500">
+        Para tu playera de la liga (solo la ven tú, tu capitán y el organizador).{' '}
+        {current ? `Tu talla: ${current}.` : 'Aún no la has elegido.'}
+      </p>
+      <div className="mt-4">
+        <ShirtSizePicker
+          value={current}
+          disabled={setSize.isPending}
+          onChange={(s) => setSize.mutate(s)}
+        />
+      </div>
+      {setSize.isError && (
+        <p className="mt-3 rounded-lg bg-rose-500/15 px-3 py-2 text-sm text-rose-200">
+          {(setSize.error as Error).message}
         </p>
       )}
     </section>

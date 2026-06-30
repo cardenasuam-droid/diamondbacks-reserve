@@ -32,6 +32,7 @@ export function useSubmitRegistration(seasonId: string | null | undefined) {
         phone: vars.phone.trim(),
         requested_category_code: vars.categoryCode,
         position: vars.position,
+        shirt_size: vars.shirtSize,
       })
       if (error) throw new Error(friendly(error.message))
     },

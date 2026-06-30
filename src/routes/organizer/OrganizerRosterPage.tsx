@@ -15,11 +15,14 @@ import { ErrorState } from '@/components/ui/ErrorState'
 import { Loader } from '@/components/ui/Loader'
 import { Badge } from '@/components/ui/Badge'
 import { Avatar } from '@/components/ui/Avatar'
+import { ShirtSizePicker } from '@/components/ui/ShirtSizePicker'
+import type { ShirtSize } from '@/lib/shirtSize'
 
 interface Draft {
   id?: string
   full_name: string
   category_code: string
+  shirt_size: ShirtSize | null
   email: string
   phone: string
   is_captain: boolean
@@ -30,6 +33,7 @@ interface Draft {
 const EMPTY: Draft = {
   full_name: '',
   category_code: '',
+  shirt_size: null,
   email: '',
   phone: '',
   is_captain: false,
@@ -64,6 +68,7 @@ export function OrganizerRosterPage() {
       id: p.id,
       full_name: p.full_name,
       category_code: p.category_code,
+      shirt_size: p.shirt_size,
       email: p.email ?? '',
       phone: p.phone ?? '',
       is_captain: p.is_captain,
@@ -147,6 +152,15 @@ export function OrganizerRosterPage() {
             inputMode="email"
             className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
           />
+          <div>
+            <span className="block text-sm font-medium text-slate-700">Talla de playera</span>
+            <div className="mt-1.5">
+              <ShirtSizePicker
+                value={draft.shirt_size}
+                onChange={(s) => setDraft({ ...draft, shirt_size: s })}
+              />
+            </div>
+          </div>
           <div className="flex items-center gap-3">
             <Avatar name={draft.full_name || '?'} photoUrl={draft.photo_url} color={team?.color} size={48} />
             <div className="flex-1">

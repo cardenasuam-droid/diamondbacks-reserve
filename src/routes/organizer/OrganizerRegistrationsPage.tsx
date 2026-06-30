@@ -161,6 +161,7 @@ function ReviewCard({
       <div className="mt-2 flex flex-wrap gap-1.5">
         <Chip>Pide: {requested?.name ?? registration.requested_category_code}</Chip>
         <Chip>Posición: {POSITION_LABEL[registration.position]}</Chip>
+        {registration.shirt_size && <Chip>Talla: {registration.shirt_size}</Chip>}
       </div>
 
       {registration.comment && (

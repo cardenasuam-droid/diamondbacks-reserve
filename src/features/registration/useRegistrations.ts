@@ -56,6 +56,7 @@ export function useApproveRegistration() {
           phone: v.registration.phone.trim(),
           gender,
           category_code: v.categoryCode,
+          shirt_size: v.registration.shirt_size ?? null,
           is_captain: false,
           is_active: true,
           photo_url: null,

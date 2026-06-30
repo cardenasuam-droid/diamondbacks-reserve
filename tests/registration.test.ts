@@ -7,6 +7,7 @@ const valid = {
   phone: '55 1234 5678',
   categoryCode: 'VAR_5',
   position: 'ambas',
+  shirtSize: 'M',
 }
 
 describe('registrationSchema', () => {
@@ -39,6 +40,14 @@ describe('registrationSchema', () => {
     }
     expect(registrationSchema.safeParse({ ...valid, position: 'zurda' }).success).toBe(false)
     expect(registrationSchema.safeParse({ ...valid, position: '' }).success).toBe(false)
+  })
+
+  it('exige una talla de playera válida', () => {
+    for (const s of ['XS', 'S', 'M', 'L', 'XL', 'XXL']) {
+      expect(registrationSchema.safeParse({ ...valid, shirtSize: s }).success).toBe(true)
+    }
+    expect(registrationSchema.safeParse({ ...valid, shirtSize: 'XXXL' }).success).toBe(false)
+    expect(registrationSchema.safeParse({ ...valid, shirtSize: '' }).success).toBe(false)
   })
 })
 
