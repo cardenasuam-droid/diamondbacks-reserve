@@ -52,14 +52,26 @@ export function PlayerDetailPage() {
 
       {/* Encabezado */}
       <div
-        className="relative mb-5 overflow-hidden rounded-2xl p-5 text-white shadow-md ring-1 ring-white/10"
+        className="relative mb-5 overflow-hidden rounded-3xl p-6 text-white shadow-md ring-1 ring-white/10"
         style={{ backgroundColor: teamColor(team?.color, '#334155') }}
       >
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-white/5" aria-hidden />
-        <div className="relative flex items-center gap-4">
-          <Avatar name={player.full_name} photoUrl={player.photo_url} color={team?.color} size={72} />
+        {/* Escudo del equipo como marca de agua tenue. */}
+        {team?.logo_url && (
+          <img
+            src={team.logo_url}
+            alt=""
+            aria-hidden
+            className="pointer-events-none absolute -right-7 -top-9 h-44 w-44 rotate-[14deg] object-contain opacity-[0.14] blur-[1px]"
+          />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-tr from-black/65 via-black/25 to-white/10" aria-hidden />
+        <div className="pointer-events-none absolute -bottom-12 -left-10 h-44 w-44 rounded-full bg-white/10 blur-3xl" aria-hidden />
+        <div className="relative flex items-center gap-5">
+          <span className="pop shrink-0 rounded-full bg-white/15 p-1 shadow-xl ring-1 ring-white/30">
+            <Avatar name={player.full_name} photoUrl={player.photo_url} color={team?.color} size={84} />
+          </span>
           <div className="min-w-0">
-            <h1 className="truncate font-heading text-2xl">{player.full_name}</h1>
+            <h1 className="truncate font-heading text-[1.9rem] leading-tight">{player.full_name}</h1>
             {team && (
               <Link
                 to={`/equipos/${team.id}`}

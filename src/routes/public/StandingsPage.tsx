@@ -2,7 +2,10 @@ import { Link } from 'react-router-dom'
 import { useActiveSeason } from '@/features/season/useActiveSeason'
 import { useStandings } from '@/features/standings/useStandings'
 import { useTeams } from '@/features/teams/useTeams'
+import { useCountUp } from '@/hooks/useCountUp'
+import type { RankedTeam } from '@/features/standings/resolveStandings'
 import { TeamCrest } from '@/components/ui/TeamCrest'
+import { Icon } from '@/components/ui/Icon'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
@@ -45,6 +48,12 @@ export function StandingsPage() {
         />
       ) : (
         <>
+          {standings.data[0] && standings.data[0].played > 0 && (
+            <LeaderSpotlight
+              leader={standings.data[0]}
+              logoUrl={logoById.get(standings.data[0].team_id)}
+            />
+          )}
           <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm">
             <table className="w-full text-sm">
               <thead>
@@ -66,7 +75,7 @@ export function StandingsPage() {
                       key={t.team_id}
                       className={
                         'border-b border-slate-100 last:border-0 ' +
-                        (leader ? 'bg-gold-500/10' : '')
+                        (leader ? 'bg-gradient-to-r from-gold-500/20 via-gold-500/[0.07] to-transparent' : '')
                       }
                     >
                       <td
@@ -88,6 +97,9 @@ export function StandingsPage() {
                               </span>
                             )}
                           </span>
+                          {leader && (
+                            <Icon name="standings" size={14} className="ml-0.5 shrink-0 text-gold-300" />
+                          )}
                         </Link>
                       </td>
                       <td className="px-2 py-2.5 text-center tabular-nums text-slate-600">{t.played}</td>
@@ -125,5 +137,45 @@ export function StandingsPage() {
         </>
       )}
     </div>
+  )
+}
+
+// Tarjeta destacada del líder (campeón actual) sobre la tabla. Escudo grande con
+// halo de su color (el `glow` lee sobre la superficie oscura), puntos en oro que
+// cuentan al entrar. Solo se muestra cuando hay partidos jugados.
+function LeaderSpotlight({
+  leader,
+  logoUrl,
+}: {
+  leader: RankedTeam
+  logoUrl: string | null | undefined
+}) {
+  const points = useCountUp(leader.points)
+  return (
+    <Link
+      to={`/equipos/${leader.team_id}`}
+      className="gold-edge group relative mb-4 flex items-center gap-4 overflow-hidden rounded-3xl bg-slate-50 p-5 shadow-md ring-1 ring-gold-500/30 transition duration-200 hover:-translate-y-0.5"
+    >
+      <div
+        className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-gold-500/15 blur-3xl"
+        aria-hidden
+      />
+      <TeamCrest name={leader.team_name} logoUrl={logoUrl} color={leader.color} size={64} glow />
+      <div className="relative min-w-0 flex-1">
+        <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-gold-300">
+          <Icon name="standings" size={13} /> Líder
+        </p>
+        <p className="truncate font-heading text-xl text-slate-900">{leader.team_name}</p>
+        <p className="mt-0.5 text-xs text-slate-500">
+          {leader.won} ganados · {leader.played} jugados
+        </p>
+      </div>
+      <div className="relative shrink-0 text-right">
+        <p className="font-heading text-3xl leading-none tabular-nums text-gold-300">
+          {Math.round(points)}
+        </p>
+        <p className="mt-1 text-[11px] font-medium uppercase tracking-wide text-slate-500">pts</p>
+      </div>
+    </Link>
   )
 }

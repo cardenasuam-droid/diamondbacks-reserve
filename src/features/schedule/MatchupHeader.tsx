@@ -7,14 +7,14 @@ function TeamTag({ team, align }: { team: TeamLite | null; align: 'left' | 'righ
   if (!team) {
     return (
       <div className={layout}>
-        <span className="h-6 w-6 shrink-0 rounded-md bg-slate-200 ring-1 ring-black/10" aria-hidden />
+        <span className="h-7 w-7 shrink-0 rounded-md bg-slate-200 ring-1 ring-black/10" aria-hidden />
         <span className="truncate font-semibold text-slate-800">—</span>
       </div>
     )
   }
   return (
     <Link to={`/equipos/${team.id}`} className={layout + ' transition hover:opacity-70'}>
-      <TeamCrest name={team.name} logoUrl={team.logo_url} color={team.color} size={24} />
+      <TeamCrest name={team.name} logoUrl={team.logo_url} color={team.color} size={28} />
       <span className="truncate font-semibold text-slate-800 underline decoration-transparent hover:decoration-inherit">
         {team.name}
       </span>

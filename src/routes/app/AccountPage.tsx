@@ -93,22 +93,33 @@ function GreetingHeader({
 
   return (
     <section
-      className="rise relative overflow-hidden rounded-2xl p-5 text-white shadow-md ring-1 ring-white/10"
+      className="rise relative overflow-hidden rounded-3xl p-6 text-white shadow-md ring-1 ring-white/10"
       style={{ backgroundColor: teamColor(team?.color, '#0a3d29') }}
     >
-      <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/15 to-white/5" aria-hidden />
+      {/* Escudo del equipo como marca de agua tenue (si tiene logo). */}
+      {team?.logo_url && (
+        <img
+          src={team.logo_url}
+          alt=""
+          aria-hidden
+          className="pointer-events-none absolute -right-7 -top-9 h-44 w-44 rotate-[14deg] object-contain opacity-[0.14] blur-[1px]"
+        />
+      )}
+      <div className="absolute inset-0 bg-gradient-to-tr from-black/60 via-black/25 to-white/5" aria-hidden />
       <div
-        className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full bg-gold-500/25 blur-3xl"
+        className="pointer-events-none absolute -right-8 -top-10 h-36 w-36 rounded-full bg-gold-500/25 blur-3xl"
         aria-hidden
       />
-      <div className="relative flex items-center gap-4">
-        {me ? (
-          <Avatar name={me.full_name} photoUrl={me.photo_url} color={team?.color} size={60} />
-        ) : (
-          <span className="flex h-[60px] w-[60px] shrink-0 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20">
-            <Icon name="account" size={30} className="text-white" />
-          </span>
-        )}
+      <div className="relative flex items-center gap-5">
+        <span className="pop shrink-0 rounded-full bg-white/15 p-1 shadow-xl ring-1 ring-white/30">
+          {me ? (
+            <Avatar name={me.full_name} photoUrl={me.photo_url} color={team?.color} size={72} />
+          ) : (
+            <span className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-white/10">
+              <Icon name="account" size={34} className="text-white" />
+            </span>
+          )}
+        </span>
         <div className="min-w-0">
           {role && (
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70">
@@ -119,7 +130,7 @@ function GreetingHeader({
             Hola{name ? `, ${name}` : ''}
           </h1>
           {me && (
-            <div className="mt-1.5 flex flex-wrap items-center gap-2">
+            <div className="mt-2 flex flex-wrap items-center gap-2">
               <Badge color="amber">{me.category_code}</Badge>
               {me.is_captain && <Badge color="emerald">Capitán</Badge>}
               {team && (

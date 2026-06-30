@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/features/auth/context'
 import { roleLabel } from '@/features/auth/roles'
@@ -54,7 +55,7 @@ export function NavDrawer({ open, onClose }: { open: boolean; onClose: () => voi
         aria-label="Menú de navegación"
         aria-hidden={!open}
         className={
-          'glass fixed inset-y-0 left-0 z-40 flex w-72 max-w-[85%] flex-col border-r border-white/10 bg-slate-100/80 shadow-xl transition-transform duration-200 ' +
+          'glass fixed inset-y-0 left-0 z-40 flex w-72 max-w-[85%] flex-col border-r border-white/10 bg-slate-100/80 shadow-2xl transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform ' +
           (open ? 'translate-x-0' : '-translate-x-full')
         }
       >
@@ -69,9 +70,9 @@ export function NavDrawer({ open, onClose }: { open: boolean; onClose: () => voi
           </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-2 py-3">
-          {groups.map((g) => (
-            <div key={g.title} className="mb-4">
+        <nav key={open ? 'open' : 'closed'} className="flex-1 overflow-y-auto px-2 py-3">
+          {groups.map((g, gi) => (
+            <div key={g.title} className="rise-item mb-4" style={{ ['--d']: gi } as CSSProperties}>
               <p className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
                 {g.title}
               </p>
@@ -80,7 +81,7 @@ export function NavDrawer({ open, onClose }: { open: boolean; onClose: () => voi
                   item.soon ? (
                     <li
                       key={item.to}
-                      className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-400"
+                      className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-slate-400"
                     >
                       <Icon name={item.icon} size={18} />
                       <span className="flex-1">{item.label}</span>
@@ -95,9 +96,9 @@ export function NavDrawer({ open, onClose }: { open: boolean; onClose: () => voi
                         end={item.end}
                         onClick={onClose}
                         className={({ isActive }) =>
-                          'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ' +
+                          'flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition ' +
                           (isActive
-                            ? 'bg-brand-500/10 text-brand-300 ring-1 ring-brand-500/30'
+                            ? 'bg-gradient-to-r from-brand-500/20 to-brand-500/5 text-brand-200 ring-1 ring-brand-500/30'
                             : 'text-slate-700 hover:bg-slate-100')
                         }
                       >
@@ -121,16 +122,20 @@ export function NavDrawer({ open, onClose }: { open: boolean; onClose: () => voi
           </button>
           {hasSession ? (
             <div className="space-y-2">
-              <p className="px-1 text-xs text-slate-500">
-                {who}
-                <br />
-                <span className="font-medium text-slate-700">{roleLabel(role)}</span>
-              </p>
+              <div className="flex items-center gap-2.5 rounded-xl bg-slate-50 px-3 py-2 ring-1 ring-slate-200">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-500/15 text-brand-300 ring-1 ring-brand-500/25">
+                  <Icon name="account" size={18} />
+                </span>
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-semibold text-slate-800">{who}</span>
+                  <span className="block text-xs text-slate-500">{roleLabel(role)}</span>
+                </span>
+              </div>
               <button
                 onClick={handleSignOut}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
               >
-                Cerrar sesión
+                <Icon name="logout" size={16} /> Cerrar sesión
               </button>
             </div>
           ) : (

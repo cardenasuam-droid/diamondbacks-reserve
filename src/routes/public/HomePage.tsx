@@ -33,6 +33,13 @@ export function HomePage() {
             className="pointer-events-none absolute -bottom-16 left-1/4 h-44 w-44 rounded-full bg-brand-500/20 blur-3xl"
             aria-hidden
           />
+          {/* Escudo de la liga como marca de agua tenue detrás del título. */}
+          <img
+            src="/logo-mark.png"
+            alt=""
+            aria-hidden
+            className="pointer-events-none absolute -left-7 top-1/2 h-52 w-52 -translate-y-1/2 object-contain opacity-[0.07]"
+          />
         </div>
         {/* Recorte de jugadora transparente (public/hero-player.webp): ocupa toda la
             altura de la sección y se ancla abajo, así su parte superior PROTRUYE por

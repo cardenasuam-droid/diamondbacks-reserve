@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from 'react'
+import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useActiveSeason } from '@/features/season/useActiveSeason'
 import { useTeams } from '@/features/teams/useTeams'
@@ -12,6 +12,7 @@ import { Avatar } from '@/components/ui/Avatar'
 import { TeamCrest } from '@/components/ui/TeamCrest'
 import { Badge } from '@/components/ui/Badge'
 import { Icon } from '@/components/ui/Icon'
+import { StatTile } from '@/components/ui/StatTile'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { Loader } from '@/components/ui/Loader'
@@ -54,18 +55,33 @@ export function TeamRosterPage() {
       <BackLink />
 
       <div
-        className="relative mb-4 overflow-hidden rounded-2xl p-5 text-white shadow-md ring-1 ring-white/10"
+        className="relative mb-5 overflow-hidden rounded-3xl p-6 text-white shadow-md ring-1 ring-white/10"
         style={{ backgroundColor: teamColor(team.color, '#334155') }}
       >
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-white/5" aria-hidden />
-        <div className="relative flex items-center gap-4">
-          <span className="shrink-0 rounded-2xl bg-white/15 p-1 shadow-lg ring-1 ring-white/25">
-            <TeamCrest name={team.name} logoUrl={team.logo_url} color={team.color} size={56} />
+        {/* Escudo gigante como marca de agua (solo si hay logo). */}
+        {team.logo_url && (
+          <img
+            src={team.logo_url}
+            alt=""
+            aria-hidden
+            className="pointer-events-none absolute -right-7 -top-9 h-44 w-44 rotate-[14deg] object-contain opacity-[0.14] blur-[1px]"
+          />
+        )}
+        {/* Velo para contraste del texto (oscurece abajo-izq) + halo suave. */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-black/65 via-black/25 to-white/10" aria-hidden />
+        <div className="pointer-events-none absolute -bottom-12 -left-10 h-44 w-44 rounded-full bg-white/10 blur-3xl" aria-hidden />
+
+        <div className="relative flex items-center gap-5">
+          <span className="pop shrink-0 rounded-[1.4rem] bg-white/15 p-1.5 shadow-xl ring-1 ring-white/30">
+            <TeamCrest name={team.name} logoUrl={team.logo_url} color={team.color} size={80} glow />
           </span>
           <div className="min-w-0">
-            <h1 className="font-heading text-2xl">{team.name}</h1>
-            {team.slogan && <p className="mt-0.5 text-sm text-white/85">{team.slogan}</p>}
-            <p className="mt-2 text-sm text-white/85">{roster.length} jugadores</p>
+            <h1 className="font-heading text-[1.9rem] leading-tight">{team.name}</h1>
+            {team.slogan && <p className="mt-1 text-sm italic text-white/85">{team.slogan}</p>}
+            <p className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-black/25 px-2.5 py-1 text-xs font-medium text-white/90 ring-1 ring-white/15">
+              <Icon name="teams" size={13} />
+              {roster.length} {roster.length === 1 ? 'jugador' : 'jugadores'}
+            </p>
           </div>
         </div>
       </div>
@@ -75,17 +91,17 @@ export function TeamRosterPage() {
         <section className="mb-5">
           <h2 className="mb-2 text-sm font-bold uppercase tracking-wide text-slate-700">Estadísticas</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <Stat label="Posición" value={`#${standing.position}`} accent i={0} />
-            <Stat label="Puntos" value={standing.points} accent i={1} />
-            <Stat label="Jugados" value={standing.played} i={2} />
-            <Stat label="Ganados" value={standing.won} i={3} />
-            <Stat label="Perdidos" value={standing.lost} i={4} />
-            <Stat label="Sets ganados" value={standing.sets_won} i={5} />
-            <Stat label="Sets perdidos" value={standing.sets_lost} i={6} />
-            <Stat label="Dif. sets" value={signed(standing.set_diff)} i={7} />
-            <Stat label="Juegos ganados" value={standing.games_won} i={8} />
-            <Stat label="Juegos perdidos" value={standing.games_lost} i={9} />
-            <Stat label="Dif. juegos" value={signed(standing.game_diff)} i={10} />
+            <StatTile label="Posición" value={`#${standing.position}`} accent i={0} />
+            <StatTile label="Puntos" value={standing.points} accent i={1} />
+            <StatTile label="Jugados" value={standing.played} i={2} />
+            <StatTile label="Ganados" value={standing.won} i={3} />
+            <StatTile label="Perdidos" value={standing.lost} i={4} />
+            <StatTile label="Sets ganados" value={standing.sets_won} i={5} />
+            <StatTile label="Sets perdidos" value={standing.sets_lost} i={6} />
+            <StatTile label="Dif. sets" value={signed(standing.set_diff)} i={7} />
+            <StatTile label="Juegos ganados" value={standing.games_won} i={8} />
+            <StatTile label="Juegos perdidos" value={standing.games_lost} i={9} />
+            <StatTile label="Dif. juegos" value={signed(standing.game_diff)} i={10} />
           </div>
         </section>
       )}
@@ -148,30 +164,6 @@ function CategoryAccordion({
           ))}
         </ul>
       )}
-    </div>
-  )
-}
-
-function Stat({
-  label,
-  value,
-  accent,
-  i = 0,
-}: {
-  label: string
-  value: string | number
-  accent?: boolean
-  i?: number
-}) {
-  return (
-    <div
-      className="rise-item rounded-xl border border-slate-200/80 bg-gradient-to-b from-slate-100 to-slate-50 p-3 shadow-sm"
-      style={{ ['--d']: i } as CSSProperties}
-    >
-      <p className="text-xs font-medium text-slate-500">{label}</p>
-      <p className={'mt-1 text-2xl font-bold tabular-nums ' + (accent ? 'text-gold-400' : 'text-slate-900')}>
-        {value}
-      </p>
     </div>
   )
 }
