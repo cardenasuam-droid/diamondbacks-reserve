@@ -2,16 +2,18 @@ import { useState } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import { useActiveSeason } from '@/features/season/useActiveSeason'
 import { useTeams } from '@/features/teams/useTeams'
+import { usePublicPlayers } from '@/features/teams/usePublicPlayers'
 import { useStandings } from '@/features/standings/useStandings'
 import { usePlayerRankings } from '@/features/stats/usePlayerRankings'
 import { useCategories } from '@/features/categories/useCategories'
 import { categoryColor } from '@/features/categories/categoryColor'
-import { teamColor } from '@/lib/color'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { Loader } from '@/components/ui/Loader'
 import { Badge } from '@/components/ui/Badge'
+import { Avatar } from '@/components/ui/Avatar'
+import { TeamCrest } from '@/components/ui/TeamCrest'
 
 type Tab = 'jugadores' | 'equipos'
 
@@ -59,9 +61,9 @@ export function StatsPage() {
       </div>
 
       {tab === 'jugadores' ? (
-        <PlayersTab teamIds={teamIds} teams={teams} />
+        <PlayersTab teamIds={teamIds} teams={teams} seasonId={season.data.id} />
       ) : (
-        <TeamsTab seasonId={season.data.id} />
+        <TeamsTab seasonId={season.data.id} teams={teams} />
       )}
     </div>
   )
@@ -70,12 +72,15 @@ export function StatsPage() {
 function PlayersTab({
   teamIds,
   teams,
+  seasonId,
 }: {
   teamIds: string[] | undefined
   teams: ReturnType<typeof useTeams>
+  seasonId: string
 }) {
   const ranking = usePlayerRankings(teamIds)
   const categories = useCategories()
+  const players = usePublicPlayers(seasonId)
 
   if (ranking.isLoading || teams.isLoading) return <Loader label="Cargando ranking…" />
   if (ranking.isError) return <ErrorState onRetry={() => ranking.refetch()} />
@@ -84,6 +89,7 @@ function PlayersTab({
   }
 
   const teamById = new Map((teams.data ?? []).map((t) => [t.id, t]))
+  const photoById = new Map((players.data ?? []).map((p) => [p.id, p.photo_url]))
   const typeOf = new Map((categories.data ?? []).map((c) => [c.code, c.type]))
 
   return (
@@ -106,11 +112,7 @@ function PlayersTab({
                 <td className="px-2 py-2.5 text-center font-semibold text-slate-500">{p.position}</td>
                 <td className="px-2 py-2.5">
                   <Link to={`/jugadores/${p.player_id}`} className="flex items-center gap-2 hover:opacity-70">
-                    <span
-                      className="inline-block h-2.5 w-2.5 shrink-0 rounded-full ring-1 ring-black/5"
-                      style={{ backgroundColor: teamColor(team?.color) }}
-                      aria-hidden
-                    />
+                    <Avatar name={p.full_name} photoUrl={photoById.get(p.player_id)} color={team?.color} size={28} />
                     <span className="font-medium text-slate-800">{p.full_name}</span>
                     <Badge color={categoryColor(typeOf.get(p.category_code))}>{p.category_code}</Badge>
                   </Link>
@@ -131,8 +133,9 @@ function PlayersTab({
   )
 }
 
-function TeamsTab({ seasonId }: { seasonId: string }) {
+function TeamsTab({ seasonId, teams }: { seasonId: string; teams: ReturnType<typeof useTeams> }) {
   const standings = useStandings(seasonId)
+  const logoById = new Map((teams.data ?? []).map((t) => [t.id, t.logo_url]))
 
   if (standings.isLoading) return <Loader label="Cargando equipos…" />
   if (standings.isError) return <ErrorState onRetry={() => standings.refetch()} />
@@ -161,11 +164,7 @@ function TeamsTab({ seasonId }: { seasonId: string }) {
               <td className="px-2 py-2.5 text-center font-semibold text-slate-500">{t.position}</td>
               <td className="px-2 py-2.5">
                 <Link to={`/equipos/${t.team_id}`} className="flex items-center gap-2 hover:opacity-70">
-                  <span
-                    className="inline-block h-2.5 w-2.5 shrink-0 rounded-full ring-1 ring-black/5"
-                    style={{ backgroundColor: teamColor(t.color) }}
-                    aria-hidden
-                  />
+                  <TeamCrest name={t.team_name} logoUrl={logoById.get(t.team_id)} color={t.color} size={24} />
                   <span className="font-medium text-slate-800">{t.team_name}</span>
                 </Link>
               </td>

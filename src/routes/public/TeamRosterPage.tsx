@@ -9,6 +9,7 @@ import { groupRoster, type RosterGroup } from '@/features/teams/groupRoster'
 import { categoryColor } from '@/features/categories/categoryColor'
 import { teamColor } from '@/lib/color'
 import { Avatar } from '@/components/ui/Avatar'
+import { TeamCrest } from '@/components/ui/TeamCrest'
 import { Badge } from '@/components/ui/Badge'
 import { Icon } from '@/components/ui/Icon'
 import { EmptyState } from '@/components/ui/EmptyState'
@@ -57,10 +58,15 @@ export function TeamRosterPage() {
         style={{ backgroundColor: teamColor(team.color, '#334155') }}
       >
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-white/5" aria-hidden />
-        <div className="relative">
-          <h1 className="font-heading text-2xl">{team.name}</h1>
-          {team.slogan && <p className="mt-0.5 text-sm text-white/85">{team.slogan}</p>}
-          <p className="mt-2 text-sm text-white/85">{roster.length} jugadores</p>
+        <div className="relative flex items-center gap-4">
+          <span className="shrink-0 rounded-2xl bg-white/15 p-1 shadow-lg ring-1 ring-white/25">
+            <TeamCrest name={team.name} logoUrl={team.logo_url} color={team.color} size={56} />
+          </span>
+          <div className="min-w-0">
+            <h1 className="font-heading text-2xl">{team.name}</h1>
+            {team.slogan && <p className="mt-0.5 text-sm text-white/85">{team.slogan}</p>}
+            <p className="mt-2 text-sm text-white/85">{roster.length} jugadores</p>
+          </div>
         </div>
       </div>
 

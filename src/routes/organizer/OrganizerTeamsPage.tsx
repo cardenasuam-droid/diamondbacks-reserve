@@ -4,7 +4,7 @@ import { useActiveSeason } from '@/features/season/useActiveSeason'
 import { useTeams } from '@/features/teams/useTeams'
 import { useSaveTeam, useDeleteTeam } from '@/features/teams/teamMutations'
 import { MediaField } from '@/features/news/MediaField'
-import { teamColor } from '@/lib/color'
+import { TeamCrest } from '@/components/ui/TeamCrest'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
@@ -137,11 +137,7 @@ export function OrganizerTeamsPage() {
               key={t.id}
               className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-100 p-3 shadow-sm"
             >
-              <span
-                className="inline-block h-3 w-3 shrink-0 rounded-full ring-1 ring-black/5"
-                style={{ backgroundColor: teamColor(t.color) }}
-                aria-hidden
-              />
+              <TeamCrest name={t.name} logoUrl={t.logo_url} color={t.color} size={28} />
               <span className="flex-1 truncate font-medium text-slate-800">{t.name}</span>
               <Link
                 to={`/app/organizador/equipos/${t.id}`}

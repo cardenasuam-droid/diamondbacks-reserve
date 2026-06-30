@@ -23,8 +23,8 @@ interface RawMatchup {
 const SELECT = `
   id, team_a_id, team_b_id,
   round:rounds!inner(id, round_number, name, round_date, status, season_id),
-  team_a:teams!team_a_id(id, name, color),
-  team_b:teams!team_b_id(id, name, color),
+  team_a:teams!team_a_id(id, name, color, logo_url),
+  team_b:teams!team_b_id(id, name, color, logo_url),
   matches(
     id, category_code, scheduled_at,
     time_block:time_blocks(label, sort_order),
@@ -57,8 +57,8 @@ async function fetchCaptainMatchup(
     rows[rows.length - 1]
 
   const isA = chosen.team_a_id === teamId
-  const myTeam = (isA ? chosen.team_a : chosen.team_b) ?? { id: teamId, name: 'Mi equipo', color: null }
-  const opponent = (isA ? chosen.team_b : chosen.team_a) ?? { id: '', name: 'Rival', color: null }
+  const myTeam = (isA ? chosen.team_a : chosen.team_b) ?? { id: teamId, name: 'Mi equipo', color: null, logo_url: null }
+  const opponent = (isA ? chosen.team_b : chosen.team_a) ?? { id: '', name: 'Rival', color: null, logo_url: null }
 
   return {
     id: chosen.id,

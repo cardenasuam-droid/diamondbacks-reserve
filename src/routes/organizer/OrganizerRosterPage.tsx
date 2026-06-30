@@ -16,6 +16,7 @@ import { ErrorState } from '@/components/ui/ErrorState'
 import { Loader } from '@/components/ui/Loader'
 import { Badge } from '@/components/ui/Badge'
 import { Avatar } from '@/components/ui/Avatar'
+import { TeamCrest } from '@/components/ui/TeamCrest'
 import { ShirtSizePicker } from '@/components/ui/ShirtSizePicker'
 import type { ShirtSize } from '@/lib/shirtSize'
 
@@ -128,7 +129,13 @@ export function OrganizerRosterPage() {
       <Link to="/app/organizador/equipos" className="text-sm text-sky-300 underline">
         ‹ Equipos
       </Link>
-      <PageHeader title={team?.name ?? 'Jugadores'} subtitle="Roster del equipo" />
+      <PageHeader
+        title={team?.name ?? 'Jugadores'}
+        subtitle="Roster del equipo"
+        leading={
+          team ? <TeamCrest name={team.name} logoUrl={team.logo_url} color={team.color} size={40} /> : undefined
+        }
+      />
 
       {!draft ? (
         addFromPool ? (

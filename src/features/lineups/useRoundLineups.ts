@@ -21,8 +21,8 @@ export interface RoundMatchupLineups {
 // Solo el organizador lee lineups de todos los equipos (RLS "organizer all").
 const SELECT = `
   id,
-  team_a:teams!team_a_id(id, name, color),
-  team_b:teams!team_b_id(id, name, color),
+  team_a:teams!team_a_id(id, name, color, logo_url),
+  team_b:teams!team_b_id(id, name, color, logo_url),
   lineups(id, team_id, status, submitted_at)
 `
 

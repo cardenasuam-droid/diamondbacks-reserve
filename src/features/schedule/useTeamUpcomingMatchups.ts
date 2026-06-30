@@ -25,8 +25,8 @@ interface RawRow {
 const SELECT = `
   id, team_a_id, team_b_id,
   round:rounds!inner(id, round_number, round_date, status, season_id),
-  team_a:teams!team_a_id(id, name, color),
-  team_b:teams!team_b_id(id, name, color)
+  team_a:teams!team_a_id(id, name, color, logo_url),
+  team_b:teams!team_b_id(id, name, color, logo_url)
 `
 
 async function fetchTeamUpcoming(teamId: string, seasonId: string): Promise<UpcomingMatchup[]> {
@@ -44,7 +44,7 @@ async function fetchTeamUpcoming(teamId: string, seasonId: string): Promise<Upco
   return rows
     .map((r) => {
       const isHome = r.team_a_id === teamId
-      const opponent = (isHome ? r.team_b : r.team_a) ?? { id: '', name: 'Rival', color: null }
+      const opponent = (isHome ? r.team_b : r.team_a) ?? { id: '', name: 'Rival', color: null, logo_url: null }
       return { id: r.id, round: r.round!, opponent, isHome }
     })
     .filter((m) => !m.round.round_date || m.round.round_date >= today)

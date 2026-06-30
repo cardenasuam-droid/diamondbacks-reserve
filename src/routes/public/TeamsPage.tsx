@@ -3,6 +3,7 @@ import { useActiveSeason } from '@/features/season/useActiveSeason'
 import { useTeams } from '@/features/teams/useTeams'
 import { usePublicPlayers } from '@/features/teams/usePublicPlayers'
 import { teamColor } from '@/lib/color'
+import { TeamCrest } from '@/components/ui/TeamCrest'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
@@ -44,15 +45,21 @@ export function TeamsPage() {
             <li key={t.id}>
               <Link
                 to={`/equipos/${t.id}`}
-                className="flex items-center gap-3 overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm transition hover:border-slate-300 hover:shadow"
+                className="flex items-stretch overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm transition hover:border-slate-300 hover:shadow"
               >
-                <span className="h-14 w-2 shrink-0" style={{ backgroundColor: teamColor(t.color) }} aria-hidden />
-                <span className="flex-1 py-3">
-                  <span className="block font-semibold text-slate-800">{t.name}</span>
-                  {t.slogan && <span className="block text-xs text-slate-500">{t.slogan}</span>}
+                <span className="w-1.5 shrink-0" style={{ backgroundColor: teamColor(t.color) }} aria-hidden />
+                <span className="flex min-w-0 flex-1 items-center gap-3 py-3 pl-3">
+                  <TeamCrest name={t.name} logoUrl={t.logo_url} color={t.color} size={44} />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-semibold text-slate-800">{t.name}</span>
+                    {t.slogan && <span className="block truncate text-xs text-slate-500">{t.slogan}</span>}
+                  </span>
                 </span>
-                <span className="px-4 text-right text-sm text-slate-500">
-                  {countByTeam.get(t.id) ?? 0} <span className="text-xs">jug.</span>
+                <span className="flex shrink-0 items-center px-4 text-right text-sm text-slate-500">
+                  <span>
+                    <span className="tabular-nums">{countByTeam.get(t.id) ?? 0}</span>{' '}
+                    <span className="text-xs">jug.</span>
+                  </span>
                 </span>
               </Link>
             </li>

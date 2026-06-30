@@ -14,6 +14,7 @@ import { teamColor } from '@/lib/color'
 import { formatRoundDate } from '@/lib/date'
 import type { UserRole } from '@/lib/types'
 import { Avatar } from '@/components/ui/Avatar'
+import { TeamCrest } from '@/components/ui/TeamCrest'
 import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
 import { Icon } from '@/components/ui/Icon'
@@ -121,7 +122,14 @@ function GreetingHeader({
             <div className="mt-1.5 flex flex-wrap items-center gap-2">
               <Badge color="amber">{me.category_code}</Badge>
               {me.is_captain && <Badge color="emerald">Capitán</Badge>}
-              {team && <span className="text-sm text-white/85">· {team.name}</span>}
+              {team && (
+                <span className="inline-flex items-center gap-1.5 text-sm text-white/85">
+                  <span className="rounded-md bg-white/15 p-0.5 ring-1 ring-white/25">
+                    <TeamCrest name={team.name} logoUrl={team.logo_url} color={team.color} size={18} />
+                  </span>
+                  {team.name}
+                </span>
+              )}
             </div>
           )}
         </div>
@@ -176,10 +184,11 @@ function NextGameCard({ game, featured, i }: { game: UpcomingMatchup; featured?:
       }
       style={{ ['--d']: i } as CSSProperties}
     >
-      <span
-        className="h-10 w-10 shrink-0 rounded-full ring-2 ring-black/20"
-        style={{ backgroundColor: teamColor(game.opponent.color) }}
-        aria-hidden
+      <TeamCrest
+        name={game.opponent.name}
+        logoUrl={game.opponent.logo_url}
+        color={game.opponent.color}
+        size={40}
       />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">

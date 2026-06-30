@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useCategories } from '@/features/categories/useCategories'
-import { teamColor } from '@/lib/color'
 import { Icon } from '@/components/ui/Icon'
+import { Avatar } from '@/components/ui/Avatar'
+import { TeamCrest } from '@/components/ui/TeamCrest'
 import type { PublicPlayer, Team } from '@/lib/types'
 import type { DraftPick } from '../types'
 
@@ -100,15 +101,14 @@ function BoardSection({
                 <span className="w-6 shrink-0 text-right text-xs tabular-nums text-slate-500">
                   {p.pick_number}
                 </span>
-                <span
-                  className="inline-block h-2.5 w-2.5 shrink-0 rounded-full ring-1 ring-black/20"
-                  style={{ backgroundColor: teamColor(team?.color ?? null) }}
-                  aria-hidden
-                />
-                <span className="w-20 shrink-0 truncate text-xs text-slate-600">{team?.name ?? '—'}</span>
-                <span className="flex-1 truncate text-sm font-medium text-slate-900">
+                <TeamCrest name={team?.name ?? '—'} logoUrl={team?.logo_url} color={team?.color} size={20} />
+                <span className="w-16 shrink-0 truncate text-xs text-slate-600">{team?.name ?? '—'}</span>
+                <span className="flex flex-1 items-center gap-1.5 truncate text-sm font-medium text-slate-900">
                   {player ? (
-                    player.full_name
+                    <>
+                      <Avatar name={player.full_name} photoUrl={player.photo_url} color={team?.color} size={22} />
+                      <span className="truncate">{player.full_name}</span>
+                    </>
                   ) : isCurrent ? (
                     <span className="text-gold-300">Eligiendo…</span>
                   ) : (

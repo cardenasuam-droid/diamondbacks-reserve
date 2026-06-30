@@ -3,13 +3,14 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '@/features/auth/context'
 import { useCategories } from '@/features/categories/useCategories'
 import { categoryColor } from '@/features/categories/categoryColor'
-import { teamColor } from '@/lib/color'
 import { formatRoundDate } from '@/lib/date'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { Loader } from '@/components/ui/Loader'
 import { Badge } from '@/components/ui/Badge'
+import { Avatar } from '@/components/ui/Avatar'
+import { TeamCrest } from '@/components/ui/TeamCrest'
 import { useCaptainTeam } from '@/features/lineups/useCaptainTeam'
 import { useCaptainMatchup } from '@/features/lineups/useCaptainMatchup'
 import { useTeamRoster } from '@/features/lineups/useTeamRoster'
@@ -169,15 +170,16 @@ export function LineupEditorPage() {
 
       {/* Encabezado del enfrentamiento */}
       <section className="overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm">
-        <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-4 py-3">
-          <span
-            className="inline-block h-3 w-3 shrink-0 rounded-full ring-1 ring-black/5"
-            style={{ backgroundColor: teamColor(mu.myTeam.color) }}
-            aria-hidden
-          />
-          <span className="font-semibold text-slate-800">{mu.myTeam.name}</span>
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-slate-100 bg-slate-50 px-4 py-3">
+          <span className="inline-flex items-center gap-1.5">
+            <TeamCrest name={mu.myTeam.name} logoUrl={mu.myTeam.logo_url} color={mu.myTeam.color} size={20} />
+            <span className="font-semibold text-slate-800">{mu.myTeam.name}</span>
+          </span>
           <span className="text-xs font-medium text-slate-500">vs</span>
-          <span className="font-semibold text-slate-800">{mu.opponent.name}</span>
+          <span className="inline-flex items-center gap-1.5">
+            <TeamCrest name={mu.opponent.name} logoUrl={mu.opponent.logo_url} color={mu.opponent.color} size={20} />
+            <span className="font-semibold text-slate-800">{mu.opponent.name}</span>
+          </span>
         </div>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-2 text-sm text-slate-600">
           <span>
@@ -307,26 +309,33 @@ function CategoryRow({
             (p) => p.gender === slot.gender && p.category_code === slot.category_code,
           )
           const selectedId = values[idx]
+          const selectedPlayer = selectedId ? roster.find((p) => p.id === selectedId) : undefined
           return (
-            <select
-              key={idx}
-              value={selectedId}
-              disabled={disabled}
-              onChange={(e) => onChange(cat.code, idx as 0 | 1, e.target.value)}
-              className="w-full rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-800 disabled:bg-slate-50 disabled:text-slate-500"
-            >
-              <option value="">— Jugador {idx + 1} —</option>
-              {candidates.map((p) => {
-                const usedIn = usedElsewhere.get(p.id)
-                const usedHere = selectedId === p.id
-                return (
-                  <option key={p.id} value={p.id}>
-                    {p.full_name}
-                    {usedIn && !usedHere ? ` · ya en ${usedIn}` : ''}
-                  </option>
-                )
-              })}
-            </select>
+            <div key={idx} className="flex items-center gap-2">
+              {selectedPlayer ? (
+                <Avatar name={selectedPlayer.full_name} photoUrl={selectedPlayer.photo_url} size={32} />
+              ) : (
+                <span className="h-8 w-8 shrink-0 rounded-full bg-slate-200 ring-1 ring-black/10" aria-hidden />
+              )}
+              <select
+                value={selectedId}
+                disabled={disabled}
+                onChange={(e) => onChange(cat.code, idx as 0 | 1, e.target.value)}
+                className="w-full rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-800 disabled:bg-slate-50 disabled:text-slate-500"
+              >
+                <option value="">— Jugador {idx + 1} —</option>
+                {candidates.map((p) => {
+                  const usedIn = usedElsewhere.get(p.id)
+                  const usedHere = selectedId === p.id
+                  return (
+                    <option key={p.id} value={p.id}>
+                      {p.full_name}
+                      {usedIn && !usedHere ? ` · ya en ${usedIn}` : ''}
+                    </option>
+                  )
+                })}
+              </select>
+            </div>
           )
         })}
       </div>

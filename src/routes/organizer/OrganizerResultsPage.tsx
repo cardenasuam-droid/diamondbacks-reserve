@@ -7,7 +7,7 @@ import { useRoundMatches } from '@/features/schedule/useRoundMatches'
 import { groupByMatchup } from '@/features/schedule/groupByMatchup'
 import { scoreLine, hasOfficialResult } from '@/features/schedule/score'
 import { categoryColor } from '@/features/categories/categoryColor'
-import { teamColor } from '@/lib/color'
+import { TeamCrest } from '@/components/ui/TeamCrest'
 import { deriveResult, type SetInput } from '@/features/results/resultLogic'
 import { useSaveResult } from '@/features/results/useSaveResult'
 import { PageHeader } from '@/components/ui/PageHeader'
@@ -60,11 +60,16 @@ export function OrganizerResultsPage() {
               key={g.matchupId}
               className="overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm"
             >
-              <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-3 py-2">
-                <TeamDot team={g.teamA} />
-                <span className="font-semibold text-slate-800">{g.teamA?.name ?? '—'}</span>
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-slate-100 bg-slate-50 px-3 py-2">
+                <span className="inline-flex items-center gap-1.5">
+                  <TeamCrest name={g.teamA?.name ?? '—'} logoUrl={g.teamA?.logo_url} color={g.teamA?.color} size={22} />
+                  <span className="font-semibold text-slate-800">{g.teamA?.name ?? '—'}</span>
+                </span>
                 <span className="text-xs text-slate-500">vs</span>
-                <span className="font-semibold text-slate-800">{g.teamB?.name ?? '—'}</span>
+                <span className="inline-flex items-center gap-1.5">
+                  <TeamCrest name={g.teamB?.name ?? '—'} logoUrl={g.teamB?.logo_url} color={g.teamB?.color} size={22} />
+                  <span className="font-semibold text-slate-800">{g.teamB?.name ?? '—'}</span>
+                </span>
               </div>
 
               <ul>
@@ -101,16 +106,6 @@ export function OrganizerResultsPage() {
         </div>
       )}
     </div>
-  )
-}
-
-function TeamDot({ team }: { team: TeamLite | null }) {
-  return (
-    <span
-      className="inline-block h-3 w-3 shrink-0 rounded-full ring-1 ring-black/5"
-      style={{ backgroundColor: teamColor(team?.color) }}
-      aria-hidden
-    />
   )
 }
 

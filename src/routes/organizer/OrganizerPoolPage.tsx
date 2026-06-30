@@ -22,6 +22,7 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { Loader } from '@/components/ui/Loader'
 import { Icon } from '@/components/ui/Icon'
+import { Avatar } from '@/components/ui/Avatar'
 import { ShirtSizePicker } from '@/components/ui/ShirtSizePicker'
 import type { ShirtSize } from '@/lib/shirtSize'
 
@@ -150,6 +151,7 @@ function InactivePoolSection({ seasonId, categories }: { seasonId: string; categ
       <ul className="mt-2 divide-y divide-slate-200">
         {players.map((p) => (
           <li key={p.id} className="flex items-center gap-2 py-2 opacity-75">
+            <Avatar name={p.full_name} photoUrl={p.photo_url} size={32} />
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium text-slate-800">{p.full_name}</p>
               <p className="text-[11px] text-slate-500">{catName(p.category_code)}</p>
@@ -237,6 +239,7 @@ function PoolRow({
 
   return (
     <li className="flex items-center gap-2 py-2">
+      <Avatar name={player.full_name} photoUrl={player.photo_url} size={32} />
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium text-slate-800">{player.full_name}</p>
         {/* Fecha/hora de inscripción: SOLO el organizador (RLS la restringe). */}

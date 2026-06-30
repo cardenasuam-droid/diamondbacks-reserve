@@ -4,6 +4,7 @@ export interface TeamLite {
   id: string
   name: string
   color: string | null
+  logo_url: string | null
 }
 
 export interface MatchResultLite {

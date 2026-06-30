@@ -11,8 +11,8 @@ const SELECT = `
   category:match_categories(name, type, sort_order),
   matchup:team_matchups(
     id,
-    team_a:teams!team_a_id(id, name, color),
-    team_b:teams!team_b_id(id, name, color)
+    team_a:teams!team_a_id(id, name, color, logo_url),
+    team_b:teams!team_b_id(id, name, color, logo_url)
   ),
   result:match_results(status, set1_team_a, set1_team_b, set2_team_a, set2_team_b, set3_team_a, set3_team_b, winner_team_id, is_walkover)
 `

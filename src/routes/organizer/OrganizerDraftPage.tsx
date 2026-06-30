@@ -18,7 +18,7 @@ import { PickClock } from '@/features/draft/components/PickClock'
 import { DraftBoard } from '@/features/draft/components/DraftBoard'
 import { PoolPicker } from '@/features/draft/components/PoolPicker'
 import type { Draft } from '@/features/draft/types'
-import { teamColor } from '@/lib/color'
+import { TeamCrest } from '@/components/ui/TeamCrest'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Loader } from '@/components/ui/Loader'
@@ -156,11 +156,7 @@ function SetupPanel({
             return (
               <li key={id} className="neu-raised flex items-center gap-2 rounded-xl px-3 py-2">
                 <span className="w-6 text-center font-heading text-sm text-gold-300">{i + 1}</span>
-                <span
-                  className="inline-block h-3 w-3 shrink-0 rounded-full ring-1 ring-black/20"
-                  style={{ backgroundColor: teamColor(t?.color ?? null) }}
-                  aria-hidden
-                />
+                <TeamCrest name={t?.name ?? '—'} logoUrl={t?.logo_url} color={t?.color} size={22} />
                 <span className="flex-1 truncate text-sm font-medium text-slate-800">{t?.name ?? '—'}</span>
                 <button
                   onClick={() => move(i, -1)}
@@ -275,11 +271,7 @@ function LivePanel({
                   {catName} {current ? `· Pick ${current.pick_number}` : ''}
                 </p>
                 <p className="mt-1 flex items-center gap-2 font-heading text-lg text-slate-900">
-                  <span
-                    className="inline-block h-3 w-3 shrink-0 rounded-full ring-1 ring-black/20"
-                    style={{ backgroundColor: teamColor(currentTeam?.color ?? null) }}
-                    aria-hidden
-                  />
+                  <TeamCrest name={currentTeam?.name ?? '—'} logoUrl={currentTeam?.logo_url} color={currentTeam?.color} size={24} />
                   <span className="truncate">{currentTeam?.name ?? '—'}</span>
                 </p>
               </div>

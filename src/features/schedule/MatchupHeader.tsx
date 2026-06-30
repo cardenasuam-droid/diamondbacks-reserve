@@ -1,27 +1,20 @@
 import { Link } from 'react-router-dom'
-import { teamColor } from '@/lib/color'
+import { TeamCrest } from '@/components/ui/TeamCrest'
 import type { TeamLite } from './types'
 
 function TeamTag({ team, align }: { team: TeamLite | null; align: 'left' | 'right' }) {
   const layout = 'flex flex-1 items-center gap-2 ' + (align === 'right' ? 'flex-row-reverse text-right' : '')
-  const dot = (
-    <span
-      className="inline-block h-3 w-3 shrink-0 rounded-full ring-1 ring-black/5"
-      style={{ backgroundColor: teamColor(team?.color) }}
-      aria-hidden
-    />
-  )
   if (!team) {
     return (
       <div className={layout}>
-        {dot}
+        <span className="h-6 w-6 shrink-0 rounded-md bg-slate-200 ring-1 ring-black/10" aria-hidden />
         <span className="truncate font-semibold text-slate-800">—</span>
       </div>
     )
   }
   return (
     <Link to={`/equipos/${team.id}`} className={layout + ' transition hover:opacity-70'}>
-      {dot}
+      <TeamCrest name={team.name} logoUrl={team.logo_url} color={team.color} size={24} />
       <span className="truncate font-semibold text-slate-800 underline decoration-transparent hover:decoration-inherit">
         {team.name}
       </span>

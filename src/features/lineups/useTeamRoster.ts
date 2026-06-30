@@ -7,7 +7,7 @@ import type { TeamPlayer } from './types'
 async function fetchTeamRoster(teamId: string): Promise<TeamPlayer[]> {
   const { data, error } = await supabase
     .from('players')
-    .select('id, full_name, gender, category_code, team_id, is_captain, phone')
+    .select('id, full_name, gender, category_code, team_id, is_captain, phone, photo_url')
     .eq('team_id', teamId)
     .eq('is_active', true)
     .order('full_name')

@@ -7,6 +7,7 @@ import { useCategories } from '@/features/categories/useCategories'
 import { categoryColor } from '@/features/categories/categoryColor'
 import { teamColor } from '@/lib/color'
 import { Avatar } from '@/components/ui/Avatar'
+import { TeamCrest } from '@/components/ui/TeamCrest'
 import { Badge } from '@/components/ui/Badge'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
@@ -60,8 +61,14 @@ export function PlayerDetailPage() {
           <div className="min-w-0">
             <h1 className="truncate font-heading text-2xl">{player.full_name}</h1>
             {team && (
-              <Link to={`/equipos/${team.id}`} className="mt-0.5 inline-block text-sm text-white/85 underline">
-                {team.name}
+              <Link
+                to={`/equipos/${team.id}`}
+                className="mt-1 inline-flex items-center gap-1.5 text-sm text-white/85 transition hover:opacity-80"
+              >
+                <span className="rounded-md bg-white/15 p-0.5 ring-1 ring-white/25">
+                  <TeamCrest name={team.name} logoUrl={team.logo_url} color={team.color} size={18} />
+                </span>
+                <span className="underline">{team.name}</span>
               </Link>
             )}
             <div className="mt-2 flex flex-wrap items-center gap-2">

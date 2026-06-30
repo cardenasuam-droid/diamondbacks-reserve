@@ -1,11 +1,12 @@
 import { Link } from 'react-router-dom'
-import { teamColor } from '@/lib/color'
 import { formatRoundDate } from '@/lib/date'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { Loader } from '@/components/ui/Loader'
 import { Badge } from '@/components/ui/Badge'
+import { Icon } from '@/components/ui/Icon'
+import { TeamCrest } from '@/components/ui/TeamCrest'
 import { useCaptainTeam } from '@/features/lineups/useCaptainTeam'
 import { useCaptainMatchup } from '@/features/lineups/useCaptainMatchup'
 import { useLineup } from '@/features/lineups/useLineup'
@@ -42,11 +43,7 @@ export function CaptainDashboard() {
 
       <section className="overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm">
         <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-4 py-3">
-          <span
-            className="inline-block h-3 w-3 shrink-0 rounded-full ring-1 ring-black/5"
-            style={{ backgroundColor: teamColor(team.data.color) }}
-            aria-hidden
-          />
+          <TeamCrest name={team.data.name} logoUrl={team.data.logo_url} color={team.data.color} size={22} />
           <span className="font-semibold text-slate-800">Próximo enfrentamiento</span>
         </div>
 
@@ -64,10 +61,16 @@ export function CaptainDashboard() {
           </div>
         ) : (
           <div className="space-y-3 p-4">
-            <div className="flex items-center gap-2 text-slate-800">
-              <span className="font-semibold">{matchup.data.myTeam.name}</span>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-slate-800">
+              <span className="inline-flex items-center gap-1.5">
+                <TeamCrest name={matchup.data.myTeam.name} logoUrl={matchup.data.myTeam.logo_url} color={matchup.data.myTeam.color} size={20} />
+                <span className="font-semibold">{matchup.data.myTeam.name}</span>
+              </span>
               <span className="text-xs text-slate-500">vs</span>
-              <span className="font-semibold">{matchup.data.opponent.name}</span>
+              <span className="inline-flex items-center gap-1.5">
+                <TeamCrest name={matchup.data.opponent.name} logoUrl={matchup.data.opponent.logo_url} color={matchup.data.opponent.color} size={20} />
+                <span className="font-semibold">{matchup.data.opponent.name}</span>
+              </span>
             </div>
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-600">
               <span>Jornada {matchup.data.round.round_number}</span>
@@ -98,9 +101,9 @@ export function CaptainDashboard() {
         </div>
         <Link
           to={`/equipos/${team.data.id}`}
-          className="flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-slate-100 p-4 text-center shadow-sm hover:border-slate-300"
+          className="flex flex-col items-center justify-center gap-1 rounded-xl border border-slate-200 bg-slate-100 p-4 text-center shadow-sm hover:border-slate-300"
         >
-          <div className="text-2xl">👥</div>
+          <Icon name="teams" size={24} className="text-brand-300" />
           <div className="text-xs text-slate-500">Ver mi roster</div>
         </Link>
       </section>

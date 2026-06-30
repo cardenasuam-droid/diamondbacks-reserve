@@ -4,7 +4,7 @@ import { useRounds } from '@/features/schedule/useRounds'
 import { RoundSelector } from '@/features/schedule/RoundSelector'
 import { useRoundLineups } from '@/features/lineups/useRoundLineups'
 import { lineupStatusLabel } from '@/features/lineups/lineupHelpers'
-import { teamColor } from '@/lib/color'
+import { TeamCrest } from '@/components/ui/TeamCrest'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
@@ -71,11 +71,11 @@ function TeamRow({ team, lineups }: { team: TeamLite | null; lineups: RoundLineu
 
   return (
     <div className="flex items-center gap-2 px-3 py-2.5">
-      <span
-        className="inline-block h-3 w-3 shrink-0 rounded-full ring-1 ring-black/5"
-        style={{ backgroundColor: teamColor(team?.color) }}
-        aria-hidden
-      />
+      {team ? (
+        <TeamCrest name={team.name} logoUrl={team.logo_url} color={team.color} size={24} />
+      ) : (
+        <span className="h-6 w-6 shrink-0 rounded-md bg-slate-200 ring-1 ring-black/10" aria-hidden />
+      )}
       <span className="flex-1 truncate font-medium text-slate-800">{team?.name ?? '—'}</span>
       <Badge color={done ? 'emerald' : status === 'draft' ? 'amber' : 'slate'}>
         {lineupStatusLabel(status)}

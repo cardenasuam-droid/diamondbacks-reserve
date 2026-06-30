@@ -6,6 +6,7 @@ export interface CaptainTeam {
   id: string
   name: string
   color: string | null
+  logo_url: string | null
   season_id: string
 }
 
@@ -14,7 +15,7 @@ export interface CaptainTeam {
 async function fetchCaptainTeam(playerId: string): Promise<CaptainTeam | null> {
   const { data, error } = await supabase
     .from('players')
-    .select('team:teams(id, name, color, season_id)')
+    .select('team:teams(id, name, color, logo_url, season_id)')
     .eq('id', playerId)
     .maybeSingle()
   if (error) throw error

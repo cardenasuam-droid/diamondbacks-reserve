@@ -10,6 +10,7 @@ export interface PoolPlayer {
   full_name: string
   gender: Gender
   category_code: string
+  photo_url: string | null
 }
 
 function friendly(msg: string): string {
@@ -26,7 +27,7 @@ export function usePoolPlayers(seasonId: string | undefined) {
     queryFn: async (): Promise<PoolPlayer[]> => {
       const { data, error } = await supabase
         .from('players_public')
-        .select('id, full_name, gender, category_code')
+        .select('id, full_name, gender, category_code, photo_url')
         .eq('season_id', seasonId as string)
         .is('team_id', null)
       if (error) throw error
@@ -47,7 +48,7 @@ export function useInactivePoolPlayers(seasonId: string | undefined, enabled: bo
     queryFn: async (): Promise<PoolPlayer[]> => {
       const { data, error } = await supabase
         .from('players')
-        .select('id, full_name, gender, category_code')
+        .select('id, full_name, gender, category_code, photo_url')
         .eq('season_id', seasonId as string)
         .is('team_id', null)
         .eq('is_active', false)

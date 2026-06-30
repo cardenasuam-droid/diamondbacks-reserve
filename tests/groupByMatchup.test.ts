@@ -19,8 +19,8 @@ function match(p: {
     category: { name: p.cat, type: 'varonil', sort_order: p.sort },
     matchup: {
       id: p.muId,
-      team_a: { id: p.teamA, name: p.teamA, color: null },
-      team_b: { id: p.teamB, name: p.teamB, color: null },
+      team_a: { id: p.teamA, name: p.teamA, color: null, logo_url: null },
+      team_b: { id: p.teamB, name: p.teamB, color: null, logo_url: null },
     },
     result: null,
   }

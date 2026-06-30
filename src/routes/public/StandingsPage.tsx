@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom'
 import { useActiveSeason } from '@/features/season/useActiveSeason'
 import { useStandings } from '@/features/standings/useStandings'
-import { teamColor } from '@/lib/color'
+import { useTeams } from '@/features/teams/useTeams'
+import { TeamCrest } from '@/components/ui/TeamCrest'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
@@ -10,6 +11,8 @@ import { Loader } from '@/components/ui/Loader'
 export function StandingsPage() {
   const season = useActiveSeason()
   const standings = useStandings(season.data?.id)
+  const teams = useTeams(season.data?.id)
+  const logoById = new Map((teams.data ?? []).map((t) => [t.id, t.logo_url]))
 
   if (season.isLoading) return <Loader label="Cargando temporada…" />
   if (season.isError) return <ErrorState onRetry={() => season.refetch()} />
@@ -76,11 +79,7 @@ export function StandingsPage() {
                       </td>
                       <td className="px-2 py-2.5">
                         <Link to={`/equipos/${t.team_id}`} className="flex items-center gap-2 hover:opacity-70">
-                          <span
-                            className="inline-block h-3 w-3 shrink-0 rounded-full ring-1 ring-black/5"
-                            style={{ backgroundColor: teamColor(t.color) }}
-                            aria-hidden
-                          />
+                          <TeamCrest name={t.team_name} logoUrl={logoById.get(t.team_id)} color={t.color} size={24} />
                           <span className={leader ? 'font-bold text-slate-900' : 'font-medium text-slate-800'}>
                             {t.team_name}
                             {t.tiedUnresolved && (

@@ -10,8 +10,8 @@ import { remainingMs } from '@/features/draft/clock'
 import { PickClock } from '@/features/draft/components/PickClock'
 import { DraftBoard } from '@/features/draft/components/DraftBoard'
 import { PoolPicker } from '@/features/draft/components/PoolPicker'
-import { teamColor } from '@/lib/color'
 import { Brand } from '@/components/ui/Brand'
+import { TeamCrest } from '@/components/ui/TeamCrest'
 import { Icon } from '@/components/ui/Icon'
 import { Loader } from '@/components/ui/Loader'
 
@@ -59,7 +59,8 @@ export function DraftPage() {
                 deadline={draft.pick_deadline}
                 categoryName={catName(current?.category_code ?? null)}
                 teamName={currentTeam?.name ?? null}
-                teamColorHex={teamColor(currentTeam?.color ?? null)}
+                teamLogoUrl={currentTeam?.logo_url ?? null}
+                teamColor={currentTeam?.color ?? null}
                 pickNumber={current?.pick_number ?? null}
                 myTurn={myTurn}
                 finished={draft.status === 'finished'}
@@ -108,7 +109,8 @@ function OnTheClock({
   deadline,
   categoryName,
   teamName,
-  teamColorHex,
+  teamLogoUrl,
+  teamColor,
   pickNumber,
   myTurn,
   finished,
@@ -118,7 +120,8 @@ function OnTheClock({
   deadline: string | null
   categoryName: string
   teamName: string | null
-  teamColorHex: string
+  teamLogoUrl: string | null
+  teamColor: string | null
   pickNumber: number | null
   myTurn: boolean
   finished: boolean
@@ -139,11 +142,7 @@ function OnTheClock({
                 {categoryName} {pickNumber ? `· Pick ${pickNumber}` : ''}
               </p>
               <p className="mt-1 flex items-center gap-2 font-heading text-lg text-slate-900">
-                <span
-                  className="inline-block h-3 w-3 shrink-0 rounded-full ring-1 ring-black/20"
-                  style={{ backgroundColor: teamColorHex }}
-                  aria-hidden
-                />
+                <TeamCrest name={teamName ?? '—'} logoUrl={teamLogoUrl} color={teamColor} size={24} />
                 <span className="truncate">{teamName ?? '—'}</span>
               </p>
               <p className="mt-0.5 text-xs text-slate-500">

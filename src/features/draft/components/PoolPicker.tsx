@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useMakePick } from '../mutations'
+import { Avatar } from '@/components/ui/Avatar'
 import type { PublicPlayer } from '@/lib/types'
 
 // Lista del pool de la categoría actual con botón Elegir. La usan la capitana (en
@@ -54,6 +55,7 @@ export function PoolPicker({
       <ul className="mt-2 max-h-80 space-y-1.5 overflow-y-auto">
         {available.map((p) => (
           <li key={p.id} className="flex items-center gap-2 rounded-xl px-1">
+            <Avatar name={p.full_name} photoUrl={p.photo_url} size={28} />
             <span className="flex-1 truncate text-sm font-medium text-slate-800">{p.full_name}</span>
             <button
               onClick={() => makePick.mutate({ draftId, seasonId, playerId: p.id })}

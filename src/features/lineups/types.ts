@@ -34,6 +34,7 @@ export interface TeamPlayer {
   team_id: string
   is_captain: boolean
   phone: string | null
+  photo_url: string | null
 }
 
 export interface StoredEntry {
