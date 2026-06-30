@@ -11,7 +11,10 @@ import {
   type PoolPlayer,
   type PoolRegistration,
 } from '@/features/teams/usePoolPlayers'
-import type { MatchCategory } from '@/lib/types'
+import { useTeams } from '@/features/teams/useTeams'
+import { useAssignPlayerTeam } from '@/features/teams/playerMutations'
+import { TeamPicker } from '@/features/teams/TeamPicker'
+import type { MatchCategory, Team } from '@/lib/types'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
@@ -37,6 +40,7 @@ export function OrganizerPoolPage() {
   const pool = usePoolPlayers(season.data?.id)
   const regs = usePoolRegistrations(season.data?.id, isOrganizer)
   const cats = useCategories()
+  const teams = useTeams(season.data?.id)
   const ranking = useMemo(() => rankingCategories(cats.data ?? []), [cats.data])
 
   if (season.isLoading) return <Loader label="Cargando…" />
@@ -101,6 +105,7 @@ export function OrganizerPoolPage() {
                     player={p}
                     reg={regMap[p.id]}
                     seasonId={seasonId}
+                    teams={teams.data ?? []}
                     categories={ranking}
                     canEdit={isOrganizer}
                   />
@@ -118,31 +123,37 @@ function PoolRow({
   player,
   reg,
   seasonId,
+  teams,
   categories,
   canEdit,
 }: {
   player: PoolPlayer
   reg: PoolRegistration | undefined
   seasonId: string
+  teams: Team[]
   categories: MatchCategory[]
   canEdit: boolean
 }) {
-  const [editing, setEditing] = useState(false)
+  const [mode, setMode] = useState<'view' | 'edit' | 'assign'>('view')
 
-  if (editing && canEdit) {
+  if (mode === 'edit' && canEdit) {
     return (
       <PoolEditForm
         player={player}
         phone={reg?.phone ?? ''}
         seasonId={seasonId}
         categories={categories}
-        onDone={() => setEditing(false)}
+        onDone={() => setMode('view')}
       />
     )
   }
 
+  if (mode === 'assign' && canEdit) {
+    return <AssignTeamForm player={player} teams={teams} seasonId={seasonId} onDone={() => setMode('view')} />
+  }
+
   return (
-    <li className="flex items-center gap-3 py-2">
+    <li className="flex items-center gap-2 py-2">
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium text-slate-800">{player.full_name}</p>
         {/* Fecha/hora de inscripción: SOLO el organizador (RLS la restringe). */}
@@ -155,15 +166,60 @@ function PoolRow({
           {reg.phone}
         </a>
       )}
+      {canEdit && teams.length > 0 && (
+        <button
+          onClick={() => setMode('assign')}
+          className="shrink-0 rounded-lg bg-gold-300 px-2.5 py-1 text-xs font-semibold text-[#1a1405] shadow-sm hover:bg-gold-200"
+        >
+          Asignar
+        </button>
+      )}
       {canEdit && (
         <button
-          onClick={() => setEditing(true)}
+          onClick={() => setMode('edit')}
           aria-label="Editar"
           className="shrink-0 rounded-lg p-1.5 text-slate-500 hover:text-slate-300"
         >
           <Icon name="edit" size={16} />
         </button>
       )}
+    </li>
+  )
+}
+
+// Asignar manualmente un jugador del pool a un equipo (organizador). Tap a un
+// equipo = asigna y sale del pool. Reversible desde el roster del equipo ("Mover").
+function AssignTeamForm({
+  player,
+  teams,
+  seasonId,
+  onDone,
+}: {
+  player: PoolPlayer
+  teams: Team[]
+  seasonId: string
+  onDone: () => void
+}) {
+  const assign = useAssignPlayerTeam()
+
+  return (
+    <li className="neu-inset my-2 space-y-3 rounded-2xl p-3">
+      <p className="text-xs text-slate-600">
+        Asignar a <span className="font-semibold text-slate-800">{player.full_name}</span> a un equipo:
+      </p>
+      <TeamPicker
+        teams={teams}
+        pending={assign.isPending}
+        onPick={(teamId) => assign.mutate({ playerId: player.id, teamId, seasonId }, { onSuccess: onDone })}
+      />
+      {assign.isError && (
+        <p className="rounded-lg border border-red-200 bg-red-50 p-2 text-sm text-red-700">
+          {(assign.error as Error).message}
+        </p>
+      )}
+      <button onClick={onDone} className="neu-raised rounded-xl px-3 py-2 text-sm font-medium text-slate-700">
+        Cancelar
+      </button>
     </li>
   )
 }

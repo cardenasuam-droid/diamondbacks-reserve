@@ -100,3 +100,33 @@ export function useDeletePlayer() {
     onSuccess: (_d, v) => invalidate(qc, v),
   })
 }
+
+export interface AssignTeamVars {
+  playerId: string
+  /** Equipo destino; null regresa al jugador al pool (sin equipo). */
+  teamId: string | null
+  seasonId: string
+  /** Equipo de origen (si lo movemos de un equipo), para refrescar su roster. */
+  fromTeamId?: string | null
+}
+
+// Asignación MANUAL de equipo (organizador), independiente del draft: pone
+// players.team_id directo. Sirve para sacar del pool, mover entre equipos o
+// regresar al pool (teamId = null). El draft usa make_pick (turnos); esto NO.
+export function useAssignPlayerTeam() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (v: AssignTeamVars) => {
+      const { error } = await supabase.from('players').update({ team_id: v.teamId }).eq('id', v.playerId)
+      if (error) throw new Error(friendly(error.message))
+    },
+    onSuccess: (_d, v) => {
+      void qc.invalidateQueries({ queryKey: ['pool-players', v.seasonId] })
+      void qc.invalidateQueries({ queryKey: ['pool-registrations', v.seasonId] })
+      void qc.invalidateQueries({ queryKey: ['players_public', v.seasonId] })
+      void qc.invalidateQueries({ queryKey: ['teams', v.seasonId] })
+      if (v.teamId) void qc.invalidateQueries({ queryKey: ['manage-roster', v.teamId] })
+      if (v.fromTeamId) void qc.invalidateQueries({ queryKey: ['manage-roster', v.fromTeamId] })
+    },
+  })
+}

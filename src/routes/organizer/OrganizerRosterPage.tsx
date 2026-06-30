@@ -6,7 +6,8 @@ import { useCategories } from '@/features/categories/useCategories'
 import { categoryColor } from '@/features/categories/categoryColor'
 import { genderForCategoryType } from '@/features/categories/eligibility'
 import { useManageRoster, type ManagedPlayer } from '@/features/teams/useManageRoster'
-import { useSavePlayer, useTogglePlayerActive } from '@/features/teams/playerMutations'
+import { useSavePlayer, useTogglePlayerActive, useAssignPlayerTeam } from '@/features/teams/playerMutations'
+import { TeamPicker } from '@/features/teams/TeamPicker'
 import { MediaField } from '@/features/news/MediaField'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { EmptyState } from '@/components/ui/EmptyState'
@@ -44,6 +45,7 @@ export function OrganizerRosterPage() {
   const categories = useCategories()
   const save = useSavePlayer()
   const toggle = useTogglePlayerActive()
+  const assign = useAssignPlayerTeam()
   const [draft, setDraft] = useState<Draft | null>(null)
 
   const team = (teams.data ?? []).find((t) => t.id === teamId)
@@ -175,6 +177,29 @@ export function OrganizerRosterPage() {
               Activo
             </label>
           </div>
+          {/* Mover a otro equipo o regresar al pool (asignación manual). */}
+          {draft.id && (
+            <div className="border-t border-slate-200 pt-3">
+              <p className="mb-2 text-xs font-medium text-slate-700">Mover de equipo</p>
+              <TeamPicker
+                teams={teams.data ?? []}
+                excludeTeamId={teamId}
+                includePool
+                pending={assign.isPending}
+                onPick={(target) =>
+                  assign.mutate(
+                    { playerId: draft.id!, teamId: target, seasonId: season.data!.id, fromTeamId: teamId },
+                    { onSuccess: () => setDraft(null) },
+                  )
+                }
+              />
+              {assign.isError && (
+                <p className="mt-2 rounded-lg bg-rose-500/15 px-3 py-2 text-sm text-rose-200">
+                  {(assign.error as Error).message}
+                </p>
+              )}
+            </div>
+          )}
           {save.isError && (
             <p className="rounded-lg bg-rose-500/15 px-3 py-2 text-sm text-rose-200">
               {(save.error as Error).message}
