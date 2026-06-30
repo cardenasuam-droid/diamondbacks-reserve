@@ -1,6 +1,6 @@
 import type { CategoryType, Gender, MatchCategory } from '@/lib/types'
 
-// Las 7 categorías de ranking (no mixtas) son las únicas que puede tener un
+// Las categorías de ranking (no mixtas) son las únicas que puede tener un
 // jugador en su ficha. MIX_A/MIX_B son combinaciones derivadas, no categorías
 // propias: por eso no se ofrecen al inscribirse.
 export function rankingCategories(categories: MatchCategory[]): MatchCategory[] {

@@ -19,7 +19,7 @@ export function lineupStatusLabel(status: LineupStatus | null | undefined): stri
 }
 
 // Mapa categoría -> selección, inicializado con todas las categorías vacías y
-// rellenado con lo ya guardado. Garantiza una entrada por cada una de las 9.
+// rellenado con lo ya guardado. Garantiza una entrada por cada categoría.
 export function selectionsFromEntries(
   entries: StoredEntry[],
   categories: MatchCategory[],

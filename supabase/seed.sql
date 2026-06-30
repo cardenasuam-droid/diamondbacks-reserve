@@ -2,18 +2,19 @@
 -- Datos fijos que no dependen de la temporada concreta. Idempotente.
 
 -- ---------------------------------------------------------------------------
--- Categorías de partido (9). Las 7 no-mixtas son también categorías de ranking.
+-- Categorías de partido (10). Las 8 no-mixtas son también categorías de ranking.
 -- ---------------------------------------------------------------------------
 insert into match_categories (code, name, type, sort_order) values
   ('VAR_4', '4a Varonil', 'varonil', 1),
   ('VAR_5', '5a Varonil', 'varonil', 2),
   ('VAR_6', '6a Varonil', 'varonil', 3),
-  ('FEM_4', '4a Femenil', 'femenil', 4),
-  ('FEM_5', '5a Femenil', 'femenil', 5),
-  ('FEM_6', '6a Femenil', 'femenil', 6),
-  ('FEM_7', '7a Femenil', 'femenil', 7),
-  ('MIX_A', 'Mixta A',    'mixta',   8),
-  ('MIX_B', 'Mixta B',    'mixta',   9)
+  ('FEM_3', '3a Femenil', 'femenil', 4),
+  ('FEM_4', '4a Femenil', 'femenil', 5),
+  ('FEM_5', '5a Femenil', 'femenil', 6),
+  ('FEM_6', '6a Femenil', 'femenil', 7),
+  ('FEM_7', '7a Femenil', 'femenil', 8),
+  ('MIX_A', 'Mixta A',    'mixta',   9),
+  ('MIX_B', 'Mixta B',    'mixta',   10)
 on conflict (code) do update
   set name = excluded.name, type = excluded.type, sort_order = excluded.sort_order;
 
@@ -26,6 +27,7 @@ insert into category_eligibility_rules
   ('VAR_4', 'male',   'VAR_4', 2),
   ('VAR_5', 'male',   'VAR_5', 2),
   ('VAR_6', 'male',   'VAR_6', 2),
+  ('FEM_3', 'female', 'FEM_3', 2),
   ('FEM_4', 'female', 'FEM_4', 2),
   ('FEM_5', 'female', 'FEM_5', 2),
   ('FEM_6', 'female', 'FEM_6', 2),

@@ -97,7 +97,7 @@ React, se saltan trivialmente.
     global. La decisión del organizador es el último recurso, manual.
 - **Orden ranking individual:** 1) puntos aportados, 2) % victorias, 3) partidos
   ganados, 4) dif. sets, 5) dif. juegos, 6) menos derrotas, 7) alfabético.
-- **Categorías (9):** VAR_4/5/6, FEM_4/5/6/7, MIX_A (VAR_5 + FEM_4), MIX_B (VAR_6 + FEM_5).
+- **Categorías (10):** VAR_4/5/6, FEM_3/4/5/6/7, MIX_A (VAR_5 + FEM_4), MIX_B (VAR_6 + FEM_5).
 - La elegibilidad por categoría está data-driven en `category_eligibility_rules`;
   la validación de alineación lee esa tabla, no la hardcodees.
 
