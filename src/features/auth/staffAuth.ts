@@ -20,6 +20,7 @@ const CLAIM_REASON: Record<string, string> = {
   already_claimed: 'Este acceso ya tiene cuenta. Inicia sesión con tu contraseña.',
   no_code: 'Este acceso no tiene código configurado. Contacta al administrador.',
   wrong_code: 'Código de acceso incorrecto.',
+  rate_limited: 'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.',
 }
 
 function friendlyAuthError(msg: string): string {

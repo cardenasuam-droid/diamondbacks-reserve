@@ -90,7 +90,12 @@ export function useSetMyPhoto() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (file: File) => {
-      const url = await uploadMedia(file, 'players')
+      // La foto va a players/<uid>/ para que la policy de Storage (0018) la ligue a
+      // la identidad: nadie puede escribir en la carpeta de otro usuario.
+      const { data: auth } = await supabase.auth.getUser()
+      const uid = auth.user?.id
+      if (!uid) throw new Error('Sesión no válida. Vuelve a iniciar sesión.')
+      const url = await uploadMedia(file, `players/${uid}`, 'image')
       const { error } = await supabase.rpc('set_my_photo', { p_url: url })
       if (error) throw new Error(friendly(error.message))
       return url

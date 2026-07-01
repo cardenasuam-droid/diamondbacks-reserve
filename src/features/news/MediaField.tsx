@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { uploadMedia } from './contentMutations'
+import { safeUrl } from '@/lib/url'
 
 // Campo de archivo: permite pegar una URL o subir un archivo al bucket 'media'.
 // Al subir, rellena la URL automáticamente.
@@ -24,7 +25,9 @@ export function MediaField({
     setBusy(true)
     setErr(null)
     try {
-      onChange(await uploadMedia(file, folder))
+      // Deriva el tipo permitido del accept: "image/*" solo imágenes; si no, admite PDF.
+      const kind = accept.trim().startsWith('image') ? 'image' : 'any'
+      onChange(await uploadMedia(file, folder, kind))
     } catch (e) {
       setErr((e as Error).message)
     } finally {
@@ -55,8 +58,8 @@ export function MediaField({
         </label>
       </div>
       {err && <p className="text-xs text-rose-600">{err}</p>}
-      {value && (
-        <a href={value} target="_blank" rel="noopener noreferrer" className="text-xs text-sky-300 underline">
+      {safeUrl(value) && (
+        <a href={safeUrl(value)} target="_blank" rel="noopener noreferrer" className="text-xs text-sky-300 underline">
           Ver archivo
         </a>
       )}

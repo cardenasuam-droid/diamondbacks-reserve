@@ -1,4 +1,5 @@
 import { useActiveReglamento } from '@/features/news/useDocuments'
+import { safeUrl } from '@/lib/url'
 import { formatDate } from '@/lib/date'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { EmptyState } from '@/components/ui/EmptyState'
@@ -25,14 +26,18 @@ export function ReglamentoPage() {
               {formatDate(doc.data.created_at) ? ` · ${formatDate(doc.data.created_at)}` : ''}
             </p>
           </div>
-          <a
-            href={doc.data.file_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
-          >
-            📄 Abrir reglamento (PDF)
-          </a>
+          {safeUrl(doc.data.file_url) ? (
+            <a
+              href={safeUrl(doc.data.file_url)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
+            >
+              📄 Abrir reglamento (PDF)
+            </a>
+          ) : (
+            <p className="text-sm text-slate-500">El enlace del reglamento no es válido.</p>
+          )}
         </div>
       )}
     </div>

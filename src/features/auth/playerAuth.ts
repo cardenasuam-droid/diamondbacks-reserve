@@ -32,6 +32,7 @@ const CLAIM_REASON: Record<string, string> = {
   already_claimed: 'Este jugador ya tiene cuenta. Inicia sesión con tu contraseña.',
   no_phone: 'Este jugador no tiene teléfono registrado. Pide acceso al organizador.',
   wrong_phone: 'Los últimos 4 dígitos del teléfono no coinciden.',
+  rate_limited: 'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.',
 }
 
 function friendlyAuthError(msg: string): string {

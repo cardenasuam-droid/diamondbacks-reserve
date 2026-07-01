@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useAllDocuments } from '@/features/news/useDocuments'
 import { useSaveDocument } from '@/features/news/contentMutations'
 import { MediaField } from '@/features/news/MediaField'
+import { safeUrl } from '@/lib/url'
 import { formatDate } from '@/lib/date'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { ErrorState } from '@/components/ui/ErrorState'
@@ -94,9 +95,11 @@ export function ReglamentoManagerPage() {
                 </span>
               </span>
               {d.is_active && <Badge color="emerald">Vigente</Badge>}
-              <a href={d.file_url} target="_blank" rel="noopener noreferrer" className="text-sm text-sky-300 underline">
-                Abrir
-              </a>
+              {safeUrl(d.file_url) && (
+                <a href={safeUrl(d.file_url)} target="_blank" rel="noopener noreferrer" className="text-sm text-sky-300 underline">
+                  Abrir
+                </a>
+              )}
             </li>
           ))}
           {(docs.data ?? []).length === 0 && (

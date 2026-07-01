@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+import { safeUrl } from '@/lib/url'
 import type { NewsAudience } from './types'
 
 function friendly(msg: string): string {
@@ -7,12 +8,44 @@ function friendly(msg: string): string {
   return msg
 }
 
+// Tipos y tamaño permitidos DEBEN coincidir con lo que el bucket 'media' acepta
+// (migración 0018: allowed_mime_types + file_size_limit). El bucket lo hace cumplir
+// en el servidor; esto es solo para dar un mensaje claro antes de subir.
+const MAX_UPLOAD_BYTES = 10 * 1024 * 1024 // 10 MB
+const EXT_BY_MIME: Record<string, string> = {
+  'image/png': 'png',
+  'image/jpeg': 'jpg',
+  'image/webp': 'webp',
+  'image/gif': 'gif',
+  'application/pdf': 'pdf',
+}
+const IMAGE_MIMES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif']
+
 // Sube un archivo al bucket público 'media' y devuelve su URL pública.
-export async function uploadMedia(file: File, folder: string): Promise<string> {
-  const ext = (file.name.split('.').pop() || 'bin').toLowerCase()
+// `kind='image'` restringe a imágenes (p. ej. fotos/logos); 'any' admite además PDF.
+export async function uploadMedia(
+  file: File,
+  folder: string,
+  kind: 'image' | 'any' = 'any',
+): Promise<string> {
+  const allowed = kind === 'image' ? IMAGE_MIMES : Object.keys(EXT_BY_MIME)
+  if (!allowed.includes(file.type)) {
+    throw new Error(
+      kind === 'image'
+        ? 'Formato no permitido. Usa una imagen PNG, JPG, WEBP o GIF.'
+        : 'Formato no permitido. Usa PNG, JPG, WEBP, GIF o PDF.',
+    )
+  }
+  if (file.size > MAX_UPLOAD_BYTES) {
+    throw new Error('El archivo supera el límite de 10 MB.')
+  }
+  // La extensión se deriva del MIME real, no del nombre del archivo (evita colar
+  // un .svg/.html disfrazado).
+  const ext = EXT_BY_MIME[file.type]
   const path = `${folder}/${crypto.randomUUID()}.${ext}`
   const { error } = await supabase.storage.from('media').upload(path, file, {
     cacheControl: '3600',
+    contentType: file.type,
     upsert: false,
   })
   if (error) {
@@ -39,11 +72,15 @@ export function useSaveNews() {
   return useMutation({
     mutationFn: async (v: SaveNewsVars) => {
       const now = new Date().toISOString()
+      const imageUrl = v.image_url.trim()
+      if (imageUrl && !safeUrl(imageUrl)) {
+        throw new Error('La URL de la imagen no es válida (usa http o https).')
+      }
       const { data: auth } = await supabase.auth.getUser()
       const base = {
         title: v.title.trim(),
         body: v.body.trim() || null,
-        image_url: v.image_url.trim() || null,
+        image_url: imageUrl || null,
         audience: v.audience,
         published: v.published,
         published_at: v.published ? now : null,
@@ -84,13 +121,17 @@ export function useSaveDocument() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (v: SaveDocumentVars) => {
+      const fileUrl = v.file_url.trim()
+      if (!safeUrl(fileUrl)) {
+        throw new Error('La URL del archivo no es válida (usa http o https, o sube el PDF).')
+      }
       const { data: auth } = await supabase.auth.getUser()
       const { data, error } = await supabase
         .from('league_documents')
         .insert({
           title: v.title.trim(),
           version: v.version.trim() || null,
-          file_url: v.file_url.trim(),
+          file_url: fileUrl,
           document_type: 'reglamento',
           is_active: true,
           uploaded_by: auth.user?.id ?? null,
