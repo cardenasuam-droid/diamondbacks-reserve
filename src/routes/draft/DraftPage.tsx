@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/features/auth/context'
 import { useCaptainTeam } from '@/features/lineups/useCaptainTeam'
 import { useActiveSeason } from '@/features/season/useActiveSeason'
@@ -19,7 +19,15 @@ import { Loader } from '@/components/ui/Loader'
 // el board en vivo; una capitana logueada ve los controles de elegir en su turno.
 export function DraftPage() {
   const { session } = useAuth()
+  const navigate = useNavigate()
   const season = useActiveSeason()
+
+  // Volver: esta pantalla es una ruta aislada (sin nav inferior). Regresa en el
+  // historial si venimos de dentro de la app; si se abrió directo (enlace/PWA), al inicio.
+  const goBack = () => {
+    if (window.history.length > 1) navigate(-1)
+    else navigate('/')
+  }
   const view = useDraftView(season.data?.id)
   const captain = useCaptainTeam()
   const myTeamId = captain.data?.id ?? null
@@ -42,7 +50,17 @@ export function DraftPage() {
     <div className="min-h-full">
       <div className="mx-auto flex min-h-full max-w-md flex-col px-4 pb-12 pt-safe">
         <header className="flex items-center justify-between py-4">
-          <Brand />
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={goBack}
+              aria-label="Volver"
+              className="-ml-1.5 flex h-9 w-9 items-center justify-center rounded-full text-slate-600 hover:bg-slate-100 active:bg-slate-100"
+            >
+              <Icon name="chevron-left" size={22} />
+            </button>
+            <Brand />
+          </div>
           <span className="text-xs font-medium tracking-wide text-slate-500">Draft en vivo</span>
         </header>
 
