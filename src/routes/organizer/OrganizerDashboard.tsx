@@ -20,6 +20,12 @@ const SECTIONS = [
     desc: 'Jugadores aprobados sin equipo (para el draft)',
   },
   {
+    to: '/app/organizador/lista-espera',
+    icon: '⏳',
+    title: 'Lista de espera',
+    desc: 'Jugadores apartados del pool que no entran al draft',
+  },
+  {
     to: '/app/organizador/draft',
     icon: '🏆',
     title: 'Draft',

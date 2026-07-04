@@ -31,6 +31,7 @@ import {
   Lock,
   Share2,
   RefreshCw,
+  Hourglass,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -72,6 +73,7 @@ const REGISTRY = {
   lock: Lock,
   share: Share2,
   refresh: RefreshCw,
+  waitlist: Hourglass,
 } satisfies Record<string, LucideIcon>
 
 export type IconName = keyof typeof REGISTRY

@@ -103,6 +103,25 @@ export function useSetPlayerPaid() {
   })
 }
 
+// Mueve un jugador entre el POOL y la LISTA DE ESPERA (bidireccional). Solo el
+// organizador (RLS "organizer all" de players). No toca team_id: el jugador sigue
+// sin equipo; solo cambia si cuenta como pool (elegible en draft) o está apartado.
+// waitlisted_at lo sella el trigger del servidor (0023).
+export function useSetWaitlisted() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (v: { id: string; is_waitlisted: boolean; season_id: string }) => {
+      const { error } = await supabase.from('players').update({ is_waitlisted: v.is_waitlisted }).eq('id', v.id)
+      if (error) throw new Error(friendly(error.message))
+    },
+    onSuccess: (_d, v) => {
+      void qc.invalidateQueries({ queryKey: ['pool-players', v.season_id] })
+      void qc.invalidateQueries({ queryKey: ['waitlist-players', v.season_id] })
+      void qc.invalidateQueries({ queryKey: ['players_public', v.season_id] })
+    },
+  })
+}
+
 // El propio jugador sube su foto desde "Mi cuenta": sube al bucket y la RPC
 // set_my_photo (0013) actualiza solo su ficha. Devuelve la URL pública.
 export function useSetMyPhoto() {

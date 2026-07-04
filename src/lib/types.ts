@@ -58,6 +58,7 @@ export interface PublicPlayer {
   is_captain: boolean
   is_active: boolean
   photo_url: string | null
+  is_waitlisted: boolean
 }
 
 export interface Profile {

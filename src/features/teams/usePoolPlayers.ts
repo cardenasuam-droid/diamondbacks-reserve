@@ -30,6 +30,27 @@ export function usePoolPlayers(seasonId: string | undefined) {
         .select('id, full_name, gender, category_code, photo_url')
         .eq('season_id', seasonId as string)
         .is('team_id', null)
+        .eq('is_waitlisted', false) // los de lista de espera NO son pool
+      if (error) throw error
+      return (data ?? []) as PoolPlayer[]
+    },
+    enabled: Boolean(seasonId),
+  })
+}
+
+// LISTA DE ESPERA: jugadores activos sin equipo apartados del pool (is_waitlisted).
+// No entran al draft (los RPC los excluyen). Lectura pública vía players_public,
+// pero la pantalla que la usa es solo de organizador (la mueve/regresa el organizador).
+export function useWaitlistPlayers(seasonId: string | undefined) {
+  return useQuery({
+    queryKey: ['waitlist-players', seasonId],
+    queryFn: async (): Promise<PoolPlayer[]> => {
+      const { data, error } = await supabase
+        .from('players_public')
+        .select('id, full_name, gender, category_code, photo_url')
+        .eq('season_id', seasonId as string)
+        .is('team_id', null)
+        .eq('is_waitlisted', true)
       if (error) throw error
       return (data ?? []) as PoolPlayer[]
     },

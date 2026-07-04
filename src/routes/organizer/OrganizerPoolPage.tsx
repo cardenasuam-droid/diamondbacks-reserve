@@ -15,7 +15,12 @@ import {
   type PoolRegistration,
 } from '@/features/teams/usePoolPlayers'
 import { useTeams } from '@/features/teams/useTeams'
-import { useAssignPlayerTeam, useTogglePlayerActive, useSetPlayerPaid } from '@/features/teams/playerMutations'
+import {
+  useAssignPlayerTeam,
+  useTogglePlayerActive,
+  useSetPlayerPaid,
+  useSetWaitlisted,
+} from '@/features/teams/playerMutations'
 import { TeamPicker } from '@/features/teams/TeamPicker'
 import type { MatchCategory, Team } from '@/lib/types'
 import { PageHeader } from '@/components/ui/PageHeader'
@@ -249,6 +254,7 @@ function PoolRow({
 }) {
   const [mode, setMode] = useState<'view' | 'edit' | 'assign'>('view')
   const setPaid = useSetPlayerPaid()
+  const setWaitlisted = useSetWaitlisted()
 
   if (mode === 'edit' && canEdit) {
     return (
@@ -314,6 +320,18 @@ function PoolRow({
           className="shrink-0 rounded-lg bg-gold-300 px-2.5 py-1 text-xs font-semibold text-[#1a1405] shadow-sm hover:bg-gold-200"
         >
           Asignar
+        </button>
+      )}
+      {canEdit && (
+        <button
+          onClick={() =>
+            setWaitlisted.mutate({ id: player.id, is_waitlisted: true, season_id: seasonId })
+          }
+          disabled={setWaitlisted.isPending}
+          title="Apartar a la lista de espera (no entra al draft)"
+          className="shrink-0 rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 hover:bg-amber-100 disabled:opacity-50"
+        >
+          A espera
         </button>
       )}
       {canEdit && (

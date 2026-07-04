@@ -24,9 +24,10 @@ export function useDraftView(seasonId: string | undefined) {
     () => new Map<string, PublicPlayer>((playersQ.data ?? []).map((p) => [p.id, p])),
     [playersQ.data],
   )
-  // Pool = jugadores activos sin equipo (free agents) de la temporada.
+  // Pool = jugadores activos sin equipo (free agents) de la temporada. Los de
+  // lista de espera (is_waitlisted) quedan fuera: no participan en el draft.
   const pool = useMemo(
-    () => (playersQ.data ?? []).filter((p) => p.team_id === null && p.is_active),
+    () => (playersQ.data ?? []).filter((p) => p.team_id === null && p.is_active && !p.is_waitlisted),
     [playersQ.data],
   )
 
