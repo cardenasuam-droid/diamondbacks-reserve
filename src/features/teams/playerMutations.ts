@@ -16,6 +16,7 @@ export interface SavePlayerVars {
   shirt_size: ShirtSize | null
   is_captain: boolean
   is_active: boolean
+  is_paid: boolean
   photo_url: string
 }
 
@@ -48,6 +49,7 @@ export function useSavePlayer() {
         shirt_size: v.shirt_size,
         is_captain: v.is_captain,
         is_active: v.is_active,
+        is_paid: v.is_paid,
         photo_url: v.photo_url.trim() || null,
       }
       if (v.id) {
@@ -80,6 +82,23 @@ export function useTogglePlayerActive() {
       invalidate(qc, v)
       void qc.invalidateQueries({ queryKey: ['pool-players', v.season_id] })
       void qc.invalidateQueries({ queryKey: ['inactive-pool-players', v.season_id] })
+    },
+  })
+}
+
+// Marca/desmarca a un jugador como "Pagó su inscripción". Solo el organizador
+// (RLS "organizer all" de players). paid_at/paid_by los sella el trigger del
+// servidor (0022). Sirve tanto para el pool (team_id null) como para asignados.
+export function useSetPlayerPaid() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (v: { id: string; is_paid: boolean; season_id: string; team_id: string | null }) => {
+      const { error } = await supabase.from('players').update({ is_paid: v.is_paid }).eq('id', v.id)
+      if (error) throw new Error(friendly(error.message))
+    },
+    onSuccess: (_d, v) => {
+      invalidate(qc, v)
+      void qc.invalidateQueries({ queryKey: ['pool-paid', v.season_id] })
     },
   })
 }

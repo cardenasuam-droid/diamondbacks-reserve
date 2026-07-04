@@ -6,7 +6,12 @@ import { useCategories } from '@/features/categories/useCategories'
 import { categoryColor } from '@/features/categories/categoryColor'
 import { genderForCategoryType } from '@/features/categories/eligibility'
 import { useManageRoster, type ManagedPlayer } from '@/features/teams/useManageRoster'
-import { useSavePlayer, useTogglePlayerActive, useAssignPlayerTeam } from '@/features/teams/playerMutations'
+import {
+  useSavePlayer,
+  useTogglePlayerActive,
+  useAssignPlayerTeam,
+  useSetPlayerPaid,
+} from '@/features/teams/playerMutations'
 import { usePoolPlayers } from '@/features/teams/usePoolPlayers'
 import { TeamPicker } from '@/features/teams/TeamPicker'
 import { MediaField } from '@/features/news/MediaField'
@@ -29,6 +34,7 @@ interface Draft {
   phone: string
   is_captain: boolean
   is_active: boolean
+  is_paid: boolean
   photo_url: string
 }
 
@@ -40,6 +46,7 @@ const EMPTY: Draft = {
   phone: '',
   is_captain: false,
   is_active: true,
+  is_paid: false,
   photo_url: '',
 }
 
@@ -51,6 +58,7 @@ export function OrganizerRosterPage() {
   const categories = useCategories()
   const save = useSavePlayer()
   const toggle = useTogglePlayerActive()
+  const setPaid = useSetPlayerPaid()
   const assign = useAssignPlayerTeam()
   const [draft, setDraft] = useState<Draft | null>(null)
 
@@ -96,6 +104,7 @@ export function OrganizerRosterPage() {
       phone: p.phone ?? '',
       is_captain: p.is_captain,
       is_active: p.is_active,
+      is_paid: p.is_paid,
       photo_url: p.photo_url ?? '',
     })
   }
@@ -274,6 +283,14 @@ export function OrganizerRosterPage() {
               />
               Activo
             </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={draft.is_paid}
+                onChange={(e) => setDraft({ ...draft, is_paid: e.target.checked })}
+              />
+              Pagado
+            </label>
           </div>
           {/* Mover a otro equipo o regresar al pool (asignación manual). */}
           {draft.id && (
@@ -341,6 +358,25 @@ export function OrganizerRosterPage() {
                 {!p.is_active && <span className="text-xs text-slate-500"> · inactivo</span>}
               </span>
               <Badge color={categoryColor(typeByCode.get(p.category_code))}>{p.category_code}</Badge>
+              <button
+                onClick={() =>
+                  setPaid.mutate({
+                    id: p.id,
+                    is_paid: !p.is_paid,
+                    season_id: season.data!.id,
+                    team_id: teamId as string,
+                  })
+                }
+                title={p.is_paid ? 'Marcar como no pagado' : 'Marcar como pagado'}
+                className={
+                  'shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ' +
+                  (p.is_paid
+                    ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                    : 'bg-slate-200 text-slate-500 hover:bg-slate-300')
+                }
+              >
+                {p.is_paid ? '✓ Pagado' : 'Pagado'}
+              </button>
               <button onClick={() => edit(p)} className="text-sm text-slate-600 underline">
                 Editar
               </button>
@@ -364,6 +400,11 @@ export function OrganizerRosterPage() {
       {toggle.isError && (
         <p className="rounded-lg bg-rose-500/15 px-3 py-2 text-sm text-rose-200">
           {(toggle.error as Error).message}
+        </p>
+      )}
+      {setPaid.isError && (
+        <p className="rounded-lg bg-rose-500/15 px-3 py-2 text-sm text-rose-200">
+          {(setPaid.error as Error).message}
         </p>
       )}
     </div>

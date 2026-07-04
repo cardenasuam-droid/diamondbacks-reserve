@@ -9,12 +9,13 @@ import {
   useUpdatePoolPlayer,
   useDeletePoolPlayer,
   usePoolShirtSizes,
+  usePoolPaid,
   useInactivePoolPlayers,
   type PoolPlayer,
   type PoolRegistration,
 } from '@/features/teams/usePoolPlayers'
 import { useTeams } from '@/features/teams/useTeams'
-import { useAssignPlayerTeam, useTogglePlayerActive } from '@/features/teams/playerMutations'
+import { useAssignPlayerTeam, useTogglePlayerActive, useSetPlayerPaid } from '@/features/teams/playerMutations'
 import { TeamPicker } from '@/features/teams/TeamPicker'
 import type { MatchCategory, Team } from '@/lib/types'
 import { PageHeader } from '@/components/ui/PageHeader'
@@ -41,12 +42,16 @@ function fmtWhen(iso: string): string {
 export function OrganizerPoolPage() {
   const { role } = useAuth()
   const isOrganizer = role === 'organizer'
+  // "Pagado" es dato administrativo: lo ven organizador y observador (admin de
+  // solo lectura), NUNCA las capitanas. Solo el organizador puede activarlo.
+  const canSeePaid = isOrganizer || role === 'viewer'
   const season = useActiveSeason()
   const pool = usePoolPlayers(season.data?.id)
   const regs = usePoolRegistrations(season.data?.id, isOrganizer)
   const cats = useCategories()
   const teams = useTeams(season.data?.id)
   const shirtSizes = usePoolShirtSizes(season.data?.id, isOrganizer)
+  const paid = usePoolPaid(season.data?.id, canSeePaid)
   const ranking = useMemo(() => rankingCategories(cats.data ?? []), [cats.data])
 
   if (season.isLoading) return <Loader label="Cargando…" />
@@ -98,11 +103,28 @@ export function OrganizerPoolPage() {
         />
       ) : (
         <div className="space-y-3">
-          {byCategory.map(({ cat, players: list }) => (
+          {byCategory.map(({ cat, players: list }) => {
+            const paidCount = canSeePaid ? list.filter((p) => paid.data?.[p.id]).length : 0
+            return (
             <section key={cat.code} className="rounded-2xl bg-slate-50 p-4 shadow-md">
               <div className="flex items-center justify-between">
                 <p className="font-heading text-sm text-slate-900">{cat.name}</p>
-                <span className="text-xs text-slate-500">{list.length}</span>
+                <div className="flex items-center gap-2">
+                  {canSeePaid && (
+                    <span
+                      className={
+                        'rounded-full px-2 py-0.5 text-xs font-semibold ' +
+                        (paidCount === list.length
+                          ? 'bg-emerald-100 text-emerald-700'
+                          : 'bg-amber-100 text-amber-700')
+                      }
+                      title="Jugadores que ya pagaron su inscripción"
+                    >
+                      {paidCount}/{list.length} pagados
+                    </span>
+                  )}
+                  <span className="text-xs text-slate-500">{list.length}</span>
+                </div>
               </div>
               <ul className="mt-2 divide-y divide-slate-200">
                 {list.map((p) => (
@@ -114,12 +136,15 @@ export function OrganizerPoolPage() {
                     teams={teams.data ?? []}
                     categories={ranking}
                     canEdit={isOrganizer}
+                    canSeePaid={canSeePaid}
+                    isPaid={paid.data?.[p.id] ?? false}
                     currentShirtSize={shirtSizes.data?.[p.id] ?? null}
                   />
                 ))}
               </ul>
             </section>
-          ))}
+            )
+          })}
         </div>
       )}
 
@@ -208,6 +233,8 @@ function PoolRow({
   teams,
   categories,
   canEdit,
+  canSeePaid,
+  isPaid,
   currentShirtSize,
 }: {
   player: PoolPlayer
@@ -216,9 +243,12 @@ function PoolRow({
   teams: Team[]
   categories: MatchCategory[]
   canEdit: boolean
+  canSeePaid: boolean
+  isPaid: boolean
   currentShirtSize: ShirtSize | null
 }) {
   const [mode, setMode] = useState<'view' | 'edit' | 'assign'>('view')
+  const setPaid = useSetPlayerPaid()
 
   if (mode === 'edit' && canEdit) {
     return (
@@ -247,6 +277,32 @@ function PoolRow({
           <p className="text-[11px] text-slate-500">Inscrito: {fmtWhen(reg.created_at)}</p>
         )}
       </div>
+      {canSeePaid &&
+        (canEdit ? (
+          <button
+            onClick={() =>
+              setPaid.mutate({ id: player.id, is_paid: !isPaid, season_id: seasonId, team_id: null })
+            }
+            title={isPaid ? 'Marcar como no pagado' : 'Marcar como pagado'}
+            className={
+              'shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ' +
+              (isPaid
+                ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                : 'bg-slate-200 text-slate-500 hover:bg-slate-300')
+            }
+          >
+            {isPaid ? '✓ Pagado' : 'Pagado'}
+          </button>
+        ) : (
+          <span
+            className={
+              'shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ' +
+              (isPaid ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-400')
+            }
+          >
+            {isPaid ? '✓ Pagado' : 'Sin pagar'}
+          </span>
+        ))}
       {canEdit && reg?.phone && (
         <a href={`tel:${reg.phone}`} className="shrink-0 text-xs text-sky-300 underline">
           {reg.phone}

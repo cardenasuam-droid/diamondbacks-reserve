@@ -111,6 +111,29 @@ export function usePoolShirtSizes(seasonId: string | undefined, enabled: boolean
   })
 }
 
+// Estado de pago de los jugadores del POOL, SOLO para el organizador/viewer (lee
+// players directo; is_paid NO está en players_public). Mapeado por id de jugador.
+// Las capitanas no lo llaman (enabled=false) y por RLS no verían el pool completo.
+export function usePoolPaid(seasonId: string | undefined, enabled: boolean) {
+  return useQuery({
+    queryKey: ['pool-paid', seasonId],
+    queryFn: async (): Promise<Record<string, boolean>> => {
+      const { data, error } = await supabase
+        .from('players')
+        .select('id, is_paid')
+        .eq('season_id', seasonId as string)
+        .is('team_id', null)
+      if (error) throw error
+      const map: Record<string, boolean> = {}
+      for (const r of (data ?? []) as { id: string; is_paid: boolean }[]) {
+        map[r.id] = r.is_paid
+      }
+      return map
+    },
+    enabled: Boolean(seasonId) && enabled,
+  })
+}
+
 export interface UpdatePoolVars {
   id: string
   seasonId: string
@@ -160,5 +183,6 @@ function invalidatePool(qc: ReturnType<typeof useQueryClient>, seasonId: string)
   void qc.invalidateQueries({ queryKey: ['inactive-pool-players', seasonId] })
   void qc.invalidateQueries({ queryKey: ['pool-registrations', seasonId] })
   void qc.invalidateQueries({ queryKey: ['pool-shirt-sizes', seasonId] })
+  void qc.invalidateQueries({ queryKey: ['pool-paid', seasonId] })
   void qc.invalidateQueries({ queryKey: ['players_public', seasonId] })
 }
