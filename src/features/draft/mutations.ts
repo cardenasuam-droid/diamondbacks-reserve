@@ -102,6 +102,25 @@ export function useAutoPick() {
   })
 }
 
+// Reinicia el draft (organizador, para pruebas): devuelve los jugadores al pool,
+// borra el board y vuelve a 'setup'. Ver RPC reset_draft (0021).
+export function useResetDraft() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (v: { draftId: string; seasonId: string }) => {
+      const { error } = await supabase.rpc('reset_draft', { p_draft_id: v.draftId })
+      if (error) throw new Error(friendly(error.message))
+    },
+    onSuccess: (_d, v) => {
+      void qc.invalidateQueries({ queryKey: ['draft', v.seasonId] })
+      void qc.invalidateQueries({ queryKey: ['draft-board', v.draftId] })
+      void qc.invalidateQueries({ queryKey: ['draft-teams', v.draftId] })
+      void qc.invalidateQueries({ queryKey: ['players_public', v.seasonId] })
+      void qc.invalidateQueries({ queryKey: ['pool-players', v.seasonId] })
+    },
+  })
+}
+
 export function usePauseDraft() {
   const qc = useQueryClient()
   return useMutation({

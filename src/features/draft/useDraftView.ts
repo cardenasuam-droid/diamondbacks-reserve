@@ -32,6 +32,14 @@ export function useDraftView(seasonId: string | undefined) {
 
   const board = boardQ.data ?? []
 
+  // Pick ANTERIOR = el último slot ya elegido (mayor pick_number con jugador). El
+  // board viene ordenado por pick_number, y los picks se llenan en orden, así que
+  // el último con jugador es el más reciente.
+  const previous = useMemo(() => {
+    const filled = board.filter((p) => p.player_id != null)
+    return filled.length ? filled[filled.length - 1] : null
+  }, [board])
+
   return {
     draft: draftQ.data ?? null,
     draftId,
@@ -39,6 +47,7 @@ export function useDraftView(seasonId: string | undefined) {
     teams: teamsQ.data ?? [],
     board,
     current: currentOpenPick(board),
+    previous,
     teamsById,
     playersById,
     pool,

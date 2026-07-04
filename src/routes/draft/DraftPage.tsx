@@ -7,11 +7,10 @@ import { useCategories } from '@/features/categories/useCategories'
 import { useDraftView } from '@/features/draft/useDraftView'
 import { useAutoPick } from '@/features/draft/mutations'
 import { remainingMs } from '@/features/draft/clock'
-import { PickClock } from '@/features/draft/components/PickClock'
 import { DraftBoard } from '@/features/draft/components/DraftBoard'
 import { PoolPicker } from '@/features/draft/components/PoolPicker'
+import { DraftHero } from '@/features/draft/components/DraftHero'
 import { Brand } from '@/components/ui/Brand'
-import { TeamCrest } from '@/components/ui/TeamCrest'
 import { Icon } from '@/components/ui/Icon'
 import { Loader } from '@/components/ui/Loader'
 
@@ -38,7 +37,6 @@ export function DraftPage() {
 
   const draft = view.draft
   const current = view.current
-  const currentTeam = current ? view.teamsById.get(current.team_id) : null
   const myTurn =
     draft?.status === 'active' && current != null && myTeamId != null && current.team_id === myTeamId
 
@@ -48,7 +46,7 @@ export function DraftPage() {
 
   return (
     <div className="min-h-full">
-      <div className="mx-auto flex min-h-full max-w-md flex-col px-4 pb-12 pt-safe">
+      <div className="mx-auto flex min-h-full max-w-md flex-col px-4 pb-12 pt-safe lg:max-w-4xl">
         <header className="flex items-center justify-between py-4">
           <div className="flex items-center gap-1.5">
             <button
@@ -71,17 +69,16 @@ export function DraftPage() {
             <Empty title="El draft aún no ha comenzado" desc="Cuando el organizador lo inicie, aquí verás los picks en vivo." />
           ) : (
             <>
-              <OnTheClock
+              <DraftHero
+                previous={view.previous}
+                current={current}
                 status={draft.status}
-                pickSeconds={draft.pick_seconds}
                 deadline={draft.pick_deadline}
-                categoryName={catName(current?.category_code ?? null)}
-                teamName={currentTeam?.name ?? null}
-                teamLogoUrl={currentTeam?.logo_url ?? null}
-                teamColor={currentTeam?.color ?? null}
-                pickNumber={current?.pick_number ?? null}
+                pickSeconds={draft.pick_seconds}
                 myTurn={myTurn}
-                finished={draft.status === 'finished'}
+                teamsById={view.teamsById}
+                playersById={view.playersById}
+                categoryName={catName}
               />
 
               {myTurn && current && view.draftId && season.data && (
@@ -118,62 +115,6 @@ export function DraftPage() {
         <footer className="pt-6 text-center text-xs text-slate-600">Diamondbacks Reserve · Team League</footer>
       </div>
     </div>
-  )
-}
-
-function OnTheClock({
-  status,
-  pickSeconds,
-  deadline,
-  categoryName,
-  teamName,
-  teamLogoUrl,
-  teamColor,
-  pickNumber,
-  myTurn,
-  finished,
-}: {
-  status: 'setup' | 'active' | 'paused' | 'finished'
-  pickSeconds: number
-  deadline: string | null
-  categoryName: string
-  teamName: string | null
-  teamLogoUrl: string | null
-  teamColor: string | null
-  pickNumber: number | null
-  myTurn: boolean
-  finished: boolean
-}) {
-  return (
-    <section
-      className={`rounded-3xl bg-slate-50 p-5 shadow-md ${myTurn ? 'ring-2 ring-gold-300' : ''}`}
-    >
-      {finished ? (
-        <p className="text-center font-heading text-lg text-slate-900">Draft finalizado 🎉</p>
-      ) : status === 'setup' ? (
-        <p className="text-center text-sm text-slate-500">Esperando a que el organizador inicie…</p>
-      ) : (
-        <>
-          <div className="flex items-center justify-between">
-            <div className="min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gold-300">
-                {categoryName} {pickNumber ? `· Pick ${pickNumber}` : ''}
-              </p>
-              <p className="mt-1 flex items-center gap-2 font-heading text-lg text-slate-900">
-                <TeamCrest name={teamName ?? '—'} logoUrl={teamLogoUrl} color={teamColor} size={24} />
-                <span className="truncate">{teamName ?? '—'}</span>
-              </p>
-              <p className="mt-0.5 text-xs text-slate-500">
-                {myTurn ? '¡Es tu turno! Elige abajo.' : 'está eligiendo'}
-              </p>
-            </div>
-          </div>
-          <div className="mt-3">
-            <PickClock deadline={deadline} status={status} pickSeconds={pickSeconds} />
-          </div>
-        </>
-      )}
-    </section>
   )
 }
 

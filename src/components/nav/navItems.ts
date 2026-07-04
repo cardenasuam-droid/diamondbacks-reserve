@@ -6,8 +6,8 @@ import type { IconName } from '@/components/ui/Icon'
 //   session   -> con sesión iniciada
 //   captain      -> capitán u organizador
 //   captain-only -> solo capitán (no organizador; evita duplicar items)
-//   organizer    -> solo organizador
-//   content      -> organizador o gestor web
+//   organizer    -> organizador u observador (solo lectura)
+//   content      -> organizador, gestor web u observador (solo lectura)
 //   dev          -> usuarios con acceso a la consola /dev (Bruja u organizador)
 export type NavGate = 'public' | 'session' | 'captain' | 'captain-only' | 'organizer' | 'content' | 'dev'
 
@@ -44,9 +44,9 @@ export function navAllows(
     case 'captain-only':
       return role === 'captain'
     case 'organizer':
-      return role === 'organizer'
+      return role === 'organizer' || role === 'viewer'
     case 'content':
-      return role === 'organizer' || role === 'web_manager'
+      return role === 'organizer' || role === 'web_manager' || role === 'viewer'
     case 'dev':
       return isDev
   }
@@ -82,6 +82,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { to: '/app/capitan', label: 'Panel de capitán', icon: 'captain', end: true, requires: 'captain' },
       { to: '/app/capitan/alineacion', label: 'Armar alineación', icon: 'lineup', requires: 'captain' },
+      { to: '/draft', label: 'Draft — hacer picks', icon: 'medal', requires: 'captain' },
       { to: '/app/pool', label: 'Pool de jugadores', icon: 'teams', requires: 'captain-only' },
     ],
   },

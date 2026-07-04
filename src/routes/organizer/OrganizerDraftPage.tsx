@@ -10,6 +10,7 @@ import {
   useUpdateDraftSeconds,
   usePauseDraft,
   useResumeDraft,
+  useResetDraft,
   useAutoPick,
 } from '@/features/draft/mutations'
 import { generateDraftSlots } from '@/features/draft/draftSlots'
@@ -251,8 +252,19 @@ function LivePanel({
 }) {
   const pause = usePauseDraft()
   const resume = useResumeDraft()
+  const reset = useResetDraft()
   const cats = useCategories()
   useHostTimer(draft.status === 'active' ? draft.id : undefined, seasonId, draft.pick_deadline)
+
+  function doReset() {
+    if (
+      !window.confirm(
+        '¿Reiniciar el draft? Se borran TODOS los picks y los jugadores drafteados vuelven al pool. Úsalo solo para pruebas.',
+      )
+    )
+      return
+    reset.mutate({ draftId: draft.id, seasonId })
+  }
 
   const current = view.current
   const currentTeam = current ? view.teamsById.get(current.team_id) : null
@@ -316,6 +328,26 @@ function LivePanel({
         currentPickNumber={current?.pick_number ?? null}
         currentCategory={current?.category_code ?? null}
       />
+
+      <section className="rounded-3xl border border-red-200 bg-red-50/60 p-4">
+        <p className="text-sm font-semibold text-red-700">Zona de pruebas</p>
+        <p className="mt-0.5 text-xs text-red-600">
+          Reiniciar borra todos los picks y regresa a los jugadores al pool. El draft vuelve a
+          "por iniciar".
+        </p>
+        {reset.isError && (
+          <p className="mt-2 rounded-lg border border-red-300 bg-red-100 p-2 text-xs text-red-700">
+            {(reset.error as Error).message}
+          </p>
+        )}
+        <button
+          onClick={doReset}
+          disabled={reset.isPending}
+          className="mt-3 rounded-xl border border-red-300 bg-white px-4 py-2 text-sm font-semibold text-red-700 shadow-sm hover:bg-red-50 disabled:opacity-50"
+        >
+          {reset.isPending ? 'Reiniciando…' : 'Reiniciar draft (prueba)'}
+        </button>
+      </section>
     </div>
   )
 }
