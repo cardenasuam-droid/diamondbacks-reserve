@@ -117,6 +117,7 @@ export function useSetWaitlisted() {
     onSuccess: (_d, v) => {
       void qc.invalidateQueries({ queryKey: ['pool-players', v.season_id] })
       void qc.invalidateQueries({ queryKey: ['waitlist-players', v.season_id] })
+      void qc.invalidateQueries({ queryKey: ['waitlist-meta', v.season_id] })
       void qc.invalidateQueries({ queryKey: ['players_public', v.season_id] })
     },
   })

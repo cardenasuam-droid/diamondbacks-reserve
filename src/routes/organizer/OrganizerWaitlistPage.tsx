@@ -3,21 +3,43 @@ import { useAuth } from '@/features/auth/context'
 import { useActiveSeason } from '@/features/season/useActiveSeason'
 import { useCategories } from '@/features/categories/useCategories'
 import { rankingCategories } from '@/features/registration/category'
-import { useWaitlistPlayers, type PoolPlayer } from '@/features/teams/usePoolPlayers'
-import { useSetWaitlisted } from '@/features/teams/playerMutations'
+import {
+  useWaitlistPlayers,
+  useWaitlistMeta,
+  usePoolRegistrations,
+  usePoolPaid,
+  type PoolPlayer,
+  type PoolRegistration,
+} from '@/features/teams/usePoolPlayers'
+import { useSetWaitlisted, useSetPlayerPaid } from '@/features/teams/playerMutations'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { Loader } from '@/components/ui/Loader'
 import { Avatar } from '@/components/ui/Avatar'
 
-// Lista de espera: jugadores apartados del pool que NO entran al draft. Solo el
-// organizador la gestiona (regresar al pool); el observador la ve de solo lectura.
+function fmtWhen(iso: string): string {
+  return new Date(iso).toLocaleString('es-MX', {
+    day: '2-digit',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+// Lista de espera: jugadores apartados del pool que NO entran al draft. Muestra la
+// misma info que el pool (fecha de inscripción, teléfono, "Pagado") y se ordena
+// por antigüedad en la espera (quien lleva más tiempo, primero). Solo el
+// organizador la gestiona; el observador la ve de solo lectura.
 export function OrganizerWaitlistPage() {
   const { role } = useAuth()
   const canEdit = role === 'organizer'
+  const canSeePaid = canEdit || role === 'viewer'
   const season = useActiveSeason()
   const waitlist = useWaitlistPlayers(season.data?.id)
+  const regs = usePoolRegistrations(season.data?.id, canEdit)
+  const paid = usePoolPaid(season.data?.id, canSeePaid)
+  const meta = useWaitlistMeta(season.data?.id, canSeePaid)
   const cats = useCategories()
   const ranking = useMemo(() => rankingCategories(cats.data ?? []), [cats.data])
 
@@ -32,13 +54,24 @@ export function OrganizerWaitlistPage() {
   }
   const seasonId = season.data.id
   const players = waitlist.data ?? []
+  const regMap = regs.data ?? {}
+  const metaMap = meta.data ?? {}
+
+  // Orden dentro de cada categoría: por antigüedad en la espera (waitlisted_at
+  // ascendente = más antiguo primero); sin fecha van al final; desempate alfabético.
+  const sortByWaited = (a: PoolPlayer, b: PoolPlayer) => {
+    const ta = metaMap[a.id] ?? ''
+    const tb = metaMap[b.id] ?? ''
+    if (ta && tb && ta !== tb) return ta.localeCompare(tb)
+    if (ta && !tb) return -1
+    if (!ta && tb) return 1
+    return a.full_name.localeCompare(b.full_name, 'es')
+  }
 
   const byCategory = ranking
     .map((c) => ({
       cat: c,
-      players: players
-        .filter((p) => p.category_code === c.code)
-        .sort((a, b) => a.full_name.localeCompare(b.full_name, 'es')),
+      players: players.filter((p) => p.category_code === c.code).sort(sortByWaited),
     }))
     .filter((g) => g.players.length > 0)
 
@@ -69,7 +102,16 @@ export function OrganizerWaitlistPage() {
               </div>
               <ul className="mt-2 divide-y divide-slate-200">
                 {list.map((p) => (
-                  <WaitlistRow key={p.id} player={p} seasonId={seasonId} canEdit={canEdit} />
+                  <WaitlistRow
+                    key={p.id}
+                    player={p}
+                    reg={regMap[p.id]}
+                    waitlistedAt={metaMap[p.id] ?? null}
+                    isPaid={paid.data?.[p.id] ?? false}
+                    seasonId={seasonId}
+                    canEdit={canEdit}
+                    canSeePaid={canSeePaid}
+                  />
                 ))}
               </ul>
             </section>
@@ -82,19 +124,71 @@ export function OrganizerWaitlistPage() {
 
 function WaitlistRow({
   player,
+  reg,
+  waitlistedAt,
+  isPaid,
   seasonId,
   canEdit,
+  canSeePaid,
 }: {
   player: PoolPlayer
+  reg: PoolRegistration | undefined
+  waitlistedAt: string | null
+  isPaid: boolean
   seasonId: string
   canEdit: boolean
+  canSeePaid: boolean
 }) {
   const setWaitlisted = useSetWaitlisted()
+  const setPaid = useSetPlayerPaid()
 
   return (
-    <li className="flex items-center gap-2 py-2">
+    <li className="flex flex-wrap items-center gap-2 py-2">
       <Avatar name={player.full_name} photoUrl={player.photo_url} size={32} />
-      <span className="min-w-0 flex-1 truncate text-sm font-medium text-slate-800">{player.full_name}</span>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium text-slate-800">{player.full_name}</p>
+        {/* Fecha/hora de inscripción (privada): SOLO organizador, igual que el pool. */}
+        {canEdit && reg?.created_at && (
+          <p className="text-[11px] text-slate-500">Inscrito: {fmtWhen(reg.created_at)}</p>
+        )}
+        {waitlistedAt && (
+          <p className="text-[11px] text-amber-600">En espera desde: {fmtWhen(waitlistedAt)}</p>
+        )}
+      </div>
+
+      {canSeePaid &&
+        (canEdit ? (
+          <button
+            onClick={() =>
+              setPaid.mutate({ id: player.id, is_paid: !isPaid, season_id: seasonId, team_id: null })
+            }
+            title={isPaid ? 'Marcar como no pagado' : 'Marcar como pagado'}
+            className={
+              'shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ' +
+              (isPaid
+                ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                : 'bg-slate-200 text-slate-500 hover:bg-slate-300')
+            }
+          >
+            {isPaid ? '✓ Pagado' : 'Pagado'}
+          </button>
+        ) : (
+          <span
+            className={
+              'shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ' +
+              (isPaid ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-400')
+            }
+          >
+            {isPaid ? '✓ Pagado' : 'Sin pagar'}
+          </span>
+        ))}
+
+      {canEdit && reg?.phone && (
+        <a href={`tel:${reg.phone}`} className="shrink-0 text-xs text-sky-300 underline">
+          {reg.phone}
+        </a>
+      )}
+
       {canEdit && (
         <button
           onClick={() => setWaitlisted.mutate({ id: player.id, is_waitlisted: false, season_id: seasonId })}
@@ -104,9 +198,6 @@ function WaitlistRow({
         >
           Regresar al pool
         </button>
-      )}
-      {setWaitlisted.isError && (
-        <span className="shrink-0 text-xs text-rose-500">Error</span>
       )}
     </li>
   )

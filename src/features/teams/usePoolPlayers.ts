@@ -80,6 +80,30 @@ export function useInactivePoolPlayers(seasonId: string | undefined, enabled: bo
   })
 }
 
+// Antigüedad en la lista de espera (waitlisted_at) por jugador, SOLO organizador/
+// viewer (lee players directo; no está en players_public). Para ordenar la lista
+// por quién lleva más tiempo esperando (FIFO). Mapeado por id de jugador.
+export function useWaitlistMeta(seasonId: string | undefined, enabled: boolean) {
+  return useQuery({
+    queryKey: ['waitlist-meta', seasonId],
+    queryFn: async (): Promise<Record<string, string | null>> => {
+      const { data, error } = await supabase
+        .from('players')
+        .select('id, waitlisted_at')
+        .eq('season_id', seasonId as string)
+        .is('team_id', null)
+        .eq('is_waitlisted', true)
+      if (error) throw error
+      const map: Record<string, string | null> = {}
+      for (const r of (data ?? []) as { id: string; waitlisted_at: string | null }[]) {
+        map[r.id] = r.waitlisted_at
+      }
+      return map
+    },
+    enabled: Boolean(seasonId) && enabled,
+  })
+}
+
 export interface PoolRegistration {
   created_at: string // fecha/hora de inscripción (solicitud de ingreso)
   phone: string | null
