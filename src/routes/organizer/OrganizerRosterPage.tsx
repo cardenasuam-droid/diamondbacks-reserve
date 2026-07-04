@@ -347,52 +347,58 @@ export function OrganizerRosterPage() {
             <li
               key={p.id}
               className={
-                'flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-100 p-3 shadow-sm ' +
+                'flex flex-col gap-2 rounded-xl border border-slate-200 bg-slate-100 p-3 shadow-sm ' +
                 (p.is_active ? '' : 'opacity-60')
               }
             >
-              <Avatar name={p.full_name} photoUrl={p.photo_url} color={team?.color} size={32} />
-              <span className="flex-1 truncate">
-                <span className="font-medium text-slate-800">{p.full_name}</span>
-                {p.is_captain && <span title="Capitán"> ⭐</span>}
-                {!p.is_active && <span className="text-xs text-slate-500"> · inactivo</span>}
-              </span>
-              <Badge color={categoryColor(typeByCode.get(p.category_code))}>{p.category_code}</Badge>
-              <button
-                onClick={() =>
-                  setPaid.mutate({
-                    id: p.id,
-                    is_paid: !p.is_paid,
-                    season_id: season.data!.id,
-                    team_id: teamId as string,
-                  })
-                }
-                title={p.is_paid ? 'Marcar como no pagado' : 'Marcar como pagado'}
-                className={
-                  'shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ' +
-                  (p.is_paid
-                    ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
-                    : 'bg-slate-200 text-slate-500 hover:bg-slate-300')
-                }
-              >
-                {p.is_paid ? '✓ Pagado' : 'Pagado'}
-              </button>
-              <button onClick={() => edit(p)} className="text-sm text-slate-600 underline">
-                Editar
-              </button>
-              <button
-                onClick={() =>
-                  toggle.mutate({
-                    id: p.id,
-                    is_active: !p.is_active,
-                    team_id: teamId as string,
-                    season_id: season.data!.id,
-                  })
-                }
-                className="text-sm text-sky-300 underline"
-              >
-                {p.is_active ? 'Desactivar' : 'Activar'}
-              </button>
+              {/* Fila 1: identidad + categoría + estado de pago. */}
+              <div className="flex items-center gap-2">
+                <Avatar name={p.full_name} photoUrl={p.photo_url} color={team?.color} size={32} />
+                <span className="min-w-0 flex-1 truncate">
+                  <span className="font-medium text-slate-800">{p.full_name}</span>
+                  {p.is_captain && <span title="Capitán"> ⭐</span>}
+                  {!p.is_active && <span className="text-xs text-slate-500"> · inactivo</span>}
+                </span>
+                <Badge color={categoryColor(typeByCode.get(p.category_code))}>{p.category_code}</Badge>
+                <button
+                  onClick={() =>
+                    setPaid.mutate({
+                      id: p.id,
+                      is_paid: !p.is_paid,
+                      season_id: season.data!.id,
+                      team_id: teamId as string,
+                    })
+                  }
+                  title={p.is_paid ? 'Marcar como no pagado' : 'Marcar como pagado'}
+                  className={
+                    'shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ' +
+                    (p.is_paid
+                      ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                      : 'bg-slate-200 text-slate-500 hover:bg-slate-300')
+                  }
+                >
+                  {p.is_paid ? '✓ Pagado' : 'Pagado'}
+                </button>
+              </div>
+              {/* Fila 2: acciones, indentadas bajo el nombre. */}
+              <div className="flex items-center gap-4 pl-10">
+                <button onClick={() => edit(p)} className="text-sm text-slate-600 underline">
+                  Editar
+                </button>
+                <button
+                  onClick={() =>
+                    toggle.mutate({
+                      id: p.id,
+                      is_active: !p.is_active,
+                      team_id: teamId as string,
+                      season_id: season.data!.id,
+                    })
+                  }
+                  className="text-sm text-sky-300 underline"
+                >
+                  {p.is_active ? 'Desactivar' : 'Activar'}
+                </button>
+              </div>
             </li>
           ))}
         </ul>

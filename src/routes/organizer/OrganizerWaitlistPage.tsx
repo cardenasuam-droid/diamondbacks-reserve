@@ -143,61 +143,65 @@ function WaitlistRow({
   const setPaid = useSetPlayerPaid()
 
   return (
-    <li className="flex flex-wrap items-center gap-2 py-2">
-      <Avatar name={player.full_name} photoUrl={player.photo_url} size={32} />
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-slate-800">{player.full_name}</p>
-        {/* Fecha/hora de inscripción (privada): SOLO organizador, igual que el pool. */}
-        {canEdit && reg?.created_at && (
-          <p className="text-[11px] text-slate-500">Inscrito: {fmtWhen(reg.created_at)}</p>
-        )}
-        {waitlistedAt && (
-          <p className="text-[11px] text-amber-600">En espera desde: {fmtWhen(waitlistedAt)}</p>
-        )}
+    <li className="py-2">
+      {/* Fila 1: identidad + fechas + estado de pago. */}
+      <div className="flex items-center gap-2">
+        <Avatar name={player.full_name} photoUrl={player.photo_url} size={32} />
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-medium text-slate-800">{player.full_name}</p>
+          {/* Fecha/hora de inscripción (privada): SOLO organizador, igual que el pool. */}
+          {canEdit && reg?.created_at && (
+            <p className="text-[11px] text-slate-500">Inscrito: {fmtWhen(reg.created_at)}</p>
+          )}
+          {waitlistedAt && (
+            <p className="text-[11px] text-amber-600">En espera desde: {fmtWhen(waitlistedAt)}</p>
+          )}
+        </div>
+        {canSeePaid &&
+          (canEdit ? (
+            <button
+              onClick={() =>
+                setPaid.mutate({ id: player.id, is_paid: !isPaid, season_id: seasonId, team_id: null })
+              }
+              title={isPaid ? 'Marcar como no pagado' : 'Marcar como pagado'}
+              className={
+                'shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ' +
+                (isPaid
+                  ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                  : 'bg-slate-200 text-slate-500 hover:bg-slate-300')
+              }
+            >
+              {isPaid ? '✓ Pagado' : 'Pagado'}
+            </button>
+          ) : (
+            <span
+              className={
+                'shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ' +
+                (isPaid ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-400')
+              }
+            >
+              {isPaid ? '✓ Pagado' : 'Sin pagar'}
+            </span>
+          ))}
       </div>
 
-      {canSeePaid &&
-        (canEdit ? (
-          <button
-            onClick={() =>
-              setPaid.mutate({ id: player.id, is_paid: !isPaid, season_id: seasonId, team_id: null })
-            }
-            title={isPaid ? 'Marcar como no pagado' : 'Marcar como pagado'}
-            className={
-              'shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ' +
-              (isPaid
-                ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
-                : 'bg-slate-200 text-slate-500 hover:bg-slate-300')
-            }
-          >
-            {isPaid ? '✓ Pagado' : 'Pagado'}
-          </button>
-        ) : (
-          <span
-            className={
-              'shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ' +
-              (isPaid ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-400')
-            }
-          >
-            {isPaid ? '✓ Pagado' : 'Sin pagar'}
-          </span>
-        ))}
-
-      {canEdit && reg?.phone && (
-        <a href={`tel:${reg.phone}`} className="shrink-0 text-xs text-sky-300 underline">
-          {reg.phone}
-        </a>
-      )}
-
+      {/* Fila 2: teléfono + acción, envuelven en móvil, indentadas bajo el nombre. */}
       {canEdit && (
-        <button
-          onClick={() => setWaitlisted.mutate({ id: player.id, is_waitlisted: false, season_id: seasonId })}
-          disabled={setWaitlisted.isPending}
-          title="Regresar al pool (vuelve a entrar al draft)"
-          className="shrink-0 rounded-lg bg-brand-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
-        >
-          Regresar al pool
-        </button>
+        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 pl-10">
+          {reg?.phone && (
+            <a href={`tel:${reg.phone}`} className="text-xs text-sky-300 underline">
+              {reg.phone}
+            </a>
+          )}
+          <button
+            onClick={() => setWaitlisted.mutate({ id: player.id, is_waitlisted: false, season_id: seasonId })}
+            disabled={setWaitlisted.isPending}
+            title="Regresar al pool (vuelve a entrar al draft)"
+            className="ml-auto rounded-lg bg-brand-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
+          >
+            Regresar al pool
+          </button>
+        </div>
       )}
     </li>
   )

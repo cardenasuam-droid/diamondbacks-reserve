@@ -274,74 +274,80 @@ function PoolRow({
   }
 
   return (
-    <li className="flex items-center gap-2 py-2">
-      <Avatar name={player.full_name} photoUrl={player.photo_url} size={32} />
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-slate-800">{player.full_name}</p>
-        {/* Fecha/hora de inscripción: SOLO el organizador (RLS la restringe). */}
-        {canEdit && reg?.created_at && (
-          <p className="text-[11px] text-slate-500">Inscrito: {fmtWhen(reg.created_at)}</p>
-        )}
+    <li className="py-2">
+      {/* Fila 1: identidad + estado de pago (siempre visible). */}
+      <div className="flex items-center gap-2">
+        <Avatar name={player.full_name} photoUrl={player.photo_url} size={32} />
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-medium text-slate-800">{player.full_name}</p>
+          {/* Fecha/hora de inscripción: SOLO el organizador (RLS la restringe). */}
+          {canEdit && reg?.created_at && (
+            <p className="text-[11px] text-slate-500">Inscrito: {fmtWhen(reg.created_at)}</p>
+          )}
+        </div>
+        {canSeePaid &&
+          (canEdit ? (
+            <button
+              onClick={() =>
+                setPaid.mutate({ id: player.id, is_paid: !isPaid, season_id: seasonId, team_id: null })
+              }
+              title={isPaid ? 'Marcar como no pagado' : 'Marcar como pagado'}
+              className={
+                'shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ' +
+                (isPaid
+                  ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                  : 'bg-slate-200 text-slate-500 hover:bg-slate-300')
+              }
+            >
+              {isPaid ? '✓ Pagado' : 'Pagado'}
+            </button>
+          ) : (
+            <span
+              className={
+                'shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ' +
+                (isPaid ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-400')
+              }
+            >
+              {isPaid ? '✓ Pagado' : 'Sin pagar'}
+            </span>
+          ))}
       </div>
-      {canSeePaid &&
-        (canEdit ? (
+
+      {/* Fila 2: acciones del organizador. Envuelven en móvil (flex-wrap) para no
+          encimarse ni tapar el nombre. Indentadas bajo el nombre (pl-10). */}
+      {canEdit && (
+        <div className="mt-2 flex flex-wrap items-center gap-2 pl-10">
+          {reg?.phone && (
+            <a href={`tel:${reg.phone}`} className="text-xs text-sky-300 underline">
+              {reg.phone}
+            </a>
+          )}
+          {teams.length > 0 && (
+            <button
+              onClick={() => setMode('assign')}
+              className="rounded-lg bg-gold-300 px-2.5 py-1 text-xs font-semibold text-[#1a1405] shadow-sm hover:bg-gold-200"
+            >
+              Asignar
+            </button>
+          )}
           <button
             onClick={() =>
-              setPaid.mutate({ id: player.id, is_paid: !isPaid, season_id: seasonId, team_id: null })
+              setWaitlisted.mutate({ id: player.id, is_waitlisted: true, season_id: seasonId })
             }
-            title={isPaid ? 'Marcar como no pagado' : 'Marcar como pagado'}
-            className={
-              'shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ' +
-              (isPaid
-                ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
-                : 'bg-slate-200 text-slate-500 hover:bg-slate-300')
-            }
+            disabled={setWaitlisted.isPending}
+            title="Apartar a la lista de espera (no entra al draft)"
+            className="rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 hover:bg-amber-100 disabled:opacity-50"
           >
-            {isPaid ? '✓ Pagado' : 'Pagado'}
+            A espera
           </button>
-        ) : (
-          <span
-            className={
-              'shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ' +
-              (isPaid ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-400')
-            }
+          <button
+            onClick={() => setMode('edit')}
+            aria-label="Editar"
+            className="ml-auto rounded-lg p-1.5 text-slate-500 hover:text-slate-300"
           >
-            {isPaid ? '✓ Pagado' : 'Sin pagar'}
-          </span>
-        ))}
-      {canEdit && reg?.phone && (
-        <a href={`tel:${reg.phone}`} className="shrink-0 text-xs text-sky-300 underline">
-          {reg.phone}
-        </a>
-      )}
-      {canEdit && teams.length > 0 && (
-        <button
-          onClick={() => setMode('assign')}
-          className="shrink-0 rounded-lg bg-gold-300 px-2.5 py-1 text-xs font-semibold text-[#1a1405] shadow-sm hover:bg-gold-200"
-        >
-          Asignar
-        </button>
-      )}
-      {canEdit && (
-        <button
-          onClick={() =>
-            setWaitlisted.mutate({ id: player.id, is_waitlisted: true, season_id: seasonId })
-          }
-          disabled={setWaitlisted.isPending}
-          title="Apartar a la lista de espera (no entra al draft)"
-          className="shrink-0 rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 hover:bg-amber-100 disabled:opacity-50"
-        >
-          A espera
-        </button>
-      )}
-      {canEdit && (
-        <button
-          onClick={() => setMode('edit')}
-          aria-label="Editar"
-          className="shrink-0 rounded-lg p-1.5 text-slate-500 hover:text-slate-300"
-        >
-          <Icon name="edit" size={16} />
-        </button>
+            <Icon name="edit" size={16} />
+          </button>
+        </div>
       )}
     </li>
   )
