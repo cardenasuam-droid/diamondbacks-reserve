@@ -1,7 +1,9 @@
 // Tipos compartidos del dominio. Reflejan el esquema SQL (identificadores en
 // inglés). Se ampliarán por feature según se necesiten.
 
-export type UserRole = 'player' | 'captain' | 'organizer' | 'web_manager'
+// 'viewer' = administrador de SOLO LECTURA: ve los paneles de organización y
+// contenido, pero la RLS le niega toda escritura (migraciones 0019/0020).
+export type UserRole = 'player' | 'captain' | 'organizer' | 'web_manager' | 'viewer'
 
 export type SeasonStatus = 'draft' | 'active' | 'finished'
 

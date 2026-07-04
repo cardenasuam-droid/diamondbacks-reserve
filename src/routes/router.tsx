@@ -81,7 +81,7 @@ export const router = createBrowserRouter([
             // Pool de jugadores: visible para capitanas y organizador (página
             // consciente del rol). Las capitanas lo ven de solo lectura.
             path: 'pool',
-            element: <RequireRole roles={['captain', 'organizer']} />,
+            element: <RequireRole roles={['captain', 'organizer', 'viewer']} />,
             children: [{ index: true, element: <OrganizerPoolPage /> }],
           },
           {
@@ -94,7 +94,7 @@ export const router = createBrowserRouter([
           },
           {
             path: 'organizador',
-            element: <RequireRole roles={['organizer']} />,
+            element: <RequireRole roles={['organizer', 'viewer']} />,
             children: [
               { index: true, element: <OrganizerDashboard /> },
               { path: 'inscripciones', element: <OrganizerRegistrationsPage /> },
@@ -108,7 +108,7 @@ export const router = createBrowserRouter([
           },
           {
             path: 'contenido',
-            element: <RequireRole roles={['organizer', 'web_manager']} />,
+            element: <RequireRole roles={['organizer', 'web_manager', 'viewer']} />,
             children: [
               { index: true, element: <NewsManagerPage /> },
               { path: 'reglamento', element: <ReglamentoManagerPage /> },

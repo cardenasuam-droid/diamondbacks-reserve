@@ -6,6 +6,7 @@ export const ROLE_LABELS: Record<UserRole, string> = {
   captain: 'Capitán',
   organizer: 'Organizador',
   web_manager: 'Gestor web',
+  viewer: 'Observador',
 }
 
 export function roleLabel(role: UserRole | null): string {
