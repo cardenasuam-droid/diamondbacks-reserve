@@ -81,13 +81,17 @@ export function DraftPage() {
                 categoryName={catName}
               />
 
-              {myTurn && current && view.draftId && season.data && (
+              {/* La capitana ve la lista de disponibles SIEMPRE durante el draft:
+                  interactiva en su turno, solo vista (sin Elegir) fuera de él. */}
+              {myTeamId != null && draft.status === 'active' && current && view.draftId && season.data && (
                 <PoolPicker
                   draftId={view.draftId}
                   seasonId={season.data.id}
                   categoryCode={current.category_code}
                   categoryName={catName(current.category_code)}
                   pool={view.pool}
+                  canPick={myTurn}
+                  title={myTurn ? 'Elige tu pick' : 'Jugadores disponibles'}
                 />
               )}
 

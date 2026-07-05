@@ -13,6 +13,7 @@ export function PoolPicker({
   categoryName,
   pool,
   title = 'Elige tu pick',
+  canPick = true,
 }: {
   draftId: string
   seasonId: string
@@ -20,6 +21,8 @@ export function PoolPicker({
   categoryName: string
   pool: PublicPlayer[]
   title?: string
+  /** false = solo vista (fuera de turno): lista los disponibles sin botón Elegir. */
+  canPick?: boolean
 }) {
   const makePick = useMakePick()
   const [query, setQuery] = useState('')
@@ -37,9 +40,11 @@ export function PoolPicker({
       <p className="font-heading text-sm text-slate-900">
         {title} · {categoryName}
       </p>
-      <p className="mt-0.5 text-xs text-slate-500">{available.length} disponibles</p>
+      <p className="mt-0.5 text-xs text-slate-500">
+        {available.length} disponibles{!canPick && ' · no es tu turno (solo vista)'}
+      </p>
 
-      {makePick.isError && (
+      {canPick && makePick.isError && (
         <p className="mt-2 rounded-lg border border-red-200 bg-red-50 p-2 text-sm text-red-700">
           {(makePick.error as Error).message}
         </p>
@@ -57,13 +62,15 @@ export function PoolPicker({
           <li key={p.id} className="flex items-center gap-2 rounded-xl px-1">
             <Avatar name={p.full_name} photoUrl={p.photo_url} size={28} />
             <span className="flex-1 truncate text-sm font-medium text-slate-800">{p.full_name}</span>
-            <button
-              onClick={() => makePick.mutate({ draftId, seasonId, playerId: p.id })}
-              disabled={makePick.isPending}
-              className="shrink-0 rounded-lg bg-gold-300 px-3 py-1.5 text-sm font-semibold text-[#1a1405] shadow-sm disabled:opacity-50"
-            >
-              Elegir
-            </button>
+            {canPick && (
+              <button
+                onClick={() => makePick.mutate({ draftId, seasonId, playerId: p.id })}
+                disabled={makePick.isPending}
+                className="shrink-0 rounded-lg bg-gold-300 px-3 py-1.5 text-sm font-semibold text-[#1a1405] shadow-sm disabled:opacity-50"
+              >
+                Elegir
+              </button>
+            )}
           </li>
         ))}
         {available.length === 0 && (
