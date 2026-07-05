@@ -123,6 +123,19 @@ export function useSetWaitlisted() {
   })
 }
 
+// Reinicia el acceso de un jugador (organizador): borra su cuenta de Auth vía RPC
+// reset_player_account (0025). El jugador vuelve al primer acceso (nombre →
+// últimos 4 dígitos → nueva contraseña). No toca datos deportivos.
+export function useResetPlayerAccount() {
+  return useMutation({
+    mutationFn: async (playerId: string): Promise<{ ok: boolean; reason: string }> => {
+      const { data, error } = await supabase.rpc('reset_player_account', { p_player_id: playerId })
+      if (error) throw new Error(friendly(error.message))
+      return data as { ok: boolean; reason: string }
+    },
+  })
+}
+
 // El propio jugador sube su foto desde "Mi cuenta": sube al bucket y la RPC
 // set_my_photo (0013) actualiza solo su ficha. Devuelve la URL pública.
 export function useSetMyPhoto() {

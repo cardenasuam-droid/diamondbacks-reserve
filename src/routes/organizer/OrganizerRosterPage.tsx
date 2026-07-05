@@ -11,6 +11,7 @@ import {
   useTogglePlayerActive,
   useAssignPlayerTeam,
   useSetPlayerPaid,
+  useResetPlayerAccount,
 } from '@/features/teams/playerMutations'
 import { usePoolPlayers } from '@/features/teams/usePoolPlayers'
 import { TeamPicker } from '@/features/teams/TeamPicker'
@@ -59,8 +60,11 @@ export function OrganizerRosterPage() {
   const save = useSavePlayer()
   const toggle = useTogglePlayerActive()
   const setPaid = useSetPlayerPaid()
+  const resetAccount = useResetPlayerAccount()
   const assign = useAssignPlayerTeam()
   const [draft, setDraft] = useState<Draft | null>(null)
+  const [resetConfirm, setResetConfirm] = useState(false)
+  const [resetDone, setResetDone] = useState<'reset' | 'no_account' | null>(null)
 
   const pool = usePoolPlayers(season.data?.id)
   const [addFromPool, setAddFromPool] = useState(false)
@@ -95,6 +99,9 @@ export function OrganizerRosterPage() {
   }
 
   function edit(p: ManagedPlayer) {
+    setResetConfirm(false)
+    setResetDone(null)
+    resetAccount.reset()
     setDraft({
       id: p.id,
       full_name: p.full_name,
@@ -106,6 +113,16 @@ export function OrganizerRosterPage() {
       is_active: p.is_active,
       is_paid: p.is_paid,
       photo_url: p.photo_url ?? '',
+    })
+  }
+
+  function doResetAccount() {
+    if (!draft?.id) return
+    resetAccount.mutate(draft.id, {
+      onSuccess: (res) => {
+        setResetConfirm(false)
+        setResetDone(res.reason === 'no_account' ? 'no_account' : 'reset')
+      },
     })
   }
 
@@ -311,6 +328,56 @@ export function OrganizerRosterPage() {
               {assign.isError && (
                 <p className="mt-2 rounded-lg bg-rose-500/15 px-3 py-2 text-sm text-rose-200">
                   {(assign.error as Error).message}
+                </p>
+              )}
+            </div>
+          )}
+          {/* Reiniciar acceso: borra la cuenta → el jugador vuelve a crear su
+              contraseña con los últimos 4 dígitos de su teléfono. */}
+          {draft.id && (
+            <div className="border-t border-slate-200 pt-3">
+              <p className="mb-1 text-xs font-medium text-slate-700">Acceso del jugador</p>
+              <p className="mb-2 text-[11px] text-slate-500">
+                Reinicia su contraseña: en su próximo ingreso volverá a verificar los últimos 4 dígitos
+                de su teléfono y creará una nueva. No afecta sus datos deportivos.
+              </p>
+              {resetDone === 'reset' ? (
+                <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+                  Listo. {draft.full_name} deberá crear una nueva contraseña con los últimos 4 dígitos de su
+                  teléfono en su próximo acceso.
+                </p>
+              ) : resetDone === 'no_account' ? (
+                <p className="rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-600">
+                  Este jugador aún no tiene cuenta; ya está en el paso inicial (nada que reiniciar).
+                </p>
+              ) : resetConfirm ? (
+                <div className="flex items-center gap-2">
+                  <span className="flex-1 text-sm text-slate-600">¿Reiniciar la contraseña?</span>
+                  <button
+                    onClick={doResetAccount}
+                    disabled={resetAccount.isPending}
+                    className="rounded-lg bg-amber-500 px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
+                  >
+                    {resetAccount.isPending ? 'Reiniciando…' : 'Sí, reiniciar'}
+                  </button>
+                  <button
+                    onClick={() => setResetConfirm(false)}
+                    className="rounded-lg px-3 py-2 text-sm text-slate-500"
+                  >
+                    No
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setResetConfirm(true)}
+                  className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-700 hover:bg-amber-100"
+                >
+                  Reiniciar contraseña
+                </button>
+              )}
+              {resetAccount.isError && (
+                <p className="mt-2 rounded-lg bg-rose-500/15 px-3 py-2 text-sm text-rose-200">
+                  {(resetAccount.error as Error).message}
                 </p>
               )}
             </div>
