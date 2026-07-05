@@ -12,11 +12,18 @@ import {
   type PoolRegistration,
 } from '@/features/teams/usePoolPlayers'
 import { useSetWaitlisted, useSetPlayerPaid } from '@/features/teams/playerMutations'
+import type { PlayerPosition } from '@/features/registration/types'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { Loader } from '@/components/ui/Loader'
 import { Avatar } from '@/components/ui/Avatar'
+
+const POSITION_LABEL: Record<PlayerPosition, string> = {
+  drive: 'Drive',
+  reves: 'Revés',
+  ambas: 'Ambas',
+}
 
 function fmtWhen(iso: string): string {
   return new Date(iso).toLocaleString('es-MX', {
@@ -149,6 +156,11 @@ function WaitlistRow({
         <Avatar name={player.full_name} photoUrl={player.photo_url} size={32} />
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-medium text-slate-800">{player.full_name}</p>
+          {canEdit && reg?.position && (
+            <span className="mt-0.5 inline-block rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-semibold text-sky-700">
+              {POSITION_LABEL[reg.position]}
+            </span>
+          )}
           {/* Fecha/hora de inscripción (privada): SOLO organizador, igual que el pool. */}
           {canEdit && reg?.created_at && (
             <p className="text-[11px] text-slate-500">Inscrito: {fmtWhen(reg.created_at)}</p>

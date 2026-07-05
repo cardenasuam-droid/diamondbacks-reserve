@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import type { Gender } from '@/lib/types'
 import type { ShirtSize } from '@/lib/shirtSize'
+import type { PlayerPosition } from '@/features/registration/types'
 
 // PoolPlayer base: viene de players_public (vista pública), así lo pueden leer
 // TANTO el organizador COMO las capitanas. Sin teléfono (privado).
@@ -107,25 +108,32 @@ export function useWaitlistMeta(seasonId: string | undefined, enabled: boolean) 
 export interface PoolRegistration {
   created_at: string // fecha/hora de inscripción (solicitud de ingreso)
   phone: string | null
+  position: PlayerPosition | null // lado de juego declarado (drive/revés/ambas)
 }
 
-// Enriquecimiento SOLO para el organizador: fecha/hora de inscripción + teléfono,
-// desde player_registrations (RLS organizador). Mapeado por id del jugador creado.
-// Las capitanas no lo llaman (enabled=false) y por RLS tampoco podrían leerlo.
+// Enriquecimiento SOLO para el organizador: fecha/hora de inscripción + teléfono +
+// posición, desde player_registrations (RLS organizador). Mapeado por id del
+// jugador creado. Las capitanas no lo llaman (enabled=false) y por RLS tampoco
+// podrían leerlo.
 export function usePoolRegistrations(seasonId: string | undefined, enabled: boolean) {
   return useQuery({
     queryKey: ['pool-registrations', seasonId],
     queryFn: async (): Promise<Record<string, PoolRegistration>> => {
       const { data, error } = await supabase
         .from('player_registrations')
-        .select('created_player_id, created_at, phone')
+        .select('created_player_id, created_at, phone, position')
         .eq('season_id', seasonId as string)
         .eq('status', 'approved')
         .not('created_player_id', 'is', null)
       if (error) throw error
       const map: Record<string, PoolRegistration> = {}
-      for (const r of (data ?? []) as { created_player_id: string; created_at: string; phone: string | null }[]) {
-        map[r.created_player_id] = { created_at: r.created_at, phone: r.phone }
+      for (const r of (data ?? []) as {
+        created_player_id: string
+        created_at: string
+        phone: string | null
+        position: PlayerPosition | null
+      }[]) {
+        map[r.created_player_id] = { created_at: r.created_at, phone: r.phone, position: r.position }
       }
       return map
     },
