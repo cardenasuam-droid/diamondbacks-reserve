@@ -61,8 +61,9 @@ export function OrganizerPoolPage() {
   const teams = useTeams(season.data?.id)
   const shirtSizes = usePoolShirtSizes(season.data?.id, isOrganizer)
   const paid = usePoolPaid(season.data?.id, canSeePaid)
-  // La vista decide qué devuelve: organizador → todos; capitana → pool + su equipo.
-  const phones = useContactPhones(season.data?.id, isOrganizer || isCaptain)
+  // La vista decide qué devuelve: organizador/observador → todos; capitana → pool
+  // + su equipo. Aquí solo se evita la consulta a quien seguro recibiría 0 filas.
+  const phones = useContactPhones(season.data?.id, isOrganizer || isCaptain || role === 'viewer')
   const ranking = useMemo(() => rankingCategories(cats.data ?? []), [cats.data])
 
   if (season.isLoading) return <Loader label="Cargando…" />
