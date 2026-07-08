@@ -16,6 +16,7 @@ function player(p: Partial<PublicPlayer> & { id: string; full_name: string; cate
     is_active: true,
     photo_url: null,
     is_waitlisted: false,
+    position: null,
     ...p,
   }
 }

@@ -10,6 +10,7 @@ import {
   useDeletePoolPlayer,
   usePoolShirtSizes,
   usePoolPaid,
+  useContactPhones,
   useInactivePoolPlayers,
   type PoolPlayer,
   type PoolRegistration,
@@ -22,22 +23,16 @@ import {
   useSetWaitlisted,
 } from '@/features/teams/playerMutations'
 import { TeamPicker } from '@/features/teams/TeamPicker'
-import type { PlayerPosition } from '@/features/registration/types'
-import type { MatchCategory, Team } from '@/lib/types'
+import type { MatchCategory, PlayerPosition, Team } from '@/lib/types'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { Loader } from '@/components/ui/Loader'
 import { Icon } from '@/components/ui/Icon'
 import { Avatar } from '@/components/ui/Avatar'
+import { PositionChip, POSITION_LABEL } from '@/components/ui/PositionChip'
 import { ShirtSizePicker } from '@/components/ui/ShirtSizePicker'
 import type { ShirtSize } from '@/lib/shirtSize'
-
-const POSITION_LABEL: Record<PlayerPosition, string> = {
-  drive: 'Drive',
-  reves: 'Revés',
-  ambas: 'Ambas',
-}
 
 function fmtWhen(iso: string): string {
   return new Date(iso).toLocaleString('es-MX', {
@@ -49,11 +44,13 @@ function fmtWhen(iso: string): string {
 }
 
 // Pool de jugadores aprobados sin equipo, agrupado por categoría. Consciente del
-// rol: el ORGANIZADOR ve fecha/hora de inscripción + teléfono y puede editar; las
-// CAPITANAS lo ven de solo lectura (la fecha/teléfono son privados, RLS).
+// rol: el ORGANIZADOR ve fecha/hora de inscripción y puede editar; las CAPITANAS
+// lo ven de solo lectura. Posición: pública (players_public). Teléfono: vista
+// curada players_contact (organizador + capitanas), nunca anon.
 export function OrganizerPoolPage() {
   const { role } = useAuth()
   const isOrganizer = role === 'organizer'
+  const isCaptain = role === 'captain'
   // "Pagado" es dato administrativo: lo ven organizador y observador (admin de
   // solo lectura), NUNCA las capitanas. Solo el organizador puede activarlo.
   const canSeePaid = isOrganizer || role === 'viewer'
@@ -64,6 +61,8 @@ export function OrganizerPoolPage() {
   const teams = useTeams(season.data?.id)
   const shirtSizes = usePoolShirtSizes(season.data?.id, isOrganizer)
   const paid = usePoolPaid(season.data?.id, canSeePaid)
+  // La vista decide qué devuelve: organizador → todos; capitana → pool + su equipo.
+  const phones = useContactPhones(season.data?.id, isOrganizer || isCaptain)
   const ranking = useMemo(() => rankingCategories(cats.data ?? []), [cats.data])
 
   if (season.isLoading) return <Loader label="Cargando…" />
@@ -150,6 +149,7 @@ export function OrganizerPoolPage() {
                     canEdit={isOrganizer}
                     canSeePaid={canSeePaid}
                     isPaid={paid.data?.[p.id] ?? false}
+                    phone={phones.data?.[p.id] ?? null}
                     currentShirtSize={shirtSizes.data?.[p.id] ?? null}
                   />
                 ))}
@@ -247,6 +247,7 @@ function PoolRow({
   canEdit,
   canSeePaid,
   isPaid,
+  phone,
   currentShirtSize,
 }: {
   player: PoolPlayer
@@ -257,6 +258,8 @@ function PoolRow({
   canEdit: boolean
   canSeePaid: boolean
   isPaid: boolean
+  /** Desde players_contact: organizador y capitanas. null si no hay acceso/dato. */
+  phone: string | null
   currentShirtSize: ShirtSize | null
 }) {
   const [mode, setMode] = useState<'view' | 'edit' | 'assign'>('view')
@@ -267,7 +270,7 @@ function PoolRow({
     return (
       <PoolEditForm
         player={player}
-        phone={reg?.phone ?? ''}
+        phone={phone ?? ''}
         seasonId={seasonId}
         categories={categories}
         currentShirtSize={currentShirtSize}
@@ -286,14 +289,11 @@ function PoolRow({
       <div className="flex items-center gap-2">
         <Avatar name={player.full_name} photoUrl={player.photo_url} size={32} />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium text-slate-800">{player.full_name}</p>
-          {/* Posición declarada (drive/revés/ambas): SOLO organizador (viene de la
-              inscripción, RLS la restringe). */}
-          {canEdit && reg?.position && (
-            <span className="mt-0.5 inline-block rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-semibold text-sky-700">
-              {POSITION_LABEL[reg.position]}
-            </span>
-          )}
+          <div className="flex items-center gap-1.5">
+            <p className="truncate text-sm font-medium text-slate-800">{player.full_name}</p>
+            {/* Posición (drive/revés/ambas): dato deportivo público (players_public). */}
+            <PositionChip position={player.position} />
+          </div>
           {/* Fecha/hora de inscripción: SOLO el organizador (RLS la restringe). */}
           {canEdit && reg?.created_at && (
             <p className="text-[11px] text-slate-500">Inscrito: {fmtWhen(reg.created_at)}</p>
@@ -327,16 +327,16 @@ function PoolRow({
           ))}
       </div>
 
-      {/* Fila 2: acciones del organizador. Envuelven en móvil (flex-wrap) para no
-          encimarse ni tapar el nombre. Indentadas bajo el nombre (pl-10). */}
-      {canEdit && (
+      {/* Fila 2: teléfono (organizador y capitanas, vía players_contact) + acciones
+          del organizador. Envuelven en móvil (flex-wrap) para no tapar el nombre. */}
+      {(canEdit || phone) && (
         <div className="mt-2 flex flex-wrap items-center gap-2 pl-10">
-          {reg?.phone && (
-            <a href={`tel:${reg.phone}`} className="text-xs text-sky-300 underline">
-              {reg.phone}
+          {phone && (
+            <a href={`tel:${phone}`} className="text-xs text-sky-300 underline">
+              {phone}
             </a>
           )}
-          {teams.length > 0 && (
+          {canEdit && teams.length > 0 && (
             <button
               onClick={() => setMode('assign')}
               className="rounded-lg bg-gold-300 px-2.5 py-1 text-xs font-semibold text-[#1a1405] shadow-sm hover:bg-gold-200"
@@ -344,23 +344,27 @@ function PoolRow({
               Asignar
             </button>
           )}
-          <button
-            onClick={() =>
-              setWaitlisted.mutate({ id: player.id, is_waitlisted: true, season_id: seasonId })
-            }
-            disabled={setWaitlisted.isPending}
-            title="Apartar a la lista de espera (no entra al draft)"
-            className="rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 hover:bg-amber-100 disabled:opacity-50"
-          >
-            A espera
-          </button>
-          <button
-            onClick={() => setMode('edit')}
-            aria-label="Editar"
-            className="ml-auto rounded-lg p-1.5 text-slate-500 hover:text-slate-300"
-          >
-            <Icon name="edit" size={16} />
-          </button>
+          {canEdit && (
+            <button
+              onClick={() =>
+                setWaitlisted.mutate({ id: player.id, is_waitlisted: true, season_id: seasonId })
+              }
+              disabled={setWaitlisted.isPending}
+              title="Apartar a la lista de espera (no entra al draft)"
+              className="rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 hover:bg-amber-100 disabled:opacity-50"
+            >
+              A espera
+            </button>
+          )}
+          {canEdit && (
+            <button
+              onClick={() => setMode('edit')}
+              aria-label="Editar"
+              className="ml-auto rounded-lg p-1.5 text-slate-500 hover:text-slate-300"
+            >
+              <Icon name="edit" size={16} />
+            </button>
+          )}
         </div>
       )}
     </li>
@@ -425,6 +429,7 @@ function PoolEditForm({
   const [phone, setPhone] = useState(initialPhone)
   const [categoryCode, setCategoryCode] = useState(player.category_code)
   const [shirtSize, setShirtSize] = useState<ShirtSize | null>(currentShirtSize)
+  const [position, setPosition] = useState<PlayerPosition | null>(player.position)
   const [confirmDel, setConfirmDel] = useState(false)
 
   function save() {
@@ -432,7 +437,16 @@ function PoolEditForm({
     const gender = cat ? genderForCategoryType(cat.type) : null
     if (!gender || !name.trim()) return
     update.mutate(
-      { id: player.id, seasonId, full_name: name, phone, gender, category_code: categoryCode, shirt_size: shirtSize },
+      {
+        id: player.id,
+        seasonId,
+        full_name: name,
+        phone,
+        gender,
+        category_code: categoryCode,
+        shirt_size: shirtSize,
+        position,
+      },
       { onSuccess: onDone },
     )
   }
@@ -459,6 +473,22 @@ function PoolEditForm({
           </select>
         </label>
       </div>
+
+      <label className="block">
+        <span className="block text-xs font-medium text-slate-600">Posición</span>
+        <select
+          value={position ?? ''}
+          onChange={(e) => setPosition((e.target.value || null) as PlayerPosition | null)}
+          className="mt-1 w-full rounded-lg px-2 py-2 text-base text-slate-900"
+        >
+          <option value="">— Sin definir —</option>
+          {(Object.keys(POSITION_LABEL) as PlayerPosition[]).map((p) => (
+            <option key={p} value={p}>
+              {POSITION_LABEL[p]}
+            </option>
+          ))}
+        </select>
+      </label>
 
       <div>
         <span className="block text-xs font-medium text-slate-600">Talla de playera</span>

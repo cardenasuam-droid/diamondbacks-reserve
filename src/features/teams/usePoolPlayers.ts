@@ -1,17 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import type { Gender } from '@/lib/types'
+import type { Gender, PlayerPosition } from '@/lib/types'
 import type { ShirtSize } from '@/lib/shirtSize'
-import type { PlayerPosition } from '@/features/registration/types'
 
 // PoolPlayer base: viene de players_public (vista pública), así lo pueden leer
-// TANTO el organizador COMO las capitanas. Sin teléfono (privado).
+// TANTO el organizador COMO las capitanas. Sin teléfono (privado); la posición sí
+// es pública (0026).
 export interface PoolPlayer {
   id: string
   full_name: string
   gender: Gender
   category_code: string
   photo_url: string | null
+  position: PlayerPosition | null
 }
 
 function friendly(msg: string): string {
@@ -28,7 +29,7 @@ export function usePoolPlayers(seasonId: string | undefined) {
     queryFn: async (): Promise<PoolPlayer[]> => {
       const { data, error } = await supabase
         .from('players_public')
-        .select('id, full_name, gender, category_code, photo_url')
+        .select('id, full_name, gender, category_code, photo_url, position')
         .eq('season_id', seasonId as string)
         .is('team_id', null)
         .eq('is_waitlisted', false) // los de lista de espera NO son pool
@@ -48,7 +49,7 @@ export function useWaitlistPlayers(seasonId: string | undefined) {
     queryFn: async (): Promise<PoolPlayer[]> => {
       const { data, error } = await supabase
         .from('players_public')
-        .select('id, full_name, gender, category_code, photo_url')
+        .select('id, full_name, gender, category_code, photo_url, position')
         .eq('season_id', seasonId as string)
         .is('team_id', null)
         .eq('is_waitlisted', true)
@@ -70,12 +71,35 @@ export function useInactivePoolPlayers(seasonId: string | undefined, enabled: bo
     queryFn: async (): Promise<PoolPlayer[]> => {
       const { data, error } = await supabase
         .from('players')
-        .select('id, full_name, gender, category_code, photo_url')
+        .select('id, full_name, gender, category_code, photo_url, position')
         .eq('season_id', seasonId as string)
         .is('team_id', null)
         .eq('is_active', false)
       if (error) throw error
       return (data ?? []) as PoolPlayer[]
+    },
+    enabled: Boolean(seasonId) && enabled,
+  })
+}
+
+// Teléfonos por jugador, desde la vista curada players_contact (0026).
+// La AUTORIZACIÓN vive en la vista, no aquí: el organizador recibe a todos; la
+// capitana solo el pool + su propio equipo; cualquier otro rol recibe 0 filas.
+// Por eso basta con habilitarlo cuando hay sesión (anon no tiene grant).
+export function useContactPhones(seasonId: string | undefined, enabled: boolean) {
+  return useQuery({
+    queryKey: ['contact-phones', seasonId],
+    queryFn: async (): Promise<Record<string, string | null>> => {
+      const { data, error } = await supabase
+        .from('players_contact')
+        .select('id, phone')
+        .eq('season_id', seasonId as string)
+      if (error) throw error
+      const map: Record<string, string | null> = {}
+      for (const r of (data ?? []) as { id: string; phone: string | null }[]) {
+        map[r.id] = r.phone
+      }
+      return map
     },
     enabled: Boolean(seasonId) && enabled,
   })
@@ -195,6 +219,7 @@ export interface UpdatePoolVars {
   gender: Gender
   category_code: string
   shirt_size: ShirtSize | null
+  position: PlayerPosition | null
 }
 
 // Edita un jugador del pool (nombre/teléfono/categoría; el género se deriva de la
@@ -211,6 +236,7 @@ export function useUpdatePoolPlayer() {
           gender: v.gender,
           category_code: v.category_code,
           shirt_size: v.shirt_size,
+          position: v.position,
         })
         .eq('id', v.id)
       if (error) throw new Error(friendly(error.message))
@@ -237,5 +263,6 @@ function invalidatePool(qc: ReturnType<typeof useQueryClient>, seasonId: string)
   void qc.invalidateQueries({ queryKey: ['pool-registrations', seasonId] })
   void qc.invalidateQueries({ queryKey: ['pool-shirt-sizes', seasonId] })
   void qc.invalidateQueries({ queryKey: ['pool-paid', seasonId] })
+  void qc.invalidateQueries({ queryKey: ['contact-phones', seasonId] })
   void qc.invalidateQueries({ queryKey: ['players_public', seasonId] })
 }

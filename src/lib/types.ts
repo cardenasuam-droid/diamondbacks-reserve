@@ -47,6 +47,10 @@ export interface Team {
   updated_at: string
 }
 
+// Lado de juego declarado por el jugador. Vive en players (0026) y, por no ser
+// dato sensible, se expone en players_public.
+export type PlayerPosition = 'drive' | 'reves' | 'ambas'
+
 // Vista players_public: SIN teléfono ni correo (privacidad por RLS).
 export interface PublicPlayer {
   id: string
@@ -59,6 +63,7 @@ export interface PublicPlayer {
   is_active: boolean
   photo_url: string | null
   is_waitlisted: boolean
+  position: PlayerPosition | null
 }
 
 export interface Profile {

@@ -1,16 +1,20 @@
 import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '@/features/auth/context'
 import { useActiveSeason } from '@/features/season/useActiveSeason'
 import { useTeams } from '@/features/teams/useTeams'
 import { usePublicPlayers } from '@/features/teams/usePublicPlayers'
+import { useContactPhones } from '@/features/teams/usePoolPlayers'
 import { usePlayerRankings } from '@/features/stats/usePlayerRankings'
 import { useCategories } from '@/features/categories/useCategories'
 import { categoryColor } from '@/features/categories/categoryColor'
 import { teamColor } from '@/lib/color'
 import { Avatar } from '@/components/ui/Avatar'
+import { PositionChip } from '@/components/ui/PositionChip'
 import { TeamCrest } from '@/components/ui/TeamCrest'
 import { Badge } from '@/components/ui/Badge'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
+import { Icon } from '@/components/ui/Icon'
 import { Loader } from '@/components/ui/Loader'
 import { StatTile } from '@/components/ui/StatTile'
 
@@ -19,11 +23,15 @@ const signed = (n: number) => (n > 0 ? `+${n}` : String(n))
 export function PlayerDetailPage() {
   const { playerId } = useParams<{ playerId: string }>()
   const navigate = useNavigate()
+  const { session } = useAuth()
   const season = useActiveSeason()
   const players = usePublicPlayers(season.data?.id)
   const teams = useTeams(season.data?.id)
   const categories = useCategories()
   const rankings = usePlayerRankings(teams.data?.map((t) => t.id))
+  // Teléfono: la vista players_contact decide quién lo recibe (organizador siempre;
+  // capitana solo pool + su equipo). Sin sesión no se consulta: anon no tiene grant.
+  const phones = useContactPhones(season.data?.id, Boolean(session))
 
   if (season.isLoading || players.isLoading || teams.isLoading || categories.isLoading) {
     return <Loader label="Cargando jugador…" />
@@ -45,6 +53,7 @@ export function PlayerDetailPage() {
   const team = (teams.data ?? []).find((t) => t.id === player.team_id)
   const category = (categories.data ?? []).find((c) => c.code === player.category_code)
   const stats = (rankings.data ?? []).find((r) => r.player_id === player.id)
+  const phone = phones.data?.[player.id] ?? null
 
   return (
     <div>
@@ -86,10 +95,28 @@ export function PlayerDetailPage() {
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <Badge color={categoryColor(category?.type)}>{player.category_code}</Badge>
               {player.is_captain && <Badge color="amber">Capitán</Badge>}
+              {/* Lado de juego: dato deportivo público (players_public, 0026). */}
+              <PositionChip position={player.position} />
             </div>
           </div>
         </div>
       </div>
+
+      {/* Contacto: solo lo ve quien la vista players_contact autoriza (organizador
+          siempre; capitana para el pool y su propio equipo). Nunca el público. */}
+      {phone && (
+        <section className="mb-5 flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-100 p-4 shadow-sm">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky-500/10 text-sky-600">
+            <Icon name="account" size={18} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs text-slate-500">Teléfono</p>
+            <a href={`tel:${phone}`} className="text-sm font-medium text-sky-600 underline">
+              {phone}
+            </a>
+          </div>
+        </section>
+      )}
 
       {/* Estadísticas */}
       {stats ? (

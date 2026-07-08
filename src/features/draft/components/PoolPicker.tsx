@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useMakePick } from '../mutations'
 import { Avatar } from '@/components/ui/Avatar'
+import { PositionChip } from '@/components/ui/PositionChip'
 import type { PublicPlayer } from '@/lib/types'
 
 // Lista del pool de la categoría actual con botón Elegir. La usan la capitana (en
@@ -61,7 +62,9 @@ export function PoolPicker({
         {available.map((p) => (
           <li key={p.id} className="flex items-center gap-2 rounded-xl px-1">
             <Avatar name={p.full_name} photoUrl={p.photo_url} size={28} />
-            <span className="flex-1 truncate text-sm font-medium text-slate-800">{p.full_name}</span>
+            <span className="min-w-0 flex-1 truncate text-sm font-medium text-slate-800">{p.full_name}</span>
+            {/* Lado de juego: ayuda a la capitana a armar parejas al elegir. */}
+            <PositionChip position={p.position} />
             {canPick && (
               <button
                 onClick={() => makePick.mutate({ draftId, seasonId, playerId: p.id })}

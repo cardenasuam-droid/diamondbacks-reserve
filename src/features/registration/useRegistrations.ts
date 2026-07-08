@@ -57,6 +57,9 @@ export function useApproveRegistration() {
           gender,
           category_code: v.categoryCode,
           shirt_size: v.registration.shirt_size ?? null,
+          // El lado de juego declarado se copia a la ficha (0026): así lo ven
+          // capitanas y el sitio público, no solo el organizador en la bandeja.
+          position: v.registration.position,
           is_captain: false,
           is_active: true,
           photo_url: null,

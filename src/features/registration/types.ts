@@ -1,8 +1,11 @@
 // Tipos del módulo de inscripción pública (tabla player_registrations, 0014).
 
 import type { ShirtSize } from '@/lib/shirtSize'
+import type { PlayerPosition } from '@/lib/types'
 
-export type PlayerPosition = 'drive' | 'reves' | 'ambas'
+// El tipo vive en lib/types (players lo tiene como columna desde 0026); se
+// reexporta aquí para no romper los imports existentes del módulo de inscripción.
+export type { PlayerPosition }
 export type RegistrationStatus = 'pending' | 'approved' | 'rejected'
 
 export interface PlayerRegistration {

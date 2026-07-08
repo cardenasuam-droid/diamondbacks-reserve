@@ -18,6 +18,7 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { Loader } from '@/components/ui/Loader'
 import { Avatar } from '@/components/ui/Avatar'
+import { PositionChip } from '@/components/ui/PositionChip'
 
 const POSITION_LABEL: Record<PlayerPosition, string> = {
   drive: 'Drive',
@@ -155,7 +156,10 @@ function WaitlistRow({
       <div className="flex items-center gap-2">
         <Avatar name={player.full_name} photoUrl={player.photo_url} size={32} />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium text-slate-800">{player.full_name}</p>
+          <div className="flex items-center gap-1.5">
+            <p className="truncate text-sm font-medium text-slate-800">{player.full_name}</p>
+            <PositionChip position={player.position} />
+          </div>
           {canEdit && reg?.position && (
             <span className="mt-0.5 inline-block rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-semibold text-sky-700">
               {POSITION_LABEL[reg.position]}

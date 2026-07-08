@@ -9,6 +9,7 @@ import { groupRoster, type RosterGroup } from '@/features/teams/groupRoster'
 import { categoryColor } from '@/features/categories/categoryColor'
 import { teamColor } from '@/lib/color'
 import { Avatar } from '@/components/ui/Avatar'
+import { PositionChip } from '@/components/ui/PositionChip'
 import { TeamCrest } from '@/components/ui/TeamCrest'
 import { Badge } from '@/components/ui/Badge'
 import { Icon } from '@/components/ui/Icon'
@@ -156,7 +157,8 @@ function CategoryAccordion({
                 className="flex items-center gap-3 px-4 py-2.5 transition hover:bg-slate-100"
               >
                 <Avatar name={p.full_name} photoUrl={p.photo_url} color={color} size={36} />
-                <span className="flex-1 font-medium text-slate-800">{p.full_name}</span>
+                <span className="min-w-0 flex-1 truncate font-medium text-slate-800">{p.full_name}</span>
+                <PositionChip position={p.position} />
                 {p.is_captain && <Badge color="amber">Capitán</Badge>}
                 <Icon name="chevron-right" size={16} className="text-slate-400" />
               </Link>
