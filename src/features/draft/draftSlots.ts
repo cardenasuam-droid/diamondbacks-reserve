@@ -1,6 +1,7 @@
-// Generación pura del board del draft (orden snake). Espeja la lógica del RPC
-// start_draft (0015): se usa para PREVISUALIZAR el board en el setup y es el
-// corazón calculable del módulo (CLAUDE.md §1) → tests obligatorios.
+// Generación pura del board en snake (orden fijo). NOTA (0028): el motor en vivo
+// ya NO usa esto — ahora sortea el orden por categoría en el servidor y marca los
+// "no pick" de capitanas (begin_category). Se conserva como helper puro del cálculo
+// snake (base compartida con el RPC) con sus tests. No refleja el sorteo ni los skips.
 
 export interface DraftSlot {
   pick_number: number // orden global del pick (1-based)

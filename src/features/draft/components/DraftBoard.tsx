@@ -71,6 +71,8 @@ function BoardSection({
   defaultOpen: boolean
 }) {
   const [open, setOpen] = useState(defaultOpen)
+  // Los "no pick" (is_skip) no cuentan para el total de la categoría.
+  const total = picks.filter((p) => !p.is_skip).length
   const done = picks.filter((p) => p.player_id).length
 
   return (
@@ -81,7 +83,7 @@ function BoardSection({
       >
         <span className="flex-1 font-heading text-sm text-slate-900">{name}</span>
         <span className="text-xs text-slate-500">
-          {done}/{picks.length}
+          {done}/{total}
         </span>
         <Icon name={open ? 'chevron-down' : 'chevron-right'} size={16} className="text-slate-500" />
       </button>
@@ -90,21 +92,23 @@ function BoardSection({
           {picks.map((p) => {
             const team = teamsById.get(p.team_id)
             const player = p.player_id ? playersById.get(p.player_id) : null
-            const isCurrent = p.pick_number === currentPickNumber
+            const isCurrent = !p.is_skip && p.pick_number === currentPickNumber
             return (
               <li
                 key={p.id}
                 className={`flex items-center gap-2.5 rounded-lg px-2 py-2 ${
                   isCurrent ? 'neu-inset' : ''
-                }`}
+                } ${p.is_skip ? 'opacity-60' : ''}`}
               >
                 <span className="w-6 shrink-0 text-right text-xs tabular-nums text-slate-500">
-                  {p.pick_number}
+                  {p.is_skip ? '—' : p.pick_number}
                 </span>
                 <TeamCrest name={team?.name ?? '—'} logoUrl={team?.logo_url} color={team?.color} size={20} />
                 <span className="w-16 shrink-0 truncate text-xs text-slate-600">{team?.name ?? '—'}</span>
                 <span className="flex flex-1 items-center gap-1.5 truncate text-sm font-medium text-slate-900">
-                  {player ? (
+                  {p.is_skip ? (
+                    <span className="text-xs italic text-slate-500">No pick · capitana ya inscrita</span>
+                  ) : player ? (
                     <>
                       <Avatar name={player.full_name} photoUrl={player.photo_url} color={team?.color} size={22} />
                       <span className="truncate">{player.full_name}</span>
@@ -115,7 +119,7 @@ function BoardSection({
                     <span className="text-slate-500">Por elegir</span>
                   )}
                 </span>
-                {p.was_auto && (
+                {p.was_auto && !p.is_skip && (
                   <span className="shrink-0 rounded-full bg-slate-200/70 px-1.5 py-0.5 text-[10px] text-slate-600">
                     auto
                   </span>

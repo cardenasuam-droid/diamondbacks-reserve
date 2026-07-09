@@ -15,6 +15,7 @@ export function useDraftRealtime(draftId: string | undefined, seasonId: string |
       void qc.invalidateQueries({ queryKey: ['draft', seasonId] })
       void qc.invalidateQueries({ queryKey: ['draft-board', draftId] })
       void qc.invalidateQueries({ queryKey: ['draft-teams', draftId] })
+      void qc.invalidateQueries({ queryKey: ['draft-category-orders', draftId] })
       void qc.invalidateQueries({ queryKey: ['players_public', seasonId] })
       void qc.invalidateQueries({ queryKey: ['pool-players', seasonId] })
     }
@@ -28,6 +29,11 @@ export function useDraftRealtime(draftId: string | undefined, seasonId: string |
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'draft_picks', filter: `draft_id=eq.${draftId}` },
+        invalidate,
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'draft_category_orders', filter: `draft_id=eq.${draftId}` },
         invalidate,
       )
       .subscribe()

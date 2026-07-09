@@ -9,8 +9,22 @@ export interface Draft {
   pick_seconds: number
   pick_deadline: string | null
   paused_remaining_ms: number | null
+  /** Categoría en sorteo o en juego (0028). null en setup/finished. */
+  current_category_code: string | null
+  /** true = fase de sorteo de orden de la categoría actual (aún sin picks). */
+  is_drawing: boolean
   created_at: string
   updated_at: string
+}
+
+// Orden sorteado de una categoría (tabla draft_category_orders, 0028). Es la base
+// de la animación del sorteo, autoritativa del servidor (todos ven lo mismo).
+export interface DraftCategoryOrder {
+  id: string
+  draft_id: string
+  category_code: string
+  team_id: string
+  position: number
 }
 
 export interface DraftTeam {
@@ -32,4 +46,6 @@ export interface DraftPick {
   picked_at: string | null
   was_auto: boolean
   picked_by: string | null
+  /** "No pick" de capitana (0028): slot que el motor salta; nunca se llena. */
+  is_skip: boolean
 }

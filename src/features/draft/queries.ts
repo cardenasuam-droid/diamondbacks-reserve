@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import type { Draft, DraftPick, DraftTeam } from './types'
+import type { Draft, DraftPick, DraftTeam, DraftCategoryOrder } from './types'
 
 // El draft de la temporada (uno por temporada). null si aún no se ha creado.
 export function useDraft(seasonId: string | undefined) {
@@ -53,7 +53,26 @@ export function useDraftBoard(draftId: string | undefined) {
   })
 }
 
-// El slot actual = el de menor pick_number sin jugador (el board viene ordenado).
+// Órdenes sorteadas por categoría (0028). Base de la animación del sorteo.
+export function useDraftCategoryOrders(draftId: string | undefined) {
+  return useQuery({
+    queryKey: ['draft-category-orders', draftId],
+    queryFn: async (): Promise<DraftCategoryOrder[]> => {
+      const { data, error } = await supabase
+        .from('draft_category_orders')
+        .select('*')
+        .eq('draft_id', draftId as string)
+        .order('category_code')
+        .order('position')
+      if (error) throw error
+      return (data ?? []) as DraftCategoryOrder[]
+    },
+    enabled: Boolean(draftId),
+  })
+}
+
+// El slot actual = el de menor pick_number sin jugador, IGNORANDO los "no pick"
+// de capitana (is_skip), que el motor salta y nunca se llenan.
 export function currentOpenPick(board: DraftPick[]): DraftPick | null {
-  return board.find((p) => p.player_id === null) ?? null
+  return board.find((p) => p.player_id === null && !p.is_skip) ?? null
 }

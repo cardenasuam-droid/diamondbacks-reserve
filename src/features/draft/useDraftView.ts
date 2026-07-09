@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useTeams } from '@/features/teams/useTeams'
 import { usePublicPlayers } from '@/features/teams/usePublicPlayers'
 import type { PublicPlayer, Team } from '@/lib/types'
-import { useDraft, useDraftBoard, useDraftTeams, currentOpenPick } from './queries'
+import { useDraft, useDraftBoard, useDraftTeams, useDraftCategoryOrders, currentOpenPick } from './queries'
 import { useDraftRealtime } from './useDraftRealtime'
 
 // Arma TODA la vista del draft de una temporada y la mantiene en vivo (Realtime).
@@ -12,6 +12,7 @@ export function useDraftView(seasonId: string | undefined) {
   const draftId = draftQ.data?.id
   const boardQ = useDraftBoard(draftId)
   const orderQ = useDraftTeams(draftId)
+  const catOrdersQ = useDraftCategoryOrders(draftId)
   const teamsQ = useTeams(seasonId)
   const playersQ = usePublicPlayers(seasonId)
   useDraftRealtime(draftId, seasonId)
@@ -32,6 +33,7 @@ export function useDraftView(seasonId: string | undefined) {
   )
 
   const board = boardQ.data ?? []
+  const draft = draftQ.data ?? null
 
   // Pick ANTERIOR = el último slot ya elegido (mayor pick_number con jugador). El
   // board viene ordenado por pick_number, y los picks se llenan en orden, así que
@@ -41,14 +43,31 @@ export function useDraftView(seasonId: string | undefined) {
     return filled.length ? filled[filled.length - 1] : null
   }, [board])
 
+  // Fase de sorteo (0028): true = mostrando/animando el orden de la categoría antes
+  // de que arranquen sus picks. El orden vive en draft_category_orders.
+  const isDrawing = Boolean(draft && draft.status === 'active' && draft.is_drawing)
+  const currentCategory = draft?.current_category_code ?? null
+
+  // Orden sorteado (equipos, en su posición) de la categoría actual.
+  const drawnOrder = useMemo(() => {
+    if (!currentCategory) return []
+    return (catOrdersQ.data ?? [])
+      .filter((o) => o.category_code === currentCategory)
+      .sort((a, b) => a.position - b.position)
+      .map((o) => ({ position: o.position, team: teamsById.get(o.team_id) ?? null, team_id: o.team_id }))
+  }, [catOrdersQ.data, currentCategory, teamsById])
+
   return {
-    draft: draftQ.data ?? null,
+    draft,
     draftId,
     order: orderQ.data ?? [],
     teams: teamsQ.data ?? [],
     board,
-    current: currentOpenPick(board),
+    current: isDrawing ? null : currentOpenPick(board),
     previous,
+    isDrawing,
+    currentCategory,
+    drawnOrder,
     teamsById,
     playersById,
     pool,

@@ -68,6 +68,22 @@ export function useStartDraft() {
   })
 }
 
+// Empieza la categoría sorteada (organizador): genera sus slots y arranca el reloj.
+// Ver RPC begin_category (0028).
+export function useBeginCategory() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (v: { draftId: string; seasonId: string }) => {
+      const { error } = await supabase.rpc('begin_category', { p_draft_id: v.draftId })
+      if (error) throw new Error(friendly(error.message))
+    },
+    onSuccess: (_d, v) => {
+      void qc.invalidateQueries({ queryKey: ['draft', v.seasonId] })
+      void qc.invalidateQueries({ queryKey: ['draft-board', v.draftId] })
+    },
+  })
+}
+
 export function useMakePick() {
   const qc = useQueryClient()
   return useMutation({

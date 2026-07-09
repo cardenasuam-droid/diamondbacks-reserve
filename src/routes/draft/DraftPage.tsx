@@ -8,6 +8,7 @@ import { useDraftView } from '@/features/draft/useDraftView'
 import { useAutoPick } from '@/features/draft/mutations'
 import { remainingMs } from '@/features/draft/clock'
 import { DraftBoard } from '@/features/draft/components/DraftBoard'
+import { DrawReveal } from '@/features/draft/components/DrawReveal'
 import { PoolPicker } from '@/features/draft/components/PoolPicker'
 import { DraftHero } from '@/features/draft/components/DraftHero'
 import { Brand } from '@/components/ui/Brand'
@@ -69,21 +70,31 @@ export function DraftPage() {
             <Empty title="El draft aún no ha comenzado" desc="Cuando el organizador lo inicie, aquí verás los picks en vivo." />
           ) : (
             <>
-              <DraftHero
-                previous={view.previous}
-                current={current}
-                status={draft.status}
-                deadline={draft.pick_deadline}
-                pickSeconds={draft.pick_seconds}
-                myTurn={myTurn}
-                teamsById={view.teamsById}
-                playersById={view.playersById}
-                categoryName={catName}
-              />
+              {view.isDrawing ? (
+                // Sorteo en vivo del orden de la categoría (todos lo ven animado).
+                <DrawReveal
+                  key={view.currentCategory ?? 'draw'}
+                  categoryName={catName(view.currentCategory)}
+                  order={view.drawnOrder}
+                  canStart={false}
+                />
+              ) : (
+                <DraftHero
+                  previous={view.previous}
+                  current={current}
+                  status={draft.status}
+                  deadline={draft.pick_deadline}
+                  pickSeconds={draft.pick_seconds}
+                  myTurn={myTurn}
+                  teamsById={view.teamsById}
+                  playersById={view.playersById}
+                  categoryName={catName}
+                />
+              )}
 
               {/* La capitana ve la lista de disponibles SIEMPRE durante el draft:
                   interactiva en su turno, solo vista (sin Elegir) fuera de él. */}
-              {myTeamId != null && draft.status === 'active' && current && view.draftId && season.data && (
+              {myTeamId != null && draft.status === 'active' && !view.isDrawing && current && view.draftId && season.data && (
                 <PoolPicker
                   draftId={view.draftId}
                   seasonId={season.data.id}
@@ -95,7 +106,7 @@ export function DraftPage() {
                 />
               )}
 
-              {!session && draft.status === 'active' && (
+              {!session && draft.status === 'active' && !view.isDrawing && (
                 <p className="rounded-2xl bg-slate-50 p-3 text-center text-sm text-slate-500 shadow-md">
                   ¿Eres capitana?{' '}
                   <Link to="/login" className="font-medium text-brand-300 underline">
