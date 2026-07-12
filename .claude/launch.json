@@ -18,6 +18,13 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["--prefix", "C:\\Dev\\padelscore-live", "run", "dev", "--", "--port", "5181"],
       "port": 5181
+    },
+    {
+      "name": "aup-cobranza",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "C:\\Dev\\AUP-Cobranza", "run", "dev"],
+      "port": 5182,
+      "autoPort": true
     }
   ]
 }

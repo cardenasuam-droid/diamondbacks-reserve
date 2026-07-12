@@ -62,6 +62,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: '/resultados', label: 'Resultados', icon: 'results' },
       { to: '/tabla', label: 'Tabla de posiciones', icon: 'standings' },
       { to: '/equipos', label: 'Equipos y rosters', icon: 'teams' },
+      { to: '/jugadores', label: 'Jugadores', icon: 'account' },
       { to: '/draft', label: 'Draft en vivo', icon: 'medal' },
       { to: '/estadisticas', label: 'Estadísticas', icon: 'stats' },
       { to: '/noticias', label: 'Noticias', icon: 'news' },

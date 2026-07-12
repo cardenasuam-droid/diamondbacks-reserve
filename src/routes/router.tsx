@@ -6,6 +6,7 @@ import { ResultsPage } from './public/ResultsPage'
 import { StandingsPage } from './public/StandingsPage'
 import { TeamsPage } from './public/TeamsPage'
 import { TeamRosterPage } from './public/TeamRosterPage'
+import { PlayersPage } from './public/PlayersPage'
 import { PlayerDetailPage } from './public/PlayerDetailPage'
 import { StatsPage } from './public/StatsPage'
 import { NewsListPage } from './public/NewsListPage'
@@ -58,6 +59,7 @@ export const router = createBrowserRouter([
       { path: 'tabla', element: <StandingsPage /> },
       { path: 'equipos', element: <TeamsPage /> },
       { path: 'equipos/:teamId', element: <TeamRosterPage /> },
+      { path: 'jugadores', element: <PlayersPage /> },
       { path: 'jugadores/:playerId', element: <PlayerDetailPage /> },
       { path: 'estadisticas', element: <StatsPage /> },
       { path: 'noticias', element: <NewsListPage /> },

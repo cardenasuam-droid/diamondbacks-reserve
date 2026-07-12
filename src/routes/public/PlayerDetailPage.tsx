@@ -1,9 +1,11 @@
+import { useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/features/auth/context'
 import { useActiveSeason } from '@/features/season/useActiveSeason'
 import { useTeams } from '@/features/teams/useTeams'
 import { usePublicPlayers } from '@/features/teams/usePublicPlayers'
 import { useContactPhones } from '@/features/teams/usePoolPlayers'
+import { useResetPlayerAccount } from '@/features/teams/playerMutations'
 import { usePlayerRankings } from '@/features/stats/usePlayerRankings'
 import { useCategories } from '@/features/categories/useCategories'
 import { categoryColor } from '@/features/categories/categoryColor'
@@ -23,7 +25,7 @@ const signed = (n: number) => (n > 0 ? `+${n}` : String(n))
 export function PlayerDetailPage() {
   const { playerId } = useParams<{ playerId: string }>()
   const navigate = useNavigate()
-  const { session } = useAuth()
+  const { session, role } = useAuth()
   const season = useActiveSeason()
   const players = usePublicPlayers(season.data?.id)
   const teams = useTeams(season.data?.id)
@@ -148,7 +150,71 @@ export function PlayerDetailPage() {
           description="Sus estadísticas aparecerán cuando dispute partidos con resultado validado."
         />
       )}
+
+      {role === 'organizer' && <ResetAccountCard playerId={player.id} name={player.full_name} />}
     </div>
+  )
+}
+
+// Reinicio de acceso (solo organizador): borra la cuenta de Auth (RPC
+// reset_player_account, 0025) y el jugador vuelve al primer acceso (nombre →
+// últimos 4 dígitos del teléfono → nueva contraseña). No toca datos deportivos.
+function ResetAccountCard({ playerId, name }: { playerId: string; name: string }) {
+  const reset = useResetPlayerAccount()
+  const [confirm, setConfirm] = useState(false)
+  const [done, setDone] = useState<'reset' | 'no_account' | null>(null)
+
+  return (
+    <section className="mt-5 rounded-2xl border border-amber-200 bg-amber-50/60 p-4">
+      <p className="text-sm font-semibold text-amber-800">Acceso del jugador</p>
+      <p className="mt-0.5 text-xs text-amber-700">
+        Reinicia su contraseña: volverá a crearla con los últimos 4 dígitos de su teléfono en su próximo acceso.
+      </p>
+
+      {done === 'reset' ? (
+        <p className="mt-3 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+          Listo. {name} deberá crear una nueva contraseña en su próximo acceso.
+        </p>
+      ) : done === 'no_account' ? (
+        <p className="mt-3 rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-600">
+          {name} aún no tiene cuenta creada; no hay nada que reiniciar.
+        </p>
+      ) : confirm ? (
+        <div className="mt-3 flex items-center gap-2">
+          <span className="flex-1 text-sm text-amber-800">¿Reiniciar la contraseña de {name}?</span>
+          <button
+            onClick={() =>
+              reset.mutate(playerId, {
+                onSuccess: (res) => {
+                  setConfirm(false)
+                  setDone(res.reason === 'no_account' ? 'no_account' : 'reset')
+                },
+              })
+            }
+            disabled={reset.isPending}
+            className="rounded-lg bg-amber-500 px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
+          >
+            {reset.isPending ? 'Reiniciando…' : 'Sí, reiniciar'}
+          </button>
+          <button onClick={() => setConfirm(false)} className="rounded-lg px-3 py-2 text-sm text-slate-500">
+            No
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={() => setConfirm(true)}
+          className="mt-3 rounded-lg border border-amber-300 bg-white px-3 py-2 text-sm font-medium text-amber-700 hover:bg-amber-50"
+        >
+          Reiniciar contraseña
+        </button>
+      )}
+
+      {reset.isError && (
+        <p className="mt-2 rounded-lg bg-rose-500/15 px-3 py-2 text-sm text-rose-700">
+          {(reset.error as Error).message}
+        </p>
+      )}
+    </section>
   )
 }
 
