@@ -27,7 +27,7 @@ export interface ScheduledMatch {
   category_code: string
   time_block: { label: string; sort_order: number } | null
   court: { name: string; number: number } | null
-  category: { name: string; type: CategoryType; sort_order: number } | null
+  category: { name: string; type: CategoryType; sort_order: number; match_sort_order: number | null } | null
   matchup: { id: string; team_a: TeamLite | null; team_b: TeamLite | null } | null
   result: MatchResultLite | null
 }

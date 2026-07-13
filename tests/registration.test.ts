@@ -57,6 +57,9 @@ const cat = (code: string, type: MatchCategory['type'], sort_order: number, is_a
   type,
   sort_order,
   is_active,
+  is_ranking: type !== 'mixta',
+  is_match: true,
+  match_sort_order: null,
 })
 
 describe('rankingCategories', () => {

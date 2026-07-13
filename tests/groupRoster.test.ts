@@ -2,9 +2,9 @@ import { groupRoster } from '@/features/teams/groupRoster'
 import type { MatchCategory, PublicPlayer } from '@/lib/types'
 
 const categories: MatchCategory[] = [
-  { code: 'VAR_4', name: '4a Varonil', type: 'varonil', sort_order: 1, is_active: true },
-  { code: 'VAR_5', name: '5a Varonil', type: 'varonil', sort_order: 2, is_active: true },
-  { code: 'FEM_4', name: '4a Femenil', type: 'femenil', sort_order: 4, is_active: true },
+  { code: 'VAR_4', name: '4a Varonil', type: 'varonil', sort_order: 1, is_active: true, is_ranking: true, is_match: true, match_sort_order: null },
+  { code: 'VAR_5', name: '5a Varonil', type: 'varonil', sort_order: 2, is_active: true, is_ranking: true, is_match: true, match_sort_order: null },
+  { code: 'FEM_4', name: '4a Femenil', type: 'femenil', sort_order: 4, is_active: true, is_ranking: true, is_match: true, match_sort_order: null },
 ]
 
 function player(p: Partial<PublicPlayer> & { id: string; full_name: string; category_code: string }): PublicPlayer {

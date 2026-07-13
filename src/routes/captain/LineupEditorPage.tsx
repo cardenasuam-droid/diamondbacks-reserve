@@ -59,24 +59,35 @@ export function LineupEditorPage() {
   const [initialized, setInitialized] = useState(false)
   const [savedMsg, setSavedMsg] = useState<string | null>(null)
 
+  // Categorías de PARTIDO de ESTE enfrentamiento (0029): las que realmente se
+  // juegan, derivadas de sus matches y ordenadas por match_sort_order. NO todo el
+  // catálogo (que ahora incluye ranking-only como VAR_4/FEM_3/FEM_7, que no se juegan).
+  const matchCats = useMemo(() => {
+    if (!matchup.data || !categories.data) return []
+    const codes = new Set(matchup.data.matches.map((m) => m.category_code))
+    return categories.data
+      .filter((c) => codes.has(c.code))
+      .sort((a, b) => (a.match_sort_order ?? a.sort_order) - (b.match_sort_order ?? b.sort_order))
+  }, [matchup.data, categories.data])
+
   // Inicializa el estado local con lo guardado una sola vez.
   useEffect(() => {
-    if (!initialized && categories.data && lineup.isSuccess) {
-      setSelections(selectionsFromEntries(lineup.data?.entries ?? [], categories.data))
+    if (!initialized && matchCats.length && lineup.isSuccess) {
+      setSelections(selectionsFromEntries(lineup.data?.entries ?? [], matchCats))
       setInitialized(true)
     }
-  }, [initialized, categories.data, lineup.isSuccess, lineup.data])
+  }, [initialized, matchCats, lineup.isSuccess, lineup.data])
 
   const validation = useMemo(() => {
-    if (!categories.data || !rules.data || !roster.data || !team.data) return null
+    if (!matchCats.length || !rules.data || !roster.data || !team.data) return null
     return validateLineup(
       team.data.id,
       Object.values(selections),
       roster.data,
       rules.data,
-      categories.data,
+      matchCats,
     )
-  }, [selections, categories.data, rules.data, roster.data, team.data])
+  }, [selections, matchCats, rules.data, roster.data, team.data])
 
   // --- estados de carga / vacío ---
   if (team.isLoading) return <Loader label="Cargando tu equipo…" />
@@ -116,7 +127,7 @@ export function LineupEditorPage() {
   if (lineup.isError) return <ErrorState onRetry={() => lineup.refetch()} />
 
   const mu = matchup.data
-  const cats = [...(categories.data ?? [])].sort((a, b) => a.sort_order - b.sort_order)
+  const cats = matchCats
   const locked = isLocked(mu)
   const usedChanges = changes.data ?? 0
   const status = lineup.data?.status ?? 'draft'
@@ -230,7 +241,7 @@ export function LineupEditorPage() {
               <span className="font-medium text-emerald-300">Alineación válida</span>
             ) : (
               <span className="font-medium text-amber-600">
-                {validation?.completeCategories.length ?? 0}/9 categorías listas
+                {validation?.completeCategories.length ?? 0}/{cats.length} categorías listas
               </span>
             )}
           </span>

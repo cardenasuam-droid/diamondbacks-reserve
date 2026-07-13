@@ -8,7 +8,7 @@ const SELECT = `
   id, scheduled_at, status, category_code,
   time_block:time_blocks(label, sort_order),
   court:courts(name, number),
-  category:match_categories(name, type, sort_order),
+  category:match_categories(name, type, sort_order, match_sort_order),
   matchup:team_matchups(
     id,
     team_a:teams!team_a_id(id, name, color, logo_url),

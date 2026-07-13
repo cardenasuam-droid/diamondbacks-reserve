@@ -25,7 +25,12 @@ export function groupByMatchup(matches: ScheduledMatch[]): MatchupGroup[] {
 
   const result = [...groups.values()]
   for (const g of result) {
-    g.matches.sort((a, b) => (a.category?.sort_order ?? 99) - (b.category?.sort_order ?? 99))
+    // Orden de las categorías de PARTIDO (0029): match_sort_order; cae a sort_order.
+    g.matches.sort(
+      (a, b) =>
+        (a.category?.match_sort_order ?? a.category?.sort_order ?? 99) -
+        (b.category?.match_sort_order ?? b.category?.sort_order ?? 99),
+    )
   }
   result.sort((a, b) => (a.teamA?.name ?? '').localeCompare(b.teamA?.name ?? '', 'es'))
   return result

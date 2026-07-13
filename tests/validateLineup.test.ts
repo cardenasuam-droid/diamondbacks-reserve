@@ -8,15 +8,15 @@ import type { MatchCategory } from '@/lib/types'
 
 // Catálogo real (seed.sql).
 const CATEGORIES: MatchCategory[] = [
-  { code: 'VAR_4', name: '4a Varonil', type: 'varonil', sort_order: 1, is_active: true },
-  { code: 'VAR_5', name: '5a Varonil', type: 'varonil', sort_order: 2, is_active: true },
-  { code: 'VAR_6', name: '6a Varonil', type: 'varonil', sort_order: 3, is_active: true },
-  { code: 'FEM_4', name: '4a Femenil', type: 'femenil', sort_order: 4, is_active: true },
-  { code: 'FEM_5', name: '5a Femenil', type: 'femenil', sort_order: 5, is_active: true },
-  { code: 'FEM_6', name: '6a Femenil', type: 'femenil', sort_order: 6, is_active: true },
-  { code: 'FEM_7', name: '7a Femenil', type: 'femenil', sort_order: 7, is_active: true },
-  { code: 'MIX_A', name: 'Mixta A', type: 'mixta', sort_order: 8, is_active: true },
-  { code: 'MIX_B', name: 'Mixta B', type: 'mixta', sort_order: 9, is_active: true },
+  { code: 'VAR_4', name: '4a Varonil', type: 'varonil', sort_order: 1, is_active: true, is_ranking: true, is_match: true, match_sort_order: null },
+  { code: 'VAR_5', name: '5a Varonil', type: 'varonil', sort_order: 2, is_active: true, is_ranking: true, is_match: true, match_sort_order: null },
+  { code: 'VAR_6', name: '6a Varonil', type: 'varonil', sort_order: 3, is_active: true, is_ranking: true, is_match: true, match_sort_order: null },
+  { code: 'FEM_4', name: '4a Femenil', type: 'femenil', sort_order: 4, is_active: true, is_ranking: true, is_match: true, match_sort_order: null },
+  { code: 'FEM_5', name: '5a Femenil', type: 'femenil', sort_order: 5, is_active: true, is_ranking: true, is_match: true, match_sort_order: null },
+  { code: 'FEM_6', name: '6a Femenil', type: 'femenil', sort_order: 6, is_active: true, is_ranking: true, is_match: true, match_sort_order: null },
+  { code: 'FEM_7', name: '7a Femenil', type: 'femenil', sort_order: 7, is_active: true, is_ranking: true, is_match: true, match_sort_order: null },
+  { code: 'MIX_A', name: 'Mixta A', type: 'mixta', sort_order: 8, is_active: true, is_ranking: true, is_match: true, match_sort_order: null },
+  { code: 'MIX_B', name: 'Mixta B', type: 'mixta', sort_order: 9, is_active: true, is_ranking: true, is_match: true, match_sort_order: null },
 ]
 
 // Reglas de elegibilidad (seed.sql).

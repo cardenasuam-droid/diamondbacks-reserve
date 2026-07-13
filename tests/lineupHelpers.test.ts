@@ -8,8 +8,8 @@ import type { StoredEntry } from '@/features/lineups/types'
 import type { MatchCategory } from '@/lib/types'
 
 const CATS: MatchCategory[] = [
-  { code: 'VAR_4', name: '4a Varonil', type: 'varonil', sort_order: 1, is_active: true },
-  { code: 'MIX_A', name: 'Mixta A', type: 'mixta', sort_order: 8, is_active: true },
+  { code: 'VAR_4', name: '4a Varonil', type: 'varonil', sort_order: 1, is_active: true, is_ranking: true, is_match: true, match_sort_order: null },
+  { code: 'MIX_A', name: 'Mixta A', type: 'mixta', sort_order: 8, is_active: true, is_ranking: true, is_match: true, match_sort_order: null },
 ]
 
 const RULES: EligibilityRule[] = [

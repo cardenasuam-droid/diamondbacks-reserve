@@ -16,7 +16,7 @@ function match(p: {
     category_code: p.cat,
     time_block: null,
     court: null,
-    category: { name: p.cat, type: 'varonil', sort_order: p.sort },
+    category: { name: p.cat, type: 'varonil', sort_order: p.sort, match_sort_order: null },
     matchup: {
       id: p.muId,
       team_a: { id: p.teamA, name: p.teamA, color: null, logo_url: null },

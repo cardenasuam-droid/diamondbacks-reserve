@@ -71,9 +71,9 @@ export function OrganizerRosterPage() {
   const [poolPick, setPoolPick] = useState('')
 
   const team = (teams.data ?? []).find((t) => t.id === teamId)
-  // Categorías de ranking (no mixtas): las que puede tener un jugador.
+  // Categorías de ranking (is_ranking, 0029): las que puede tener un jugador.
   const rankingCats = useMemo(
-    () => (categories.data ?? []).filter((c) => c.type !== 'mixta'),
+    () => (categories.data ?? []).filter((c) => c.is_ranking),
     [categories.data],
   )
   const typeByCode = useMemo(

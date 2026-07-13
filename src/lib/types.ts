@@ -34,6 +34,11 @@ export interface MatchCategory {
   type: CategoryType
   sort_order: number
   is_active: boolean
+  // Formato "Suma" (0029): se separa lo que un jugador ES (ranking) de lo que se
+  // PROGRAMA/juega (match). Una categoría puede ser una, otra o ambas.
+  is_ranking: boolean // un jugador puede tener esta categoría (VAR_4, FEM_3…)
+  is_match: boolean // se programa y juega (SUMA9_VAR, VAR_5, MIX_A…)
+  match_sort_order: number | null // orden de despliegue entre las de partido
 }
 
 export interface Team {

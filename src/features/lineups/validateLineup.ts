@@ -90,7 +90,10 @@ export function validateLineup(
   }
 
   const selByCat = new Map(selections.map((s) => [s.category_code, s]))
-  const sortedCats = [...categories].sort((a, b) => a.sort_order - b.sort_order)
+  // Orden de las categorías de PARTIDO (0029): match_sort_order; cae a sort_order.
+  const sortedCats = [...categories].sort(
+    (a, b) => (a.match_sort_order ?? a.sort_order) - (b.match_sort_order ?? b.sort_order),
+  )
 
   const issues: LineupIssue[] = []
   const completeCategories: string[] = []
