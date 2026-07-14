@@ -10,7 +10,7 @@ import { usePlayerRankings } from '@/features/stats/usePlayerRankings'
 import { useCategories } from '@/features/categories/useCategories'
 import { categoryColor } from '@/features/categories/categoryColor'
 import { teamColor } from '@/lib/color'
-import { Avatar } from '@/components/ui/Avatar'
+import { initialsOf } from '@/components/ui/Avatar'
 import { imageThumb } from '@/lib/image'
 import { PositionChip } from '@/components/ui/PositionChip'
 import { TeamCrest } from '@/components/ui/TeamCrest'
@@ -82,9 +82,23 @@ export function PlayerDetailPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/40 to-black/55" aria-hidden />
         <div className="pointer-events-none absolute -bottom-16 left-1/2 h-52 w-52 -translate-x-1/2 rounded-full bg-white/10 blur-3xl" aria-hidden />
         <div className="relative flex flex-col items-center">
-          <span className="pop rounded-full bg-white/15 p-1.5 shadow-2xl ring-1 ring-white/40">
-            <Avatar name={player.full_name} photoUrl={player.photo_url} color={team?.color} size={140} />
-          </span>
+          {/* Foto grande tipo tarjeta (retrato 3:4). object-top evita cortar la cabeza
+              en fotos verticales; muestra mucho más que un círculo (adiós al "zoom"). */}
+          {player.photo_url ? (
+            <img
+              src={imageThumb(player.photo_url, { width: 560, quality: 72 }) ?? player.photo_url}
+              alt={player.full_name}
+              decoding="async"
+              className="pop aspect-[3/4] w-full max-w-[260px] rounded-2xl object-cover object-top shadow-2xl ring-1 ring-white/40"
+            />
+          ) : (
+            <span
+              className="pop flex aspect-[3/4] w-full max-w-[260px] items-center justify-center rounded-2xl text-6xl font-bold text-white shadow-2xl ring-1 ring-white/40"
+              style={{ backgroundColor: teamColor(team?.color, '#475569') }}
+            >
+              {initialsOf(player.full_name)}
+            </span>
+          )}
           <h1 className="mt-4 text-balance font-heading text-[1.7rem] leading-tight">{player.full_name}</h1>
           {team && (
             <Link

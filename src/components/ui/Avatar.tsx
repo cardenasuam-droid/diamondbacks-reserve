@@ -36,7 +36,9 @@ export function Avatar({
         loading="lazy"
         decoding="async"
         style={dimension}
-        className={'shrink-0 rounded-full object-cover ring-1 ring-black/10 ' + className}
+        // object-top: en fotos verticales el círculo muestra la cabeza, no un
+        // recorte al centro que parece "zoom".
+        className={'shrink-0 rounded-full object-cover object-top ring-1 ring-black/10 ' + className}
       />
     )
   }
