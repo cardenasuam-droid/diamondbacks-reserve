@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { teamColor } from '@/lib/color'
+import { imageThumb } from '@/lib/image'
 import { initialsOf } from './Avatar'
 
 // Hex (#RGB o #RRGGBB) + alfa de 2 dígitos → #RRGGBBAA. Normaliza el corto a largo.
@@ -42,11 +43,14 @@ export function TeamCrest({
   const box = { width: size, height: size, borderRadius: radius, boxShadow: glowShadow }
 
   if (logoUrl && ok) {
+    // Logo redimensionado por el servidor (contain = sin recorte). Menos egress.
+    const src = imageThumb(logoUrl, { width: Math.round(size * 2), quality: 75, resize: 'contain' }) ?? logoUrl
     return (
       <img
-        src={logoUrl}
+        src={src}
         alt=""
         loading="lazy"
+        decoding="async"
         style={box}
         onError={() => setOk(false)}
         className={'shrink-0 bg-white object-contain p-0.5 ring-1 ring-black/10 ' + className}

@@ -11,6 +11,7 @@ import { usePlayerRankings } from '@/features/stats/usePlayerRankings'
 import { useTeamUpcomingMatchups, type UpcomingMatchup } from '@/features/schedule/useTeamUpcomingMatchups'
 import { useSetMyPhoto, useSetMyShirtSize } from '@/features/teams/playerMutations'
 import { teamColor } from '@/lib/color'
+import { imageThumb } from '@/lib/image'
 import { formatRoundDate } from '@/lib/date'
 import type { UserRole } from '@/lib/types'
 import { Avatar } from '@/components/ui/Avatar'
@@ -99,9 +100,11 @@ function GreetingHeader({
       {/* Escudo del equipo como marca de agua tenue (si tiene logo). */}
       {team?.logo_url && (
         <img
-          src={team.logo_url}
+          src={imageThumb(team.logo_url, { width: 300, quality: 50, resize: 'contain' }) ?? team.logo_url}
           alt=""
           aria-hidden
+          loading="lazy"
+          decoding="async"
           className="pointer-events-none absolute -right-7 -top-9 h-44 w-44 rotate-[14deg] object-contain opacity-[0.14] blur-[1px]"
         />
       )}

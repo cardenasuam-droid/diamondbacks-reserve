@@ -44,7 +44,8 @@ export async function uploadMedia(
   const ext = EXT_BY_MIME[file.type]
   const path = `${folder}/${crypto.randomUUID()}.${ext}`
   const { error } = await supabase.storage.from('media').upload(path, file, {
-    cacheControl: '3600',
+    // Nombre UUID inmutable → cache larga: el navegador/CDN no re-descarga (menos egress).
+    cacheControl: '31536000',
     contentType: file.type,
     upsert: false,
   })

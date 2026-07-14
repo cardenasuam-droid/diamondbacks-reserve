@@ -1,4 +1,5 @@
 import { teamColor } from '@/lib/color'
+import { imageThumb } from '@/lib/image'
 
 // Iniciales de un nombre: hasta 2 letras (primera de las dos primeras palabras).
 export function initialsOf(name: string): string {
@@ -25,10 +26,15 @@ export function Avatar({
   const dimension = { width: size, height: size }
 
   if (photoUrl) {
+    // Miniatura redimensionada por el servidor (Pro) a ~2× para pantallas retina:
+    // ~10 KB en vez de la foto full-res. Corta el cached egress drásticamente.
+    const src = imageThumb(photoUrl, { width: Math.round(size * 2), quality: 65, resize: 'cover' }) ?? photoUrl
     return (
       <img
-        src={photoUrl}
+        src={src}
         alt={name}
+        loading="lazy"
+        decoding="async"
         style={dimension}
         className={'shrink-0 rounded-full object-cover ring-1 ring-black/10 ' + className}
       />

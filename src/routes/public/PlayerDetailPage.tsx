@@ -11,6 +11,7 @@ import { useCategories } from '@/features/categories/useCategories'
 import { categoryColor } from '@/features/categories/categoryColor'
 import { teamColor } from '@/lib/color'
 import { Avatar } from '@/components/ui/Avatar'
+import { imageThumb } from '@/lib/image'
 import { PositionChip } from '@/components/ui/PositionChip'
 import { TeamCrest } from '@/components/ui/TeamCrest'
 import { Badge } from '@/components/ui/Badge'
@@ -69,9 +70,11 @@ export function PlayerDetailPage() {
         {/* Escudo del equipo como marca de agua tenue. */}
         {team?.logo_url && (
           <img
-            src={team.logo_url}
+            src={imageThumb(team.logo_url, { width: 300, quality: 50, resize: 'contain' }) ?? team.logo_url}
             alt=""
             aria-hidden
+            loading="lazy"
+            decoding="async"
             className="pointer-events-none absolute -right-7 -top-9 h-44 w-44 rotate-[14deg] object-contain opacity-[0.14] blur-[1px]"
           />
         )}
