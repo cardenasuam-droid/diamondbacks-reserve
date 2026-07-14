@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { safeUrl } from '@/lib/url'
+import { resizeImage } from '@/lib/resizeImage'
 import type { NewsAudience } from './types'
 
 function friendly(msg: string): string {
@@ -36,17 +37,20 @@ export async function uploadMedia(
         : 'Formato no permitido. Usa PNG, JPG, WEBP, GIF o PDF.',
     )
   }
-  if (file.size > MAX_UPLOAD_BYTES) {
+  // Redimensiona imágenes en el cliente ANTES de validar tamaño: así una foto de
+  // celular de 3–9 MB se achica a cientos de KB y además cabe en el límite de 10 MB.
+  const toUpload = file.type.startsWith('image/') ? await resizeImage(file) : file
+  if (toUpload.size > MAX_UPLOAD_BYTES) {
     throw new Error('El archivo supera el límite de 10 MB.')
   }
   // La extensión se deriva del MIME real, no del nombre del archivo (evita colar
   // un .svg/.html disfrazado).
-  const ext = EXT_BY_MIME[file.type]
+  const ext = EXT_BY_MIME[toUpload.type]
   const path = `${folder}/${crypto.randomUUID()}.${ext}`
-  const { error } = await supabase.storage.from('media').upload(path, file, {
+  const { error } = await supabase.storage.from('media').upload(path, toUpload, {
     // Nombre UUID inmutable → cache larga: el navegador/CDN no re-descarga (menos egress).
     cacheControl: '31536000',
-    contentType: file.type,
+    contentType: toUpload.type,
     upsert: false,
   })
   if (error) {

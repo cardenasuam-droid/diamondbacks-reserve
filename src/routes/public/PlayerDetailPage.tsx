@@ -62,9 +62,10 @@ export function PlayerDetailPage() {
     <div>
       <BackLink onClick={() => navigate(-1)} />
 
-      {/* Encabezado */}
+      {/* Encabezado — la foto es la protagonista, centrada (móvil-primero). El velo
+          oscuro garantiza contraste del texto blanco sobre cualquier color de equipo. */}
       <div
-        className="relative mb-5 overflow-hidden rounded-3xl p-6 text-white shadow-md ring-1 ring-white/10"
+        className="relative mb-5 overflow-hidden rounded-3xl px-6 pb-6 pt-7 text-center text-white shadow-md ring-1 ring-white/10"
         style={{ backgroundColor: teamColor(team?.color, '#334155') }}
       >
         {/* Escudo del equipo como marca de agua tenue. */}
@@ -75,34 +76,32 @@ export function PlayerDetailPage() {
             aria-hidden
             loading="lazy"
             decoding="async"
-            className="pointer-events-none absolute -right-7 -top-9 h-44 w-44 rotate-[14deg] object-contain opacity-[0.14] blur-[1px]"
+            className="pointer-events-none absolute -right-8 -top-10 h-48 w-48 rotate-[14deg] object-contain opacity-[0.12] blur-[1px]"
           />
         )}
-        <div className="absolute inset-0 bg-gradient-to-tr from-black/65 via-black/25 to-white/10" aria-hidden />
-        <div className="pointer-events-none absolute -bottom-12 -left-10 h-44 w-44 rounded-full bg-white/10 blur-3xl" aria-hidden />
-        <div className="relative flex items-center gap-5">
-          <span className="pop shrink-0 rounded-full bg-white/15 p-1 shadow-xl ring-1 ring-white/30">
-            <Avatar name={player.full_name} photoUrl={player.photo_url} color={team?.color} size={84} />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/40 to-black/55" aria-hidden />
+        <div className="pointer-events-none absolute -bottom-16 left-1/2 h-52 w-52 -translate-x-1/2 rounded-full bg-white/10 blur-3xl" aria-hidden />
+        <div className="relative flex flex-col items-center">
+          <span className="pop rounded-full bg-white/15 p-1.5 shadow-2xl ring-1 ring-white/40">
+            <Avatar name={player.full_name} photoUrl={player.photo_url} color={team?.color} size={140} />
           </span>
-          <div className="min-w-0">
-            <h1 className="truncate font-heading text-[1.9rem] leading-tight">{player.full_name}</h1>
-            {team && (
-              <Link
-                to={`/equipos/${team.id}`}
-                className="mt-1 inline-flex items-center gap-1.5 text-sm text-white/85 transition hover:opacity-80"
-              >
-                <span className="rounded-md bg-white/15 p-0.5 ring-1 ring-white/25">
-                  <TeamCrest name={team.name} logoUrl={team.logo_url} color={team.color} size={18} />
-                </span>
-                <span className="underline">{team.name}</span>
-              </Link>
-            )}
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              <Badge color={categoryColor(category?.type)}>{player.category_code}</Badge>
-              {player.is_captain && <Badge color="amber">Capitán</Badge>}
-              {/* Lado de juego: dato deportivo público (players_public, 0026). */}
-              <PositionChip position={player.position} />
-            </div>
+          <h1 className="mt-4 text-balance font-heading text-[1.7rem] leading-tight">{player.full_name}</h1>
+          {team && (
+            <Link
+              to={`/equipos/${team.id}`}
+              className="mt-1.5 inline-flex items-center gap-1.5 text-sm text-white/85 transition hover:opacity-80"
+            >
+              <span className="rounded-md bg-white/15 p-0.5 ring-1 ring-white/25">
+                <TeamCrest name={team.name} logoUrl={team.logo_url} color={team.color} size={18} />
+              </span>
+              <span className="underline">{team.name}</span>
+            </Link>
+          )}
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+            <Badge color={categoryColor(category?.type)}>{player.category_code}</Badge>
+            {player.is_captain && <Badge color="amber">Capitán</Badge>}
+            {/* Lado de juego: dato deportivo público (players_public, 0026). */}
+            <PositionChip position={player.position} />
           </div>
         </div>
       </div>

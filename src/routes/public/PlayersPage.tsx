@@ -102,7 +102,7 @@ function PlayerRow({ player, team }: { player: PublicPlayer; team: Team | null }
         to={`/jugadores/${player.id}`}
         className="flex items-center gap-3 px-4 py-2.5 transition hover:bg-slate-100"
       >
-        <Avatar name={player.full_name} photoUrl={player.photo_url} color={team?.color} size={36} />
+        <Avatar name={player.full_name} photoUrl={player.photo_url} color={team?.color} size={44} />
         <span className="min-w-0 flex-1 truncate font-medium text-slate-800">
           {player.full_name}
           {player.is_captain && <span title="Capitán"> ⭐</span>}

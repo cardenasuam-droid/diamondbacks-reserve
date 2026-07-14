@@ -116,9 +116,9 @@ function GreetingHeader({
       <div className="relative flex items-center gap-5">
         <span className="pop shrink-0 rounded-full bg-white/15 p-1 shadow-xl ring-1 ring-white/30">
           {me ? (
-            <Avatar name={me.full_name} photoUrl={me.photo_url} color={team?.color} size={72} />
+            <Avatar name={me.full_name} photoUrl={me.photo_url} color={team?.color} size={88} />
           ) : (
-            <span className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-white/10">
+            <span className="flex h-[88px] w-[88px] items-center justify-center rounded-full bg-white/10">
               <Icon name="account" size={34} className="text-white" />
             </span>
           )}
@@ -289,7 +289,7 @@ function PhotoSection({ playerId, name }: { playerId: string; name: string }) {
         Aparecerá en el roster de tu equipo y en tu perfil de jugador.
       </p>
       <div className="mt-4 flex items-center gap-4">
-        <Avatar name={name} photoUrl={photo} size={64} />
+        <Avatar name={name} photoUrl={photo} size={80} />
         <label className="cursor-pointer rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
           {setPhoto.isPending ? 'Subiendo…' : photo ? 'Cambiar foto' : 'Subir foto'}
           <input
