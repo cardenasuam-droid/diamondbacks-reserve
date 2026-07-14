@@ -82,18 +82,22 @@ export function PlayerDetailPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/40 to-black/55" aria-hidden />
         <div className="pointer-events-none absolute -bottom-16 left-1/2 h-52 w-52 -translate-x-1/2 rounded-full bg-white/10 blur-3xl" aria-hidden />
         <div className="relative flex flex-col items-center">
-          {/* Foto grande tipo tarjeta (retrato 3:4). object-top evita cortar la cabeza
-              en fotos verticales; muestra mucho más que un círculo (adiós al "zoom"). */}
+          {/* Foto COMPLETA (sin recortar): transform en modo contain + object-contain.
+              Se muestra entera y grande, a su proporción real; el velo del banner
+              rellena el espacio sobrante sin bordes feos. */}
           {player.photo_url ? (
             <img
-              src={imageThumb(player.photo_url, { width: 560, quality: 72 }) ?? player.photo_url}
+              src={
+                imageThumb(player.photo_url, { width: 640, height: 800, quality: 74, resize: 'contain' }) ??
+                player.photo_url
+              }
               alt={player.full_name}
               decoding="async"
-              className="pop aspect-[3/4] w-full max-w-[260px] rounded-2xl object-cover object-top shadow-2xl ring-1 ring-white/40"
+              className="pop mx-auto block max-h-[62vh] w-auto max-w-full rounded-2xl object-contain shadow-2xl ring-1 ring-white/40"
             />
           ) : (
             <span
-              className="pop flex aspect-[3/4] w-full max-w-[260px] items-center justify-center rounded-2xl text-6xl font-bold text-white shadow-2xl ring-1 ring-white/40"
+              className="pop flex aspect-[3/4] w-full max-w-[240px] items-center justify-center rounded-2xl text-6xl font-bold text-white shadow-2xl ring-1 ring-white/40"
               style={{ backgroundColor: teamColor(team?.color, '#475569') }}
             >
               {initialsOf(player.full_name)}
