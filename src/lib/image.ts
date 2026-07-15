@@ -12,6 +12,15 @@
 const PUBLIC = '/storage/v1/object/public/'
 const RENDER = '/storage/v1/render/image/public/'
 
+// Supabase cobra por transformación ÚNICA (imagen + parámetros). Para no generar
+// una por cada tamaño de avatar de la app, se agrupa el ancho en pocas cubetas:
+// así cada foto se transforma en ≤3 anchos, no en uno por cada medida de pantalla.
+const WIDTH_BUCKETS = [96, 192, 384]
+function bucketWidth(w: number): number {
+  const r = Math.round(w)
+  return WIDTH_BUCKETS.find((b) => r <= b) ?? Math.max(r, WIDTH_BUCKETS[WIDTH_BUCKETS.length - 1])
+}
+
 export interface ThumbOpts {
   /** Ancho objetivo en px (usa ~2× el tamaño de despliegue para pantallas retina). */
   width: number
@@ -27,8 +36,12 @@ export function imageThumb(url: string | null | undefined, opts: ThumbOpts): str
   const at = url.indexOf(PUBLIC)
   if (at === -1) return url // no es una URL pública de Storage → sin cambios
   const base = url.slice(0, at) + RENDER + url.slice(at + PUBLIC.length)
+  // Con height (p. ej. la ficha en contain) se respeta el tamaño exacto: es UNA
+  // variante por foto. Sin height (avatares/logos en muchos tamaños) se agrupa el
+  // ancho en cubetas para minimizar transformaciones únicas.
+  const width = opts.height ? Math.round(opts.width) : bucketWidth(opts.width)
   const params = new URLSearchParams({
-    width: String(Math.round(opts.width)),
+    width: String(width),
     quality: String(opts.quality ?? 65),
     resize: opts.resize ?? 'cover',
   })

@@ -13,10 +13,20 @@ describe('imageThumb', () => {
     expect(out).not.toContain('/object/public/')
   })
 
-  it('redondea el ancho y usa calidad 65 por defecto', () => {
-    const out = imageThumb(PUB, { width: 71.6 })!
-    expect(out).toContain('width=72')
-    expect(out).toContain('quality=65')
+  it('agrupa el ancho en cubetas (sin height) para minimizar transformaciones', () => {
+    // 40, 72, 88 → todos caen en la cubeta 96; 176 → 192.
+    expect(imageThumb(PUB, { width: 40 })!).toContain('width=96')
+    expect(imageThumb(PUB, { width: 72 })!).toContain('width=96')
+    expect(imageThumb(PUB, { width: 88 })!).toContain('width=96')
+    expect(imageThumb(PUB, { width: 176 })!).toContain('width=192')
+    expect(imageThumb(PUB, { width: 40 })!).toContain('quality=65')
+  })
+
+  it('con height respeta el ancho EXACTO (una variante por foto, p. ej. la ficha)', () => {
+    const out = imageThumb(PUB, { width: 640, height: 800, resize: 'contain' })!
+    expect(out).toContain('width=640')
+    expect(out).toContain('height=800')
+    expect(out).toContain('resize=contain')
   })
 
   it('deja intactas las URLs externas o data:', () => {
