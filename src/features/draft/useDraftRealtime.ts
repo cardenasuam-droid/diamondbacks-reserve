@@ -1,35 +1,41 @@
 import { useEffect, useRef } from 'react'
 import { useQueryClient, type QueryClient } from '@tanstack/react-query'
-import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import type { PublicPlayer } from '@/lib/types'
 import type { DraftPick } from './types'
 
-// Puente Realtime → TanStack Query. Mantiene el estado del draft en vivo para
-// TODOS los clientes (capitanas, organizador, público) sin ahogar el backend.
+// Realtime del draft por BROADCAST desde la BD (migración 0033), en vez de
+// postgres_changes. Motivo: postgres_changes reevalúa RLS por conexión y no
+// escala con espectadores; broadcast emite un mensaje por evento a un topic y
+// Realtime lo reparte. Requiere que 0033 esté aplicada (trigger + policy de
+// recepción para anon). Desplegar cliente y migración JUNTOS.
 //
-// Por qué así (aprendido en un draft real con tráfico alto):
-//  · Cada pick escribe en draft_picks + players + drafts, generando 2 eventos
-//    postgres_changes. Antes, cada cliente reaccionaba invalidando 6 queries por
-//    evento → con N clientes = ~12N refetches por pick, DOS de ellos el roster
-//    completo (players_public). Eso saturaba la API y los picks tardaban en verse.
-//  · Ahora:
-//     1) DEBOUNCE: los eventos de un mismo pick (y ráfagas como begin_category) se
-//        juntan en un solo flush de invalidaciones LIGERAS (draft + draft-board).
-//     2) PARCHE QUIRÚRGICO: al draftearse un jugador, se actualiza SOLO su team_id
-//        en la caché players_public (sale del pool) en vez de refetchear todo el
-//        roster. players es la tabla pesada y NO está en la publicación Realtime,
-//        por eso antes se refetcheaba entera; el parche evita esa petición.
+// Estrategia de caché (idéntica a la versión anterior, para no refetchear de más):
+//  · PARCHE QUIRÚRGICO del team_id del jugador drafteado en players_public (sale
+//    del pool) — evita refetchear el roster completo en cada pick.
+//  · invalidaciones LIGERAS con debounce (draft + draft-board).
+//  · RED DE SEGURIDAD: un refetch ligero cada SAFETY_MS por si un cliente perdió
+//    algún mensaje (o si la entrega a anon fallara en algún dispositivo), para que
+//    igual se ponga al día sin depender al 100% del broadcast.
 const FLUSH_MS = 350
+const SAFETY_MS = 20_000
+
+interface DraftBroadcast {
+  op: 'INSERT' | 'UPDATE' | 'DELETE'
+  table: 'drafts' | 'draft_picks' | 'draft_category_orders'
+  record: (Partial<DraftPick> & { status?: string }) | null
+  old: Partial<DraftPick> | null
+}
 
 export function useDraftRealtime(draftId: string | undefined, seasonId: string | undefined) {
   const qc = useQueryClient()
-  // Debounce compartido por todos los eventos del canal.
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const pending = useRef<Map<string, readonly unknown[]>>(new Map())
 
   useEffect(() => {
     if (!draftId || !seasonId) return
+    let cancelled = false
+    let channel: ReturnType<typeof supabase.channel> | null = null
 
     const scheduleInvalidate = (key: readonly unknown[]) => {
       pending.current.set(JSON.stringify(key), key)
@@ -42,57 +48,57 @@ export function useDraftRealtime(draftId: string | undefined, seasonId: string |
       }, FLUSH_MS)
     }
 
-    const onPickChange = (payload: RealtimePostgresChangesPayload<DraftPick>) => {
-      // Un jugador recién drafteado debe SALIR del pool. players_public no recibe
-      // eventos (players no está publicada), así que parcheamos su team_id aquí.
-      const row = (payload.new ?? {}) as Partial<DraftPick>
-      if (row.player_id && row.team_id) {
-        patchPlayerTeam(qc, seasonId, row.player_id, row.team_id)
+    const handle = (b: DraftBroadcast) => {
+      if (b.table === 'draft_picks') {
+        const row = b.record ?? {}
+        // Un jugador recién drafteado debe SALIR del pool. players_public no
+        // recibe broadcasts (players no está en el trigger), así que parcheamos
+        // su team_id aquí en vez de refetchear todo el roster.
+        if (row.player_id && row.team_id) patchPlayerTeam(qc, seasonId, row.player_id, row.team_id)
+        scheduleInvalidate(['draft-board', draftId])
+        scheduleInvalidate(['draft', seasonId])
+      } else if (b.table === 'drafts') {
+        scheduleInvalidate(['draft', seasonId])
+        // Reinicio (setup) o fin: el pool cambia en bloque; resincroniza el roster
+        // (transición rara, fuera del camino caliente del pick).
+        const status = b.record?.status
+        if (status === 'setup' || status === 'finished') {
+          scheduleInvalidate(['players_public', seasonId])
+          scheduleInvalidate(['pool-players', seasonId])
+        }
+      } else {
+        scheduleInvalidate(['draft-category-orders', draftId])
+        scheduleInvalidate(['draft', seasonId])
       }
-      scheduleInvalidate(['draft-board', draftId])
-      scheduleInvalidate(['draft', seasonId])
     }
 
-    const onDraftChange = (payload: RealtimePostgresChangesPayload<{ status?: string }>) => {
-      scheduleInvalidate(['draft', seasonId])
-      // Al reiniciar (setup) o terminar, el pool cambia en bloque: resincroniza
-      // el roster completo (transición rara, no en el camino caliente del pick).
-      const status = (payload.new as { status?: string } | null)?.status
-      if (status === 'setup' || status === 'finished') {
-        scheduleInvalidate(['players_public', seasonId])
-        scheduleInvalidate(['pool-players', seasonId])
-      }
-    }
+    // Adjunta el token actual (sesión de capitana/organizador, o anon del
+    // espectador) a la conexión Realtime para la autorización RLS del canal
+    // privado, y recién entonces suscribe.
+    supabase.auth.getSession().then(({ data }) => {
+      if (cancelled) return
+      void supabase.realtime.setAuth(data.session?.access_token ?? null)
+      channel = supabase
+        .channel(`draft:${draftId}`, { config: { private: true } })
+        .on('broadcast', { event: 'draft_change' }, (msg) => handle(msg.payload as DraftBroadcast))
+        .subscribe()
+    })
 
-    const channel = supabase
-      .channel(`draft:${draftId}`)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'drafts', filter: `id=eq.${draftId}` },
-        onDraftChange,
-      )
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'draft_picks', filter: `draft_id=eq.${draftId}` },
-        onPickChange,
-      )
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'draft_category_orders', filter: `draft_id=eq.${draftId}` },
-        () => {
-          scheduleInvalidate(['draft-category-orders', draftId])
-          scheduleInvalidate(['draft', seasonId])
-        },
-      )
-      .subscribe()
+    // Red de seguridad: refetch ligero periódico (cubre mensajes perdidos).
+    const safety = setInterval(() => {
+      void qc.invalidateQueries({ queryKey: ['draft', seasonId] })
+      void qc.invalidateQueries({ queryKey: ['draft-board', draftId] })
+    }, SAFETY_MS)
 
     return () => {
+      cancelled = true
       if (timer.current) {
         clearTimeout(timer.current)
         timer.current = null
       }
       pending.current.clear()
-      void supabase.removeChannel(channel)
+      clearInterval(safety)
+      if (channel) void supabase.removeChannel(channel)
     }
   }, [draftId, seasonId, qc])
 }
