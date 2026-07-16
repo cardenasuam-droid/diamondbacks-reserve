@@ -77,3 +77,26 @@ export function slotRequirements(
   }
   return slots.slice(0, 2)
 }
+
+// Fecha/hora LÍMITE para enviar o editar una alineación: el sábado inmediatamente
+// anterior a la jornada, 07:00 hora de México (America/Mexico_City = UTC-6 todo el
+// año desde 2023, sin horario de verano). Debe coincidir con lineup_deadline() del
+// servidor (migración 0035). `roundDate` es 'YYYY-MM-DD'.
+export function lineupDeadline(roundDate: string): Date {
+  const [y, m, d] = roundDate.split('-').map(Number)
+  // getUTCDay sobre una fecha UTC pura: 0=domingo .. 6=sábado.
+  const dow = new Date(Date.UTC(y, m - 1, d)).getUTCDay()
+  const back = (dow + 1) % 7 === 0 ? 7 : (dow + 1) % 7
+  const sat = new Date(Date.UTC(y, m - 1, d - back))
+  const yy = sat.getUTCFullYear()
+  const mm = String(sat.getUTCMonth() + 1).padStart(2, '0')
+  const dd = String(sat.getUTCDate()).padStart(2, '0')
+  return new Date(`${yy}-${mm}-${dd}T07:00:00-06:00`)
+}
+
+// ¿Ya pasó el límite? (candado del lado cliente; el trigger de servidor es el
+// guardián real). Sin fecha de jornada, no bloquea.
+export function isLineupLocked(roundDate: string | null | undefined, now: number = Date.now()): boolean {
+  if (!roundDate) return false
+  return now >= lineupDeadline(roundDate).getTime()
+}

@@ -22,26 +22,23 @@ import {
   lineupStatusLabel,
   selectionsFromEntries,
   slotRequirements,
+  lineupDeadline,
+  isLineupLocked,
 } from '@/features/lineups/lineupHelpers'
 import { validateLineup, type LineupSelection } from '@/features/lineups/validateLineup'
-import type { CaptainMatchup, TeamPlayer } from '@/features/lineups/types'
+import type { TeamPlayer } from '@/features/lineups/types'
 import type { MatchCategory } from '@/lib/types'
 
-const ONE_HOUR = 60 * 60 * 1000
-
-function earliestScheduled(matchup: CaptainMatchup): string | null {
-  const times = matchup.matches
-    .map((m) => m.scheduled_at)
-    .filter((t): t is string => Boolean(t))
-    .sort()
-  return times[0] ?? null
-}
-
-// Candado de 1 hora del lado cliente (el trigger es el guardián real).
-function isLocked(matchup: CaptainMatchup): boolean {
-  const t = earliestScheduled(matchup)
-  if (!t) return false
-  return Date.now() > new Date(t).getTime() - ONE_HOUR
+// Formatea la fecha/hora límite (sábado 07:00) en hora de México para mostrarla.
+function formatDeadline(roundDate: string): string {
+  return new Intl.DateTimeFormat('es-MX', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'America/Mexico_City',
+  }).format(lineupDeadline(roundDate))
 }
 
 export function LineupEditorPage() {
@@ -128,7 +125,7 @@ export function LineupEditorPage() {
 
   const mu = matchup.data
   const cats = matchCats
-  const locked = isLocked(mu)
+  const locked = isLineupLocked(mu.round.round_date)
   const usedChanges = changes.data ?? 0
   const status = lineup.data?.status ?? 'draft'
 
@@ -204,12 +201,18 @@ export function LineupEditorPage() {
         </div>
       </section>
 
-      {locked && (
+      {locked ? (
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/15 p-3 text-sm text-amber-200">
-          🔒 Bloqueada: pasó el límite de 1 hora antes del partido. Solo el
+          🔒 Bloqueada: pasó el límite (sábado 07:00 antes de la jornada). Solo el
           organizador puede hacer cambios.
         </div>
-      )}
+      ) : mu.round.round_date ? (
+        <div className="rounded-xl border border-slate-200 bg-slate-100 p-3 text-sm text-slate-600">
+          ⏰ Puedes enviar o editar tu alineación hasta el{' '}
+          <span className="font-semibold text-slate-800">{formatDeadline(mu.round.round_date)}</span>.
+          Después de esa hora se bloquea.
+        </div>
+      ) : null}
 
       {/* Categorías */}
       <div className="space-y-2">
