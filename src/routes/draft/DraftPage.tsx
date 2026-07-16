@@ -64,7 +64,7 @@ export function DraftPage() {
         </header>
 
         <main className="rise flex-1 space-y-4">
-          {season.isLoading || view.isLoading ? (
+          {season.isLoading || view.essentialsLoading ? (
             <Loader label="Cargando draft…" />
           ) : !draft ? (
             <Empty title="El draft aún no ha comenzado" desc="Cuando el organizador lo inicie, aquí verás los picks en vivo." />

@@ -5,6 +5,25 @@ import { createClient } from '@supabase/supabase-js'
 const url = import.meta.env.VITE_SUPABASE_URL
 const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
+// Timeout duro para TODA petición HTTP (PostgREST/Auth/Storage). Sin esto, una
+// petición que se cuelga bajo tráfico alto nunca se rechaza y TanStack Query se
+// queda en `pending` para siempre → la pantalla se congela en "Cargando…".
+// Con timeout, la petición se aborta y el `retry` de TanStack Query entra a jugar.
+// NO afecta a Realtime (usa WebSocket, no fetch).
+const REQUEST_TIMEOUT_MS = 12_000
+
+const timeoutFetch: typeof fetch = (input, init) => {
+  const timeout = AbortSignal.timeout(REQUEST_TIMEOUT_MS)
+  // Combina el timeout con la señal de aborto que ya trajera el llamador.
+  const anyFn = (AbortSignal as { any?: (s: AbortSignal[]) => AbortSignal }).any
+  const signal = init?.signal
+    ? anyFn
+      ? anyFn([init.signal, timeout])
+      : init.signal
+    : timeout
+  return fetch(input, { ...init, signal })
+}
+
 /** true cuando .env tiene URL + anon key. La UI lo usa para avisar si falta config. */
 export const isSupabaseConfigured = Boolean(url && anonKey)
 
@@ -28,5 +47,6 @@ export const supabase = createClient(
       autoRefreshToken: true,
       detectSessionInUrl: true,
     },
+    global: { fetch: timeoutFetch },
   },
 )

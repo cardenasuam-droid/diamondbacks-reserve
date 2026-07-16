@@ -72,6 +72,10 @@ export function useDraftView(seasonId: string | undefined) {
     playersById,
     pool,
     isLoading: draftQ.isLoading || teamsQ.isLoading || playersQ.isLoading,
+    // Solo lo IMPRESCINDIBLE para decidir qué pintar: saber si existe el draft.
+    // teams/players se rellenan cuando llegan (el board degrada con placeholders),
+    // así un request lento de esos NO congela toda la pantalla en "Cargando…".
+    essentialsLoading: draftQ.isLoading,
     isError: draftQ.isError || boardQ.isError,
   }
 }
