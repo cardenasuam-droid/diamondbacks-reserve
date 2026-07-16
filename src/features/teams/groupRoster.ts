@@ -7,7 +7,7 @@ export interface RosterGroup {
 }
 
 // Agrupa el roster por categoría de ranking, ordenado por sort_order de la
-// categoría. Dentro de cada grupo: capitán primero, luego alfabético.
+// categoría. Dentro de cada grupo: capitán, luego co-capitán, luego alfabético.
 export function groupRoster(
   players: PublicPlayer[],
   categories: MatchCategory[],
@@ -29,6 +29,7 @@ export function groupRoster(
       players: [...ps].sort(
         (a, b) =>
           Number(b.is_captain) - Number(a.is_captain) ||
+          Number(b.is_cocaptain) - Number(a.is_cocaptain) ||
           a.full_name.localeCompare(b.full_name, 'es'),
       ),
     }))

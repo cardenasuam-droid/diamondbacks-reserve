@@ -34,6 +34,7 @@ interface Draft {
   email: string
   phone: string
   is_captain: boolean
+  is_cocaptain: boolean
   is_active: boolean
   is_paid: boolean
   photo_url: string
@@ -46,6 +47,7 @@ const EMPTY: Draft = {
   email: '',
   phone: '',
   is_captain: false,
+  is_cocaptain: false,
   is_active: true,
   is_paid: false,
   photo_url: '',
@@ -110,6 +112,7 @@ export function OrganizerRosterPage() {
       email: p.email ?? '',
       phone: p.phone ?? '',
       is_captain: p.is_captain,
+      is_cocaptain: p.is_cocaptain,
       is_active: p.is_active,
       is_paid: p.is_paid,
       photo_url: p.photo_url ?? '',
@@ -288,9 +291,22 @@ export function OrganizerRosterPage() {
               <input
                 type="checkbox"
                 checked={draft.is_captain}
-                onChange={(e) => setDraft({ ...draft, is_captain: e.target.checked })}
+                // Capitán y co-capitán son excluyentes (lo blinda además la BD).
+                onChange={(e) =>
+                  setDraft({ ...draft, is_captain: e.target.checked, is_cocaptain: e.target.checked ? false : draft.is_cocaptain })
+                }
               />
               Capitán
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={draft.is_cocaptain}
+                onChange={(e) =>
+                  setDraft({ ...draft, is_cocaptain: e.target.checked, is_captain: e.target.checked ? false : draft.is_captain })
+                }
+              />
+              Co-capitán
             </label>
             <label className="flex items-center gap-2">
               <input
@@ -424,6 +440,7 @@ export function OrganizerRosterPage() {
                 <span className="min-w-0 flex-1 truncate">
                   <span className="font-medium text-slate-800">{p.full_name}</span>
                   {p.is_captain && <span title="Capitán"> ⭐</span>}
+                  {p.is_cocaptain && <span title="Co-capitán"> ☆</span>}
                   {!p.is_active && <span className="text-xs text-slate-500"> · inactivo</span>}
                 </span>
                 <Badge color={categoryColor(typeByCode.get(p.category_code))}>{p.category_code}</Badge>

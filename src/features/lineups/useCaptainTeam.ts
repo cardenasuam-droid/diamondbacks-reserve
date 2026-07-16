@@ -10,19 +10,20 @@ export interface CaptainTeam {
   season_id: string
 }
 
-// El equipo del capitán, derivado de su ficha de jugador (profile.player_id).
-// SOLO devuelve equipo si la ficha es capitana (is_captain): un jugador normal con
-// equipo NO es capitán, así que no debe habilitarse para hacer picks en el draft.
+// El equipo del capitán O co-capitán, derivado de su ficha (profile.player_id).
+// SOLO devuelve equipo si la ficha es capitana o co-capitana: un jugador normal
+// con equipo NO lo es, así que no debe habilitarse para hacer picks en el draft.
+// El co-capitán tiene los mismos accesos que el capitán (migración 0034).
 // RLS: "players self read" permite leer la propia ficha; teams es público.
 async function fetchCaptainTeam(playerId: string): Promise<CaptainTeam | null> {
   const { data, error } = await supabase
     .from('players')
-    .select('is_captain, team:teams(id, name, color, logo_url, season_id)')
+    .select('is_captain, is_cocaptain, team:teams(id, name, color, logo_url, season_id)')
     .eq('id', playerId)
     .maybeSingle()
   if (error) throw error
-  const row = data as { is_captain: boolean; team: CaptainTeam | null } | null
-  return row?.is_captain ? (row.team ?? null) : null
+  const row = data as { is_captain: boolean; is_cocaptain: boolean; team: CaptainTeam | null } | null
+  return row && (row.is_captain || row.is_cocaptain) ? (row.team ?? null) : null
 }
 
 export function useCaptainTeam() {

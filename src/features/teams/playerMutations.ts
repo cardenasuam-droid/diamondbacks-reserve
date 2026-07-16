@@ -15,6 +15,7 @@ export interface SavePlayerVars {
   category_code: string
   shirt_size: ShirtSize | null
   is_captain: boolean
+  is_cocaptain: boolean
   is_active: boolean
   is_paid: boolean
   photo_url: string
@@ -23,6 +24,9 @@ export interface SavePlayerVars {
 function friendly(msg: string): string {
   if (/row-level security/i.test(msg)) return 'No tienes permiso (¿eres organizador?).'
   if (/one_captain_per_team/i.test(msg)) return 'Ese equipo ya tiene un capitán.'
+  if (/one_cocaptain_per_team/i.test(msg)) return 'Ese equipo ya tiene un co-capitán.'
+  if (/players_not_captain_and_cocaptain/i.test(msg)) return 'Un jugador no puede ser capitán y co-capitán a la vez.'
+  if (/players_cocaptain_has_team/i.test(msg)) return 'El co-capitán debe estar en un equipo.'
   if (/duplicate|unique/i.test(msg)) return 'Ya existe un jugador con ese email en la temporada.'
   if (/foreign key|violates|referenced/i.test(msg)) {
     return 'No se puede borrar: el jugador tiene alineaciones o resultados. Desactívalo en su lugar.'
@@ -48,6 +52,7 @@ export function useSavePlayer() {
         category_code: v.category_code,
         shirt_size: v.shirt_size,
         is_captain: v.is_captain,
+        is_cocaptain: v.is_cocaptain,
         is_active: v.is_active,
         is_paid: v.is_paid,
         photo_url: v.photo_url.trim() || null,
