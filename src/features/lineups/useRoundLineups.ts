@@ -8,6 +8,8 @@ export interface RoundLineupStatus {
   team_id: string
   status: LineupStatus
   submitted_at: string | null
+  /** No nulo = publicada (visible para todos). La fija publish_round_lineups (0036). */
+  locked_at: string | null
 }
 
 export interface RoundMatchupLineups {
@@ -23,7 +25,7 @@ const SELECT = `
   id,
   team_a:teams!team_a_id(id, name, color, logo_url),
   team_b:teams!team_b_id(id, name, color, logo_url),
-  lineups(id, team_id, status, submitted_at)
+  lineups(id, team_id, status, submitted_at, locked_at)
 `
 
 async function fetchRoundLineups(roundId: string): Promise<RoundMatchupLineups[]> {
