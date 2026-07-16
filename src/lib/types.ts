@@ -65,6 +65,9 @@ export interface PublicPlayer {
   gender: Gender
   category_code: string
   is_captain: boolean
+  // Co-capitán: mismos accesos que el capitán (rol 'captain'), distinguido por
+  // esta bandera para la etiqueta. Migración 0034.
+  is_cocaptain: boolean
   is_active: boolean
   photo_url: string | null
   is_waitlisted: boolean

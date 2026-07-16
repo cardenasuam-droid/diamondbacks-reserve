@@ -13,6 +13,7 @@ function player(p: Partial<PublicPlayer> & { id: string; full_name: string; cate
     team_id: 't1',
     gender: 'male',
     is_captain: false,
+    is_cocaptain: false,
     is_active: true,
     photo_url: null,
     is_waitlisted: false,
@@ -41,5 +42,16 @@ describe('groupRoster', () => {
     ]
     const [grupo] = groupRoster(players, categories)
     expect(grupo.players.map((p) => p.full_name)).toEqual(['Beto', 'Aldo', 'Zoe'])
+  })
+
+  it('ordena capitán, luego co-capitán, luego alfabético', () => {
+    const players = [
+      player({ id: '1', full_name: 'Zoe', category_code: 'VAR_4' }),
+      player({ id: '2', full_name: 'Yara', category_code: 'VAR_4', is_cocaptain: true }),
+      player({ id: '3', full_name: 'Aldo', category_code: 'VAR_4' }),
+      player({ id: '4', full_name: 'Beto', category_code: 'VAR_4', is_captain: true }),
+    ]
+    const [grupo] = groupRoster(players, categories)
+    expect(grupo.players.map((p) => p.full_name)).toEqual(['Beto', 'Yara', 'Aldo', 'Zoe'])
   })
 })

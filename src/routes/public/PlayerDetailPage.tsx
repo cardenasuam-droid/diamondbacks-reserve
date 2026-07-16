@@ -118,6 +118,7 @@ export function PlayerDetailPage() {
           <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
             <Badge color={categoryColor(category?.type)}>{player.category_code}</Badge>
             {player.is_captain && <Badge color="amber">Capitán</Badge>}
+            {player.is_cocaptain && <Badge color="blue">Co-capitán</Badge>}
             {/* Lado de juego: dato deportivo público (players_public, 0026). */}
             <PositionChip position={player.position} />
           </div>

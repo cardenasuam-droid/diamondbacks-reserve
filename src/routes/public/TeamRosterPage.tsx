@@ -163,6 +163,7 @@ function CategoryAccordion({
                 <span className="min-w-0 flex-1 truncate font-medium text-slate-800">{p.full_name}</span>
                 <PositionChip position={p.position} />
                 {p.is_captain && <Badge color="amber">Capitán</Badge>}
+                {p.is_cocaptain && <Badge color="blue">Co-capitán</Badge>}
                 <Icon name="chevron-right" size={16} className="text-slate-400" />
               </Link>
             </li>

@@ -136,6 +136,7 @@ function GreetingHeader({
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <Badge color="amber">{me.category_code}</Badge>
               {me.is_captain && <Badge color="emerald">Capitán</Badge>}
+              {me.is_cocaptain && <Badge color="blue">Co-capitán</Badge>}
               {team && (
                 <span className="inline-flex items-center gap-1.5 text-sm text-white/85">
                   <span className="rounded-md bg-white/15 p-0.5 ring-1 ring-white/25">

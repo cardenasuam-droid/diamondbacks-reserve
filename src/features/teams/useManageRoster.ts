@@ -15,6 +15,7 @@ export interface ManagedPlayer {
   shirt_size: ShirtSize | null
   team_id: string
   is_captain: boolean
+  is_cocaptain: boolean
   is_active: boolean
   is_paid: boolean
   photo_url: string | null
@@ -23,7 +24,7 @@ export interface ManagedPlayer {
 async function fetchManageRoster(teamId: string): Promise<ManagedPlayer[]> {
   const { data, error } = await supabase
     .from('players')
-    .select('id, full_name, email, phone, gender, category_code, shirt_size, team_id, is_captain, is_active, is_paid, photo_url')
+    .select('id, full_name, email, phone, gender, category_code, shirt_size, team_id, is_captain, is_cocaptain, is_active, is_paid, photo_url')
     .eq('team_id', teamId)
     .order('full_name')
   if (error) throw error

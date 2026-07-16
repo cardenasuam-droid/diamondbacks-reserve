@@ -106,6 +106,7 @@ function PlayerRow({ player, team }: { player: PublicPlayer; team: Team | null }
         <span className="min-w-0 flex-1 truncate font-medium text-slate-800">
           {player.full_name}
           {player.is_captain && <span title="Capitán"> ⭐</span>}
+          {player.is_cocaptain && <span title="Co-capitán"> ☆</span>}
         </span>
         <PositionChip position={player.position} />
         {team ? (
