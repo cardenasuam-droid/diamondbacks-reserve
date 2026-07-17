@@ -99,8 +99,14 @@ export function SchedulePage() {
                           </div>
                           {(pairA || pairB) && (
                             <div className="mt-1.5 grid grid-cols-2 gap-x-3 text-xs text-slate-600">
-                              <span className="truncate">{pairText(pairA)}</span>
-                              <span className="truncate text-right">{pairText(pairB)}</span>
+                              <span className="truncate">
+                                {pairA?.is_exception && <span title="Excepción a la regla">⚠️ </span>}
+                                {pairText(pairA)}
+                              </span>
+                              <span className="truncate text-right">
+                                {pairText(pairB)}
+                                {pairB?.is_exception && <span title="Excepción a la regla"> ⚠️</span>}
+                              </span>
                             </div>
                           )}
                         </li>
