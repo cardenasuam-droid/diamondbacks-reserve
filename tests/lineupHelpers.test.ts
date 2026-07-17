@@ -21,7 +21,7 @@ const RULES: EligibilityRule[] = [
 describe('selectionsFromEntries', () => {
   it('rellena todas las categorías y respeta lo guardado', () => {
     const entries: StoredEntry[] = [
-      { id: 'e1', match_id: 'm1', category_code: 'VAR_4', player_1_id: 'a', player_2_id: 'b' },
+      { id: 'e1', match_id: 'm1', category_code: 'VAR_4', player_1_id: 'a', player_2_id: 'b', is_exception: false },
     ]
     const map = selectionsFromEntries(entries, CATS)
     expect(map.VAR_4).toEqual({ category_code: 'VAR_4', player_1_id: 'a', player_2_id: 'b' })

@@ -4,7 +4,7 @@
 // capitán + el roster + las reglas de elegibilidad (data-driven, tabla
 // category_eligibility_rules) y devuelve todos los problemas encontrados.
 // La UI decide si permite enviar (solo cuando `valid === true`); los triggers
-// de servidor (lock 1h, límite de cambios) son la otra mitad del blindaje.
+// de servidor (lock, límite de cambios) son la otra mitad del blindaje.
 //
 // Reglas que hace cumplir (spec §8.2, §8.3):
 //   - cada categoría debe quedar completa (2 jugadores)
@@ -13,6 +13,14 @@
 //   - cada jugador debe cumplir género + categoría de ranking requeridos
 //   - las mixtas se arman con el perfil correcto (1 + 1)
 //   - un jugador no puede aparecer en más de una categoría de la jornada
+//
+// EXCEPCIÓN por falta de jugadores (confirmada por la capitana): para las
+// categorías marcadas en `exceptionCategories`, se relaja la regla de categoría y
+// la de "no repetir en la jornada":
+//   - el jugador debe seguir siendo del GÉNERO del hueco,
+//   - y de categoría IGUAL O MÁS DÉBIL (número mayor: 4a es más fuerte que 5a),
+//   - y sí puede repetirse (dobletear) en esa categoría de excepción.
+// Un jugador MÁS FUERTE o de otro género sigue siendo inválido (no es excepción).
 
 import type { Gender, MatchCategory } from '@/lib/types'
 
@@ -62,6 +70,13 @@ export interface LineupValidation {
   completeCategories: string[]
 }
 
+// Rango de una categoría de ranking por su número (4a, 5a…). MAYOR número = MÁS
+// DÉBIL (4a es más fuerte que 5a). VAR_4 -> 4, FEM_7 -> 7. Sin número → null.
+export function categoryRank(code: string): number | null {
+  const m = /(\d+)/.exec(code)
+  return m ? parseInt(m[1], 10) : null
+}
+
 // "2 de 4a Varonil" | "1 de 5a Varonil y 1 de 4a Femenil"
 function describeRequirement(
   rules: EligibilityRule[],
@@ -78,6 +93,7 @@ export function validateLineup(
   roster: EligiblePlayer[],
   rules: EligibilityRule[],
   categories: MatchCategory[],
+  exceptionCategories: Set<string> = new Set(),
 ): LineupValidation {
   const nameOf = (code: string) => categories.find((c) => c.code === code)?.name ?? code
   const rosterById = new Map(roster.map((p) => [p.id, p]))
@@ -103,6 +119,7 @@ export function validateLineup(
   for (const cat of sortedCats) {
     const code = cat.code
     const catName = cat.name
+    const isException = exceptionCategories.has(code)
     const sel =
       selByCat.get(code) ?? { category_code: code, player_1_id: null, player_2_id: null }
     const before = issues.length
@@ -122,7 +139,7 @@ export function validateLineup(
       })
     }
 
-    // Mismo jugador dos veces en la misma categoría.
+    // Mismo jugador dos veces en la misma categoría (nunca, ni con excepción).
     const duplicateInCat =
       Boolean(sel.player_1_id) && sel.player_1_id === sel.player_2_id
     if (duplicateInCat) {
@@ -159,8 +176,11 @@ export function validateLineup(
       resolved.push(p)
     }
 
-    // Duplicado en la jornada: cada jugador distinto cuenta una vez por categoría.
+    // Duplicado en la jornada: un jugador puede estar en A LO SUMO una categoría
+    // NORMAL. Las apariciones por EXCEPCIÓN son libres (no cuentan ni se marcan),
+    // así que un jugador puede tener su categoría normal + dobletear por excepción.
     for (const p of new Map(resolved.map((r) => [r.id, r])).values()) {
+      if (isException) continue
       const seen = firstSeenCategory.get(p.id)
       if (seen) {
         issues.push({
@@ -175,18 +195,30 @@ export function validateLineup(
     }
 
     // Elegibilidad: solo cuando la categoría tiene exactamente 2 jugadores
-    // válidos y distintos. Si está incompleta o tiene ajenos/desconocidos, esos
-    // errores ya se reportaron y no añadimos ruido.
+    // válidos y distintos.
     const catRules = rulesByCat.get(code) ?? []
     if (resolved.length === 2 && !duplicateInCat) {
       const pool = [...resolved]
       for (const rule of catRules) {
         let need = rule.required_count
+        const reqRank = categoryRank(rule.required_player_category_code)
         for (let i = pool.length - 1; i >= 0 && need > 0; i--) {
-          if (
-            pool[i].gender === rule.required_gender &&
-            pool[i].category_code === rule.required_player_category_code
-          ) {
+          const p = pool[i]
+          let ok: boolean
+          if (isException) {
+            // Excepción: mismo género + categoría IGUAL O MÁS DÉBIL (número mayor).
+            const pr = categoryRank(p.category_code)
+            ok =
+              p.gender === rule.required_gender &&
+              reqRank != null &&
+              pr != null &&
+              pr >= reqRank
+          } else {
+            ok =
+              p.gender === rule.required_gender &&
+              p.category_code === rule.required_player_category_code
+          }
+          if (ok) {
             pool.splice(i, 1)
             need--
           }
@@ -198,10 +230,12 @@ export function validateLineup(
           category_code: code,
           code: 'ineligible',
           player_id: p.id,
-          message: `Error en ${catName}: ${p.full_name} no cumple los requisitos (${describeRequirement(
-            catRules,
-            nameOf,
-          )}).`,
+          message: isException
+            ? `Error en ${catName}: ${p.full_name} no cumple ni con excepción (debe ser del mismo género y de categoría igual o más débil).`
+            : `Error en ${catName}: ${p.full_name} no cumple los requisitos (${describeRequirement(
+                catRules,
+                nameOf,
+              )}).`,
         })
       }
     }

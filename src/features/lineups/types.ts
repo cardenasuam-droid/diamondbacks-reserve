@@ -43,6 +43,8 @@ export interface StoredEntry {
   category_code: string
   player_1_id: string | null
   player_2_id: string | null
+  /** Excepción confirmada por la capitana (fuera de categoría / repetido). 0038. */
+  is_exception: boolean
 }
 
 export interface StoredLineup {

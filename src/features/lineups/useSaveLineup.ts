@@ -13,6 +13,8 @@ export interface SaveLineupVars {
   existing: StoredLineup | null
   categories: MatchCategory[]
   selections: Record<string, LineupSelection>
+  /** Categorías marcadas como EXCEPCIÓN real (fuera de categoría / repetido). 0038. */
+  exceptionCategories?: Set<string>
   /** true = enviar/confirmar; false = guardar borrador. */
   submit: boolean
 }
@@ -30,7 +32,7 @@ function friendlyError(msg: string): string {
 // El RPC crea/actualiza el lineup, registra los change_logs por categoría
 // cambiada (el trigger valida el tope de 5) y hace upsert de las entradas.
 async function saveLineup(vars: SaveLineupVars): Promise<string> {
-  const { matchup, teamId, categories, selections, submit } = vars
+  const { matchup, teamId, categories, selections, exceptionCategories, submit } = vars
   const matchIdByCategory = new Map(matchup.matches.map((m) => [m.category_code, m.id]))
 
   const entries = categories
@@ -40,6 +42,7 @@ async function saveLineup(vars: SaveLineupVars): Promise<string> {
       match_id: matchIdByCategory.get(c.code) as string,
       player_1_id: selections[c.code]?.player_1_id ?? null,
       player_2_id: selections[c.code]?.player_2_id ?? null,
+      is_exception: exceptionCategories?.has(c.code) ?? false,
     }))
 
   const { data, error } = await supabase.rpc('save_lineup', {

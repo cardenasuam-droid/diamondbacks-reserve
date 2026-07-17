@@ -11,7 +11,7 @@ async function fetchLineup(
   const { data, error } = await supabase
     .from('lineups')
     .select(
-      'id, status, submitted_at, change_count_used, entries:lineup_entries(id, match_id, category_code, player_1_id, player_2_id)',
+      'id, status, submitted_at, change_count_used, entries:lineup_entries(id, match_id, category_code, player_1_id, player_2_id, is_exception)',
     )
     .eq('team_matchup_id', teamMatchupId)
     .eq('team_id', teamId)

@@ -8,6 +8,8 @@ import { supabase } from '@/lib/supabase'
 export interface PublishedPair {
   player_1_id: string | null
   player_2_id: string | null
+  /** Excepción a la regla de categoría (marca ⚠️ en el rol). 0038. */
+  is_exception: boolean
 }
 
 // Clave de una pareja publicada: enfrentamiento + equipo + categoría.
@@ -29,7 +31,7 @@ async function fetchPublishedLineups(roundId: string): Promise<PublishedLineups>
 
   const { data, error } = await supabase
     .from('lineups')
-    .select('team_matchup_id, team_id, lineup_entries(category_code, player_1_id, player_2_id)')
+    .select('team_matchup_id, team_id, lineup_entries(category_code, player_1_id, player_2_id, is_exception)')
     .in('team_matchup_id', ids)
     .not('locked_at', 'is', null)
   if (error) throw error
@@ -37,12 +39,15 @@ async function fetchPublishedLineups(roundId: string): Promise<PublishedLineups>
   for (const l of (data ?? []) as {
     team_matchup_id: string
     team_id: string
-    lineup_entries: { category_code: string; player_1_id: string | null; player_2_id: string | null }[] | null
+    lineup_entries:
+      | { category_code: string; player_1_id: string | null; player_2_id: string | null; is_exception: boolean }[]
+      | null
   }[]) {
     for (const e of l.lineup_entries ?? []) {
       map.set(publishedKey(l.team_matchup_id, l.team_id, e.category_code), {
         player_1_id: e.player_1_id,
         player_2_id: e.player_2_id,
+        is_exception: e.is_exception,
       })
     }
   }
