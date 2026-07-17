@@ -87,13 +87,17 @@ export function SchedulePage() {
                         ? published.data?.get(publishedKey(g.matchupId, g.teamB.id, m.category_code))
                         : undefined
                       return (
-                        <li key={m.id}>
-                          {/* Tarjeta clickeable → pantalla del partido. La categoría va UNA
-                              vez (el badge); el espacio liberado es para el roster. */}
+                        <li key={m.id} className="relative transition hover:bg-slate-50">
+                          {/* Tarjeta clickeable → pantalla del partido. Es un link de FONDO
+                              (absolute) para que los nombres de jugadores puedan ser sus
+                              propios links encima (z-[2]) sin anidar anchors. La categoría
+                              va UNA vez (el badge); el espacio liberado es para el roster. */}
                           <Link
                             to={`/partidos/${m.id}`}
-                            className="block px-3 py-2 transition hover:bg-slate-50 active:bg-slate-50"
-                          >
+                            aria-label={`Ver partido ${m.category?.name ?? m.category_code}`}
+                            className="absolute inset-0 z-[1]"
+                          />
+                          <div className="px-3 py-2">
                             <div className="flex items-center gap-2">
                               <Badge color={categoryColor(m.category?.type)}>{m.category_code}</Badge>
                               <span className="ml-auto shrink-0 text-right text-xs text-slate-500">
@@ -111,7 +115,7 @@ export function SchedulePage() {
                                 <PairNames pair={pairB} nameOf={nameOf} align="right" />
                               </div>
                             )}
-                          </Link>
+                          </div>
                         </li>
                       )
                     })}
@@ -132,8 +136,8 @@ function hasPlayers(pair: PublishedPair | undefined): boolean {
 }
 
 // Los dos nombres de una pareja publicada, apilados y alineados hacia el lado de
-// su equipo. ⚠️ = la pareja se armó con una excepción a la regla de categoría; la
-// marca vive FUERA del span que trunca para no perderse con nombres largos.
+// su equipo. Cada nombre es un LINK a la ficha del jugador. ⚠️ = la pareja se armó
+// con una excepción a la regla; vive FUERA del texto que trunca para no perderse.
 function PairNames({
   pair,
   nameOf,
@@ -149,21 +153,36 @@ function PairNames({
   }
   const p = pair as PublishedPair
   return (
-    <div className={`min-w-0 text-xs text-slate-600 ${right ? 'text-right' : ''}`}>
+    <div className={`min-w-0 text-xs ${right ? 'text-right' : ''}`}>
       <p className={`flex items-center gap-1 ${right ? 'justify-end' : ''}`}>
         {p.is_exception && !right && (
           <span className="shrink-0" title="Excepción a la regla">
             ⚠️
           </span>
         )}
-        <span className="min-w-0 truncate">{nameOf(p.player_1_id)}</span>
+        <PlayerName id={p.player_1_id} nameOf={nameOf} />
         {p.is_exception && right && (
           <span className="shrink-0" title="Excepción a la regla">
             ⚠️
           </span>
         )}
       </p>
-      <p className="truncate">{nameOf(p.player_2_id)}</p>
+      <PlayerName id={p.player_2_id} nameOf={nameOf} />
     </div>
+  )
+}
+
+// Nombre de un jugador dentro de la tarjeta del rol: link a su ficha cuando hay id
+// (z-[2] para ganarle al link de fondo de la tarjeta); texto plano si el hueco no
+// tiene jugador asignado.
+function PlayerName({ id, nameOf }: { id: string | null; nameOf: (id: string | null) => string }) {
+  if (!id) return <span className="block min-w-0 truncate text-slate-500">{nameOf(id)}</span>
+  return (
+    <Link
+      to={`/jugadores/${id}`}
+      className="relative z-[2] block min-w-0 truncate text-slate-600 underline decoration-transparent hover:decoration-inherit"
+    >
+      {nameOf(id)}
+    </Link>
   )
 }
