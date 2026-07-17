@@ -2,6 +2,7 @@ import { createBrowserRouter } from 'react-router-dom'
 import { PublicLayout } from './public/PublicLayout'
 import { HomePage } from './public/HomePage'
 import { SchedulePage } from './public/SchedulePage'
+import { MatchDetailPage } from './public/MatchDetailPage'
 import { ResultsPage } from './public/ResultsPage'
 import { StandingsPage } from './public/StandingsPage'
 import { TeamsPage } from './public/TeamsPage'
@@ -55,6 +56,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: 'rol', element: <SchedulePage /> },
+      { path: 'partidos/:matchId', element: <MatchDetailPage /> },
       { path: 'resultados', element: <ResultsPage /> },
       { path: 'tabla', element: <StandingsPage /> },
       { path: 'equipos', element: <TeamsPage /> },
