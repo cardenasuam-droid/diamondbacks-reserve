@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import { useActiveSeason } from '@/features/season/useActiveSeason'
 import { useRounds } from '@/features/schedule/useRounds'
 import { useRoundMatches } from '@/features/schedule/useRoundMatches'
@@ -15,6 +16,7 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { Loader } from '@/components/ui/Loader'
 import { Badge } from '@/components/ui/Badge'
+import { Icon } from '@/components/ui/Icon'
 
 export function SchedulePage() {
   const season = useActiveSeason()
@@ -36,8 +38,6 @@ export function SchedulePage() {
     [players.data],
   )
   const nameOf = (id: string | null) => (id ? nameById.get(id) ?? '—' : '—')
-  const pairText = (pair: PublishedPair | undefined) =>
-    pair ? `${nameOf(pair.player_1_id)} · ${nameOf(pair.player_2_id)}` : '—'
 
   if (season.isLoading) return <Loader label="Cargando temporada…" />
   if (!season.data) {
@@ -87,28 +87,31 @@ export function SchedulePage() {
                         ? published.data?.get(publishedKey(g.matchupId, g.teamB.id, m.category_code))
                         : undefined
                       return (
-                        <li key={m.id} className="px-3 py-2">
-                          <div className="flex items-center justify-between gap-2">
-                            <span className="flex items-center gap-2">
+                        <li key={m.id}>
+                          {/* Tarjeta clickeable → pantalla del partido. La categoría va UNA
+                              vez (el badge); el espacio liberado es para el roster. */}
+                          <Link
+                            to={`/partidos/${m.id}`}
+                            className="block px-3 py-2 transition hover:bg-slate-50 active:bg-slate-50"
+                          >
+                            <div className="flex items-center gap-2">
                               <Badge color={categoryColor(m.category?.type)}>{m.category_code}</Badge>
-                              <span className="text-sm text-slate-700">{m.category?.name}</span>
-                            </span>
-                            <span className="shrink-0 text-right text-xs text-slate-500">
-                              {m.time_block?.label} · {m.court?.name}
-                            </span>
-                          </div>
-                          {(pairA || pairB) && (
-                            <div className="mt-1.5 grid grid-cols-2 gap-x-3 text-xs text-slate-600">
-                              <span className="truncate">
-                                {pairA?.is_exception && <span title="Excepción a la regla">⚠️ </span>}
-                                {pairText(pairA)}
+                              <span className="ml-auto shrink-0 text-right text-xs text-slate-500">
+                                {m.time_block?.label} · {m.court?.name}
                               </span>
-                              <span className="truncate text-right">
-                                {pairText(pairB)}
-                                {pairB?.is_exception && <span title="Excepción a la regla"> ⚠️</span>}
-                              </span>
+                              <Icon name="chevron-right" size={14} className="shrink-0 text-slate-400" />
                             </div>
-                          )}
+                            {/* Roster publicado: cada pareja del lado de SU equipo (A
+                                izquierda, B derecha, como el encabezado), separadas por vs.
+                                Solo cuando al menos un lado tiene jugadores reales. */}
+                            {(hasPlayers(pairA) || hasPlayers(pairB)) && (
+                              <div className="mt-1.5 grid grid-cols-[1fr_auto_1fr] items-center gap-x-2">
+                                <PairNames pair={pairA} nameOf={nameOf} align="left" />
+                                <span className="text-[10px] font-medium text-slate-400">vs</span>
+                                <PairNames pair={pairB} nameOf={nameOf} align="right" />
+                              </div>
+                            )}
+                          </Link>
                         </li>
                       )
                     })}
@@ -119,6 +122,48 @@ export function SchedulePage() {
           )}
         </>
       )}
+    </div>
+  )
+}
+
+// ¿La pareja publicada tiene al menos un jugador real asignado?
+function hasPlayers(pair: PublishedPair | undefined): boolean {
+  return Boolean(pair && (pair.player_1_id || pair.player_2_id))
+}
+
+// Los dos nombres de una pareja publicada, apilados y alineados hacia el lado de
+// su equipo. ⚠️ = la pareja se armó con una excepción a la regla de categoría; la
+// marca vive FUERA del span que trunca para no perderse con nombres largos.
+function PairNames({
+  pair,
+  nameOf,
+  align,
+}: {
+  pair: PublishedPair | undefined
+  nameOf: (id: string | null) => string
+  align: 'left' | 'right'
+}) {
+  const right = align === 'right'
+  if (!hasPlayers(pair)) {
+    return <p className={`text-xs text-slate-400 ${right ? 'text-right' : ''}`}>Por definir</p>
+  }
+  const p = pair as PublishedPair
+  return (
+    <div className={`min-w-0 text-xs text-slate-600 ${right ? 'text-right' : ''}`}>
+      <p className={`flex items-center gap-1 ${right ? 'justify-end' : ''}`}>
+        {p.is_exception && !right && (
+          <span className="shrink-0" title="Excepción a la regla">
+            ⚠️
+          </span>
+        )}
+        <span className="min-w-0 truncate">{nameOf(p.player_1_id)}</span>
+        {p.is_exception && right && (
+          <span className="shrink-0" title="Excepción a la regla">
+            ⚠️
+          </span>
+        )}
+      </p>
+      <p className="truncate">{nameOf(p.player_2_id)}</p>
     </div>
   )
 }
