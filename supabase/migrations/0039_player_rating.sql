@@ -568,9 +568,13 @@ begin
   --     lo revierte. Sin este guard, un re-run dejaría rating_seed con el valor
   --     viejo y rating con el editado: exactamente la desincronización que el
   --     encabezado de esta migración declara imposible.
-  --     (a), (b) y (c) viven dentro de un único bloque do $$, que es UNA sola
+  --     (a), (b) y (c) viven dentro de un único bloque DO, que es UNA sola
   --     sentencia y por tanto atómica: o se aplican los tres o ninguno. No hay
   --     estado intermedio posible entre ellos.
+  --     (Y ojo al escribir aquí dentro: el cuerpo del bloque va entre comillas
+  --     de dólar, así que Postgres NO interpreta estas líneas como comentarios.
+  --     Un par de signos de dólar suelto en un comentario cierra el bloque antes
+  --     de tiempo y rompe la migración entera.)
   update players p
      set rating_seed        = d.rating,
          rating_seed_source = 'dictado'
