@@ -433,157 +433,131 @@ grant select on players_public to anon, authenticated;
 -- Ningún varón trae rating dictado: los 69 arrancan en la semilla de su categoría,
 -- así que en la Jornada 1 todos los partidos masculinos parten de E = 0.500.
 --
--- Idempotente: re-ejecutar la migración deja exactamente el mismo estado y no
--- revierte ediciones posteriores del organizador.
+-- TODO ESTO ES UNA SOLA SENTENCIA. No hay tabla temporal ni estado que viajar
+-- entre sentencias: la lista de 88 va inline en un CTE. Un intento anterior usaba
+-- una tabla temporal y el editor de Supabase no la conservaba de una sentencia a
+-- la siguiente ("relation does not exist"). Al vivir todo dentro de un único
+-- bloque, además, las comprobaciones del final pueden ir DESPUÉS de escribir: si
+-- alguna falla, el error revierte el bloque entero y players queda intacto.
 --
--- La tabla temporal se crea y se destruye con DROP explícito (no con
--- `on commit drop`) para que funcione igual si el SQL Editor corre el script
--- como una sola transacción o si hace autocommit por sentencia.
+-- Idempotente: los tres UPDATE solo tocan filas sin semilla, así que re-ejecutar
+-- no revierte ninguna corrección posterior del organizador.
+--
+-- OJO al editar aquí dentro: el cuerpo del bloque va entre comillas de dólar y
+-- Postgres NO lee estas líneas como comentarios. Un par de signos de dólar suelto
+-- en un comentario cierra el bloque antes de tiempo y rompe la migración entera.
 -- ---------------------------------------------------------------------------
-drop table if exists _rating_dictado_0039;
-
-create temporary table _rating_dictado_0039 (
-  player_id uuid primary key,
-  rating    numeric not null
-);
-
-insert into _rating_dictado_0039 (player_id, rating) values
-  ('13798594-bc72-4d53-a335-63c0d2ac3834', 2061),  -- Alejandra García (FEM_3)
-  ('2996c6da-3ef5-4588-a353-6c27414b00a3', 2436),  -- Alma Huguette de Alba (FEM_3)
-  ('0d95712d-7edc-4330-8c0c-b9c28f7f38b0', 2072),  -- Carolina Treviño (FEM_3)
-  ('48b1bdb7-4467-4e0c-984e-b098f6be7a9a', 2066),  -- Griselda Oaxaca Molinar (FEM_3)
-  ('799f7da6-909b-450d-b7fc-221bce74c414', 2188),  -- Laura Lozoya (FEM_3)
-  ('07efa173-034b-4b1c-a1de-260f130a979e', 2040),  -- Lili Avalos (FEM_3)
-  ('c2d0d2cf-1149-4106-bc7e-eadb03c9cbff', 2245),  -- María Fernanda Prado (FEM_3)
-  ('3a6dcd31-97d6-4d48-9df3-4fc61dfc3c1f', 2171),  -- Mónica Hernandez (FEM_3)
-  ('5b744019-bd76-4d25-adba-d668ee315e26', 2062),  -- Paola López (FEM_3)
-  ('36eee2ec-09be-487a-b42a-8502ff2c7e32', 2165),  -- Sara Hernandez (FEM_3)
-  ('a0981a9d-63f5-4751-b37e-c8c00b545c6e', 1985),  -- Adriana Haro (FEM_4)
-  ('e8c36b72-b79d-4f53-ae24-c4e37c0aaf7a', 1827),  -- Alejandra Contreras (FEM_4)
-  ('2e921d12-38f0-4dee-a85d-2fd0046f793d', 1857),  -- Ana Escarcega (FEM_4)
-  ('7be0935e-86db-4e02-abd6-a78c83740972', 1935),  -- Andrea Dávila (FEM_4)
-  ('23881b66-8a49-4de5-8a63-b553ba736ddb', 1560),  -- Andrea García (FEM_4)
-  ('f9f190ed-bb0a-48ce-b544-437fd11ae7ff', 1778),  -- Anilú Gaytán (FEM_4)
-  ('baeb5a35-0c02-4606-a911-15d3ded6e19e', 1781),  -- Blanca Ramos (FEM_4)
-  ('cbb66239-0819-49f8-aca2-b5ed0d7a4e2a', 1819),  -- Daniela Rodríguez (FEM_4)
-  ('0d6a3ff3-81ef-4cd5-a6c2-49cd1a0b1f65', 1589),  -- Dayana Peña (FEM_4)
-  ('e3cfabc6-e724-4010-9a2a-6eb6e468e096', 1629),  -- Janeth Carbajal (FEM_4)
-  ('94efdb66-c3b4-41e3-910f-4884d1cf5cf2', 1855),  -- Laura García Gardea (FEM_4)
-  ('d94c6e66-cb1d-44cf-8db2-2d000ddce87e', 1703),  -- Liliana Rodríguez (FEM_4)
-  ('88cf3ff3-b7ad-4601-88de-867681c9edfb', 1558),  -- Lydia Juárez (FEM_4)
-  ('fe36344f-dfa5-4fff-b071-34ee22b7168a', 1611),  -- Maria Renee Gonzalez (FEM_4)
-  ('10e6e0d7-54ab-4d17-99ce-96e755d9fcea', 1661),  -- Morena Marrufo (FEM_4)
-  ('5d812361-e100-4d3e-8d86-557cd704869a', 1733),  -- Nidia Shamira Gutierrez Barajas (FEM_4)
-  ('06722f8e-e8cd-4095-b8ac-bb17a3121ee2', 1976),  -- Paola Lozano (FEM_4)
-  ('c0efa3f0-d568-42c9-b4d4-d08e48bda31c', 1703),  -- Paola Rodríguez (FEM_4)
-  ('8157df01-2a15-4667-a287-fbe7272f4b28', 2028),  -- Paulina Labrado (FEM_4)
-  ('745d0ba9-300a-405d-8394-e125656d0c04', 1444),  -- Samantha Garza (FEM_4)
-  ('4b5eba6a-0143-42ba-ab58-27c55583dcbe', 1608),  -- Sofía Payán (FEM_4)
-  ('51439dc2-bda7-4382-b698-f8052e4d0e02', 1755),  -- Violeta Fierro Gonzalez (FEM_4)
-  ('91ca35f1-c6e1-426b-8063-1f73f9adc7cc', 1715),  -- Zayra Azaeta (FEM_4)
-  ('6f1156ab-633f-4df9-9da8-71ed6bca466e', 1469),  -- Almendra Robles (FEM_5)
-  ('6ce41519-6878-4250-bcf1-586dabe0e6f3', 1506),  -- Amelia Melendez (FEM_5)
-  ('dd2ac7b5-bebe-4654-b6b8-a0f49bbc13e3', 1403),  -- Astrid  Buenrostro (FEM_5)
-  ('bfb1d406-76be-42b8-a0ae-a4b440cdc0bc', 1559),  -- Brenda Rodallegas (FEM_5)
-  ('c81e6ec3-bf54-4a9d-abfe-bf85e7a4ed71', 1655),  -- Claudia Hinojos (FEM_5)
-  ('f72259f4-d5d4-4620-ad39-adadba744445', 1536),  -- Cris Amaro (FEM_5)
-  ('3d6d8af7-4ea6-4d14-b0a5-6c752b16ff07', 1358),  -- Cristina González (FEM_5)
-  ('9f38c823-aadf-45b6-bec9-fb70c625bdad', 1622),  -- Elizabeth Murillo (FEM_5)
-  ('510c9012-f846-4b1e-b34d-1f7354dafb59', 1379),  -- Frida Martinez (FEM_5)
-  ('edd7bbde-385d-4774-96d3-e753cf04ba51', 1508),  -- Gabriela Garcia (FEM_5)
-  ('b99b2cf8-5068-4e2e-b363-3bf67b41a42c', 1153),  -- Giselle Gamez (FEM_5)
-  ('a4d6dc60-c2ef-4400-b1ea-7c43a5406c30', 1474),  -- Jenny Sáenz (FEM_5)
-  ('4ffb456c-8c4c-4e80-9591-b0b2cd9ce376', 1250),  -- Liz Magallanes (FEM_5)
-  ('c557bee5-7ec7-4176-a8df-76b6d910713e', 1672),  -- Marian Davila (FEM_5)
-  ('9001eb51-e0c7-4e76-b4c1-9af4f4bd6675', 1566),  -- Martha Reyes (FEM_5)
-  ('8e428114-1911-4809-94fb-8a8e7cb72af0', 1306),  -- Michelle Gamez (FEM_5)
-  ('69bf4e07-867e-46c6-82f5-5ad6aa528c07', 1552),  -- Mily Hernandez (FEM_5)
-  ('0066a10e-b752-47d1-9a80-6a3455c1521e', 1368),  -- Mitzi Valdes (FEM_5)
-  ('a1a542f4-5e43-4a1a-a2ab-d81c53be0d21', 1618),  -- Silvia Félix (FEM_5)
-  ('b33e4dd8-4a51-4d31-a7c7-36547a44ddc1', 1159),  -- Sophia Ortiz (FEM_5)
-  ('d95dedf4-008e-44d4-958c-3f6abfb40cc3', 1351),  -- Thelma Hernandez (FEM_5)
-  ('477c4cd2-31a6-4b7c-baf3-bfe7f59bf991', 1249),  -- Yanery Cazarez (FEM_5)
-  ('66bc2f60-03a7-4e81-8b9e-9ba0b333021e', 923),  -- Adriana Cabrera (FEM_6)
-  ('22f52467-81a9-4040-8e88-63c66456bf16', 855),  -- Alejandra Hernandez (FEM_6)
-  ('d42bb210-ca9f-4f65-b6f8-1bb37b341dee', 1094),  -- Alma Rivero (FEM_6)
-  ('6d9f76d2-fa60-4541-8796-c763d99c2979', 1076),  -- Ana Laura Portillo (FEM_6)
-  ('0cfe90ab-6bde-4c68-b27e-a7db9e0647f6', 1132),  -- Analucía Prado (FEM_6)
-  ('51014a31-0fe1-4328-bd78-6da681fd774d', 1645),  -- Andrea Barragan (FEM_6)
-  ('8a11b78e-9039-4949-878e-0043c245f41c', 984),  -- Betsabé Urita (FEM_6)
-  ('73bd099a-b25e-4d04-9ef1-e762b14b380f', 1550),  -- Bibiana Del castillo (FEM_6)
-  ('414602e7-6fa1-4f65-ad1f-7d1c57093b0d', 1146),  -- Celeste Zapata (FEM_6)
-  ('f6bb8b4f-3f26-4ab7-8d6b-2517b0736dcd', 1228),  -- Cris Hernandez (FEM_6)
-  ('fc040203-4c91-4b6e-8a6f-eefe6625269c', 1298),  -- Cristina Peláez (FEM_6)
-  ('99513a90-182e-45b9-914e-2aefd51cbd2f', 1189),  -- Dalia Garcia (FEM_6)
-  ('a28af459-4a0e-4f40-9e62-870524b031d6', 1030),  -- Daniela Gallardo (FEM_6)
-  ('881877b5-247d-4345-95e7-a4bff3b772f7', 1061),  -- Gabriela Melgar (FEM_6)
-  ('7c894bdc-cca0-4775-a8f9-00ae39c31028', 1314),  -- Gabriela Silva (FEM_6)
-  ('86d9a194-4095-4014-9c07-87cf8343302a', 1068),  -- Georgina Anchondo Sáenz (FEM_6)
-  ('7f8dcdd4-087c-4165-b03e-96ff193e68f2', 1030),  -- Iris Guillén (FEM_6)
-  ('cc0af089-ab99-49e2-9d05-55cfb7077413', 935),  -- Laura Baeza (FEM_6)
-  ('bbc96596-ffbe-440c-82cf-835137795e96', 1446),  -- Mara Nevarez (FEM_6)
-  ('74b4a4ad-2630-40a3-ba72-f10d7574ea93', 1302),  -- Marcela Barraza (FEM_6)
-  ('27496059-7f92-49be-ae82-827c6ed6a426', 1067),  -- Mia Gonzalez (FEM_6)
-  ('62c9ee45-61a6-4ac1-ac6b-3c78b85f22aa', 1152),  -- Nadia Salas (FEM_6)
-  ('995c5bcb-cb5b-4ba0-b2c5-70b6031ae5d0', 1286),  -- Nidia Armendáriz (FEM_6)
-  ('0b9ed370-fbc4-43ef-87ce-afdc5879cfcb', 1498),  -- Paola Cazares (FEM_6)
-  ('5bae783c-d365-4b9c-9db1-42b4ccc91892', 1383),  -- Priscilla Lozano (FEM_6)
-  ('6a1b752a-373f-4024-b975-a4cc7142884a', 1282),  -- Sandra Loya (FEM_6)
-  ('124109cf-0ff0-41ad-917c-550e196491c0', 1026),  -- Tamahara Duarte Valdiviez (FEM_6)
-  ('68a2cdab-bf92-4320-ae5c-81611b500423', 1170),  -- Tana Otamendi (FEM_6)
-  ('3c42cf8c-8e78-4401-9d1b-a7cff231feff', 1034),  -- Ale Valdez (FEM_7)
-  ('c0ae9e8d-924a-44ea-9810-c62f92c2a18a', 1071),  -- Berenice Guerrero (FEM_7)
-  ('607ee9d3-26e8-466e-b77f-dceeb5afeaf5', 796),  -- Cindy Urita (FEM_7)
-  ('4a0e28b1-3840-42c7-b85c-1455cc9fbe76', 704),  -- Damaris gallegos (FEM_7)
-  ('a2c996e9-e234-4a60-aaae-89531a0935dd', 815)   -- Laura Olivas (FEM_7)
-;
-
 do $$
 declare
   v_dictados int;
   v_suma     numeric;
-  v_faltan   int;
-  v_sin_semilla int;
+  v_sin      int;
 begin
-  -- Guardas: si el cotejo no cuadra con lo verificado, aborta ENTERA y sin haber
-  -- tocado players. Es preferible no cargar nada a cargarle el rating de una
-  -- jugadora a otra.
-  select count(*), sum(rating) into v_dictados, v_suma from _rating_dictado_0039;
-  if v_dictados <> 88 or v_suma <> 130919 then
-    raise exception 'Rating abortado: se esperaban 88 filas y suma 130919; llegaron % filas y suma %',
-      v_dictados, v_suma;
-  end if;
 
-  select count(*) into v_faltan
-    from _rating_dictado_0039 d
-    left join players p on p.id = d.player_id
-   where p.id is null;
-  if v_faltan > 0 then
-    raise exception 'Rating abortado: % player_id del cotejo no existen en players', v_faltan;
-  end if;
-
-  -- (a) Los 88 dictados por el organizador.
-  --     Igual que (b), solo toca a quien AÚN NO tiene semilla. Si el organizador
-  --     corrige a mano el rating de una jugadora, re-ejecutar la migración NO se
-  --     lo revierte. Sin este guard, un re-run dejaría rating_seed con el valor
-  --     viejo y rating con el editado: exactamente la desincronización que el
-  --     encabezado de esta migración declara imposible.
-  --     (a), (b) y (c) viven dentro de un único bloque DO, que es UNA sola
-  --     sentencia y por tanto atómica: o se aplican los tres o ninguno. No hay
-  --     estado intermedio posible entre ellos.
-  --     (Y ojo al escribir aquí dentro: el cuerpo del bloque va entre comillas
-  --     de dólar, así que Postgres NO interpreta estas líneas como comentarios.
-  --     Un par de signos de dólar suelto en un comentario cierra el bloque antes
-  --     de tiempo y rompe la migración entera.)
+  -- (a) Los 88 dictados por el organizador. Solo toca a quien AÚN NO tiene
+  --     semilla, para no pisar una corrección manual en una re-ejecución.
+  --     Los valores van sin castear: se convierten en el punto de uso.
+  with d(player_id, rating) as (
+    values
+      ('13798594-bc72-4d53-a335-63c0d2ac3834', 2061),  -- Alejandra García (FEM_3)
+      ('2996c6da-3ef5-4588-a353-6c27414b00a3', 2436),  -- Alma Huguette de Alba (FEM_3)
+      ('0d95712d-7edc-4330-8c0c-b9c28f7f38b0', 2072),  -- Carolina Treviño (FEM_3)
+      ('48b1bdb7-4467-4e0c-984e-b098f6be7a9a', 2066),  -- Griselda Oaxaca Molinar (FEM_3)
+      ('799f7da6-909b-450d-b7fc-221bce74c414', 2188),  -- Laura Lozoya (FEM_3)
+      ('07efa173-034b-4b1c-a1de-260f130a979e', 2040),  -- Lili Avalos (FEM_3)
+      ('c2d0d2cf-1149-4106-bc7e-eadb03c9cbff', 2245),  -- María Fernanda Prado (FEM_3)
+      ('3a6dcd31-97d6-4d48-9df3-4fc61dfc3c1f', 2171),  -- Mónica Hernandez (FEM_3)
+      ('5b744019-bd76-4d25-adba-d668ee315e26', 2062),  -- Paola López (FEM_3)
+      ('36eee2ec-09be-487a-b42a-8502ff2c7e32', 2165),  -- Sara Hernandez (FEM_3)
+      ('a0981a9d-63f5-4751-b37e-c8c00b545c6e', 1985),  -- Adriana Haro (FEM_4)
+      ('e8c36b72-b79d-4f53-ae24-c4e37c0aaf7a', 1827),  -- Alejandra Contreras (FEM_4)
+      ('2e921d12-38f0-4dee-a85d-2fd0046f793d', 1857),  -- Ana Escarcega (FEM_4)
+      ('7be0935e-86db-4e02-abd6-a78c83740972', 1935),  -- Andrea Dávila (FEM_4)
+      ('23881b66-8a49-4de5-8a63-b553ba736ddb', 1560),  -- Andrea García (FEM_4)
+      ('f9f190ed-bb0a-48ce-b544-437fd11ae7ff', 1778),  -- Anilú Gaytán (FEM_4)
+      ('baeb5a35-0c02-4606-a911-15d3ded6e19e', 1781),  -- Blanca Ramos (FEM_4)
+      ('cbb66239-0819-49f8-aca2-b5ed0d7a4e2a', 1819),  -- Daniela Rodríguez (FEM_4)
+      ('0d6a3ff3-81ef-4cd5-a6c2-49cd1a0b1f65', 1589),  -- Dayana Peña (FEM_4)
+      ('e3cfabc6-e724-4010-9a2a-6eb6e468e096', 1629),  -- Janeth Carbajal (FEM_4)
+      ('94efdb66-c3b4-41e3-910f-4884d1cf5cf2', 1855),  -- Laura García Gardea (FEM_4)
+      ('d94c6e66-cb1d-44cf-8db2-2d000ddce87e', 1703),  -- Liliana Rodríguez (FEM_4)
+      ('88cf3ff3-b7ad-4601-88de-867681c9edfb', 1558),  -- Lydia Juárez (FEM_4)
+      ('fe36344f-dfa5-4fff-b071-34ee22b7168a', 1611),  -- Maria Renee Gonzalez (FEM_4)
+      ('10e6e0d7-54ab-4d17-99ce-96e755d9fcea', 1661),  -- Morena Marrufo (FEM_4)
+      ('5d812361-e100-4d3e-8d86-557cd704869a', 1733),  -- Nidia Shamira Gutierrez Barajas (FEM_4)
+      ('06722f8e-e8cd-4095-b8ac-bb17a3121ee2', 1976),  -- Paola Lozano (FEM_4)
+      ('c0efa3f0-d568-42c9-b4d4-d08e48bda31c', 1703),  -- Paola Rodríguez (FEM_4)
+      ('8157df01-2a15-4667-a287-fbe7272f4b28', 2028),  -- Paulina Labrado (FEM_4)
+      ('745d0ba9-300a-405d-8394-e125656d0c04', 1444),  -- Samantha Garza (FEM_4)
+      ('4b5eba6a-0143-42ba-ab58-27c55583dcbe', 1608),  -- Sofía Payán (FEM_4)
+      ('51439dc2-bda7-4382-b698-f8052e4d0e02', 1755),  -- Violeta Fierro Gonzalez (FEM_4)
+      ('91ca35f1-c6e1-426b-8063-1f73f9adc7cc', 1715),  -- Zayra Azaeta (FEM_4)
+      ('6f1156ab-633f-4df9-9da8-71ed6bca466e', 1469),  -- Almendra Robles (FEM_5)
+      ('6ce41519-6878-4250-bcf1-586dabe0e6f3', 1506),  -- Amelia Melendez (FEM_5)
+      ('dd2ac7b5-bebe-4654-b6b8-a0f49bbc13e3', 1403),  -- Astrid  Buenrostro (FEM_5)
+      ('bfb1d406-76be-42b8-a0ae-a4b440cdc0bc', 1559),  -- Brenda Rodallegas (FEM_5)
+      ('c81e6ec3-bf54-4a9d-abfe-bf85e7a4ed71', 1655),  -- Claudia Hinojos (FEM_5)
+      ('f72259f4-d5d4-4620-ad39-adadba744445', 1536),  -- Cris Amaro (FEM_5)
+      ('3d6d8af7-4ea6-4d14-b0a5-6c752b16ff07', 1358),  -- Cristina González (FEM_5)
+      ('9f38c823-aadf-45b6-bec9-fb70c625bdad', 1622),  -- Elizabeth Murillo (FEM_5)
+      ('510c9012-f846-4b1e-b34d-1f7354dafb59', 1379),  -- Frida Martinez (FEM_5)
+      ('edd7bbde-385d-4774-96d3-e753cf04ba51', 1508),  -- Gabriela Garcia (FEM_5)
+      ('b99b2cf8-5068-4e2e-b363-3bf67b41a42c', 1153),  -- Giselle Gamez (FEM_5)
+      ('a4d6dc60-c2ef-4400-b1ea-7c43a5406c30', 1474),  -- Jenny Sáenz (FEM_5)
+      ('4ffb456c-8c4c-4e80-9591-b0b2cd9ce376', 1250),  -- Liz Magallanes (FEM_5)
+      ('c557bee5-7ec7-4176-a8df-76b6d910713e', 1672),  -- Marian Davila (FEM_5)
+      ('9001eb51-e0c7-4e76-b4c1-9af4f4bd6675', 1566),  -- Martha Reyes (FEM_5)
+      ('8e428114-1911-4809-94fb-8a8e7cb72af0', 1306),  -- Michelle Gamez (FEM_5)
+      ('69bf4e07-867e-46c6-82f5-5ad6aa528c07', 1552),  -- Mily Hernandez (FEM_5)
+      ('0066a10e-b752-47d1-9a80-6a3455c1521e', 1368),  -- Mitzi Valdes (FEM_5)
+      ('a1a542f4-5e43-4a1a-a2ab-d81c53be0d21', 1618),  -- Silvia Félix (FEM_5)
+      ('b33e4dd8-4a51-4d31-a7c7-36547a44ddc1', 1159),  -- Sophia Ortiz (FEM_5)
+      ('d95dedf4-008e-44d4-958c-3f6abfb40cc3', 1351),  -- Thelma Hernandez (FEM_5)
+      ('477c4cd2-31a6-4b7c-baf3-bfe7f59bf991', 1249),  -- Yanery Cazarez (FEM_5)
+      ('66bc2f60-03a7-4e81-8b9e-9ba0b333021e', 923),  -- Adriana Cabrera (FEM_6)
+      ('22f52467-81a9-4040-8e88-63c66456bf16', 855),  -- Alejandra Hernandez (FEM_6)
+      ('d42bb210-ca9f-4f65-b6f8-1bb37b341dee', 1094),  -- Alma Rivero (FEM_6)
+      ('6d9f76d2-fa60-4541-8796-c763d99c2979', 1076),  -- Ana Laura Portillo (FEM_6)
+      ('0cfe90ab-6bde-4c68-b27e-a7db9e0647f6', 1132),  -- Analucía Prado (FEM_6)
+      ('51014a31-0fe1-4328-bd78-6da681fd774d', 1645),  -- Andrea Barragan (FEM_6)
+      ('8a11b78e-9039-4949-878e-0043c245f41c', 984),  -- Betsabé Urita (FEM_6)
+      ('73bd099a-b25e-4d04-9ef1-e762b14b380f', 1550),  -- Bibiana Del castillo (FEM_6)
+      ('414602e7-6fa1-4f65-ad1f-7d1c57093b0d', 1146),  -- Celeste Zapata (FEM_6)
+      ('f6bb8b4f-3f26-4ab7-8d6b-2517b0736dcd', 1228),  -- Cris Hernandez (FEM_6)
+      ('fc040203-4c91-4b6e-8a6f-eefe6625269c', 1298),  -- Cristina Peláez (FEM_6)
+      ('99513a90-182e-45b9-914e-2aefd51cbd2f', 1189),  -- Dalia Garcia (FEM_6)
+      ('a28af459-4a0e-4f40-9e62-870524b031d6', 1030),  -- Daniela Gallardo (FEM_6)
+      ('881877b5-247d-4345-95e7-a4bff3b772f7', 1061),  -- Gabriela Melgar (FEM_6)
+      ('7c894bdc-cca0-4775-a8f9-00ae39c31028', 1314),  -- Gabriela Silva (FEM_6)
+      ('86d9a194-4095-4014-9c07-87cf8343302a', 1068),  -- Georgina Anchondo Sáenz (FEM_6)
+      ('7f8dcdd4-087c-4165-b03e-96ff193e68f2', 1030),  -- Iris Guillén (FEM_6)
+      ('cc0af089-ab99-49e2-9d05-55cfb7077413', 935),  -- Laura Baeza (FEM_6)
+      ('bbc96596-ffbe-440c-82cf-835137795e96', 1446),  -- Mara Nevarez (FEM_6)
+      ('74b4a4ad-2630-40a3-ba72-f10d7574ea93', 1302),  -- Marcela Barraza (FEM_6)
+      ('27496059-7f92-49be-ae82-827c6ed6a426', 1067),  -- Mia Gonzalez (FEM_6)
+      ('62c9ee45-61a6-4ac1-ac6b-3c78b85f22aa', 1152),  -- Nadia Salas (FEM_6)
+      ('995c5bcb-cb5b-4ba0-b2c5-70b6031ae5d0', 1286),  -- Nidia Armendáriz (FEM_6)
+      ('0b9ed370-fbc4-43ef-87ce-afdc5879cfcb', 1498),  -- Paola Cazares (FEM_6)
+      ('5bae783c-d365-4b9c-9db1-42b4ccc91892', 1383),  -- Priscilla Lozano (FEM_6)
+      ('6a1b752a-373f-4024-b975-a4cc7142884a', 1282),  -- Sandra Loya (FEM_6)
+      ('124109cf-0ff0-41ad-917c-550e196491c0', 1026),  -- Tamahara Duarte Valdiviez (FEM_6)
+      ('68a2cdab-bf92-4320-ae5c-81611b500423', 1170),  -- Tana Otamendi (FEM_6)
+      ('3c42cf8c-8e78-4401-9d1b-a7cff231feff', 1034),  -- Ale Valdez (FEM_7)
+      ('c0ae9e8d-924a-44ea-9810-c62f92c2a18a', 1071),  -- Berenice Guerrero (FEM_7)
+      ('607ee9d3-26e8-466e-b77f-dceeb5afeaf5', 796),  -- Cindy Urita (FEM_7)
+      ('4a0e28b1-3840-42c7-b85c-1455cc9fbe76', 704),  -- Damaris gallegos (FEM_7)
+      ('a2c996e9-e234-4a60-aaae-89531a0935dd', 815)   -- Laura Olivas (FEM_7)
+  )
   update players p
-     set rating_seed        = d.rating,
+     set rating_seed        = d.rating::numeric,
          rating_seed_source = 'dictado'
-    from _rating_dictado_0039 d
-   where p.id = d.player_id
+    from d
+   where p.id = d.player_id::uuid
      and p.rating_seed is null;
 
-  -- (b) El resto, por categoría. Solo toca a quien AÚN NO tiene semilla, así que
-  --     re-ejecutar no pisa una edición posterior del organizador.
+  get diagnostics v_dictados = row_count;
+
+  -- (b) El resto, por categoría.
   update players p
      set rating_seed        = cs.seed,
          rating_seed_source = 'categoria'
@@ -599,17 +573,35 @@ begin
      and rating_seed is not null
      and coalesce(rating_matches, 0) = 0;
 
-  -- Comprobación final: nadie activo puede quedarse sin semilla. Si alguien tiene
-  -- una category_code fuera de rating_category_seeds (p. ej. una categoría nueva
-  -- sin semilla definida), esto lo saca a la luz en vez de dejarlo en null.
-  select count(*) into v_sin_semilla
-    from players where is_active = true and rating_seed is null;
-  if v_sin_semilla > 0 then
-    raise exception 'Rating incompleto: % jugadores activos quedaron sin semilla (¿categoría sin fila en rating_category_seeds?)',
-      v_sin_semilla;
+  -- -------------------------------------------------------------------------
+  -- Comprobaciones. Van DESPUÉS de escribir porque un raise aquí revierte el
+  -- bloque completo: es una sola sentencia y por tanto atómica. Si algo no
+  -- cuadra, players queda exactamente como estaba.
+  -- -------------------------------------------------------------------------
+
+  -- O se escribieron las 88 (carga inicial) o ninguna (re-ejecución). Cualquier
+  -- número intermedio significa que el roster cambió bajo los pies del cotejo.
+  if v_dictados not in (0, 88) then
+    raise exception 'Rating abortado: se esperaba escribir 88 semillas dictadas o ninguna (re-ejecución); se escribieron %. ¿Cambió el roster desde el cotejo?', v_dictados;
   end if;
 
-  raise notice 'Rating sembrado: % dictados + resto por categoría.', v_dictados;
-end $$;
+  -- Suma de control, solo en la carga inicial: en una re-ejecución posterior el
+  -- organizador ya pudo corregir semillas a mano y la suma cambiaría con razón.
+  if v_dictados = 88 then
+    select sum(rating_seed) into v_suma
+      from players where rating_seed_source = 'dictado';
+    if v_suma <> 130919 then
+      raise exception 'Rating abortado: la suma de las semillas dictadas es % y debía ser 130919', v_suma;
+    end if;
+  end if;
 
-drop table if exists _rating_dictado_0039;
+  -- Nadie activo puede quedarse sin semilla. Si alguien tiene una category_code
+  -- fuera de rating_category_seeds, esto lo saca a la luz en vez de dejarlo null.
+  select count(*) into v_sin
+    from players where is_active = true and rating_seed is null;
+  if v_sin > 0 then
+    raise exception 'Rating incompleto: % jugadores activos quedaron sin semilla (¿categoría sin fila en rating_category_seeds?)', v_sin;
+  end if;
+
+  raise notice 'Rating sembrado: % semillas dictadas escritas; el resto por categoría.', v_dictados;
+end $$;
