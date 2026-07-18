@@ -18,6 +18,8 @@ function player(p: Partial<PublicPlayer> & { id: string; full_name: string; cate
     photo_url: null,
     is_waitlisted: false,
     position: null,
+    rating: null,
+    rating_matches: 0,
     ...p,
   }
 }

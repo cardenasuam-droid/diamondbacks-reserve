@@ -13,6 +13,7 @@ import { teamColor } from '@/lib/color'
 import { initialsOf } from '@/components/ui/Avatar'
 import { imageThumb } from '@/lib/image'
 import { PositionChip } from '@/components/ui/PositionChip'
+import { RatingChip } from '@/components/ui/RatingChip'
 import { TeamCrest } from '@/components/ui/TeamCrest'
 import { Badge } from '@/components/ui/Badge'
 import { EmptyState } from '@/components/ui/EmptyState'
@@ -121,6 +122,10 @@ export function PlayerDetailPage() {
             {player.is_cocaptain && <Badge color="blue">Co-capitán</Badge>}
             {/* Lado de juego: dato deportivo público (players_public, 0026). */}
             <PositionChip position={player.position} />
+            {/* Rating ELO (0039). Va aquí y NO en la rejilla de estadísticas de
+                abajo porque esa rejilla solo se pinta cuando el jugador ya tiene
+                resultados: el rating existe desde antes de la primera jornada. */}
+            <RatingChip rating={player.rating} matches={player.rating_matches} size="lg" />
           </div>
         </div>
       </div>
