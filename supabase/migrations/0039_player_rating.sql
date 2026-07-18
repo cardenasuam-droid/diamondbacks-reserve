@@ -131,15 +131,20 @@ alter table players add constraint players_rating_seed_source_check
 -- toca: mover la semilla bajo los pies de un rating con historia lo falsearía;
 -- en ese caso el organizador ajusta a mano y queda auditado.
 -- ---------------------------------------------------------------------------
--- SECURITY INVOKER (el default) a propósito: la única tabla que lee es
--- rating_category_seeds, que tiene lectura pública, así que no hace falta elevar
--- privilegios. `pg_temp` va al final del search_path por higiene: es la primera
--- función de este repo que LEE una tabla desde un trigger, y sin fijarlo un
--- objeto temporal homónimo podría interponerse (mismo criterio que save_lineup).
+-- SECURITY INVOKER (el default) a propósito: no hace falta elevar privilegios.
+-- Lee dos tablas: rating_category_seeds (lectura pública) y, en el camino de
+-- UPDATE, player_rating_adjustments (solo organizador/viewer). Esa segunda se
+-- evalúa con la RLS de quien dispara el trigger, así que alguien sin ese rol
+-- vería "sin ajustes". Hoy es inofensivo porque la ÚNICA política de UPDATE
+-- sobre players es "organizer all" y el organizador sí ve sus propios ajustes;
+-- si algún día se le da escritura de roster al capitán hay que revisar esto, o
+-- la resiembra automática pisaría un ajuste manual sin verlo.
+-- `pg_temp` va al final del search_path por higiene (mismo criterio que save_lineup).
 create or replace function set_player_rating_seed()
 returns trigger language plpgsql set search_path = public, pg_temp as $$
 declare
-  v_seed numeric;
+  v_seed       numeric;
+  v_resembrado boolean := false;   -- ¿cambió la semilla el sistema, o una persona?
 begin
   if tg_op = 'INSERT' then
     if new.rating_seed is null then
@@ -185,28 +190,50 @@ begin
     if v_seed is not null then
       new.rating_seed := v_seed;
       new.rating      := v_seed;
+      v_resembrado    := true;
     end if;
   end if;
 
-  -- Sello de auditoría cuando la semilla cambia (venga de donde venga). Una
-  -- semilla editada a mano pasa a ser 'dictado': es exactamente lo que es, y así
-  -- deja de estar expuesta a la resiembra automática de arriba.
+  -- Sello de auditoría cuando la semilla cambia, venga de donde venga.
   if new.rating_seed is distinct from old.rating_seed then
     new.rating_seed_at := now();
     new.rating_seed_by := auth.uid();
-    if coalesce(new.rating_seed_source, '') = 'categoria'
+
+    -- Una semilla editada A MANO pasa a ser 'dictado': es exactamente lo que es,
+    -- y así deja de estar expuesta a la resiembra automática de arriba.
+    -- El `not v_resembrado` es imprescindible: sin él, la resiembra que acaba de
+    -- correr caería aquí y se auto-marcaría como dictada. Dos daños a la vez:
+    -- la ficha diría que el organizador puso un número que puso el sistema, y
+    -- un segundo cambio de categoría ya no resembraría nunca, porque la
+    -- condición de arriba exige source='categoria'.
+    if not v_resembrado
+       and coalesce(new.rating_seed_source, '') = 'categoria'
        and new.rating_seed_source is not distinct from old.rating_seed_source then
       new.rating_seed_source := 'dictado';
+    end if;
+
+    -- La semilla arrastra al rating vigente. La resiembra ya lo hace; el camino
+    -- MANUAL también tiene que hacerlo, o corregir una semilla antes de la
+    -- primera jornada dejaría rating_seed nuevo y rating viejo — y el viejo es
+    -- justo el número que ven el público y el ranking. Solo mientras no haya
+    -- historia: en cuanto el jugador tiene partidos, el rating lo manda el
+    -- recálculo y no la semilla.
+    if not v_resembrado
+       and coalesce(new.rating_matches, 0) = 0
+       and new.rating is not distinct from old.rating then
+      new.rating := new.rating_seed;
     end if;
   end if;
 
   return new;
 end $$;
 
-drop trigger if exists trg_players_rating_seed on players;
-create trigger trg_players_rating_seed
-  before insert or update on players
-  for each row execute function set_player_rating_seed();
+-- El trigger se crea MÁS ABAJO, después de player_rating_adjustments (sección 5),
+-- porque el camino de UPDATE consulta esa tabla. plpgsql compila la condición del
+-- `if` como un solo SELECT, así que no hay cortocircuito que salve: con el trigger
+-- activo y la tabla todavía inexistente, CUALQUIER update sobre players fallaría
+-- —aunque no toque category_code— y si el script se cortara en esa ventana,
+-- players quedaría con un trigger roto bloqueando toda escritura.
 
 -- ---------------------------------------------------------------------------
 -- 5. Ajustes manuales del organizador
@@ -230,6 +257,12 @@ create table if not exists player_rating_adjustments (
 
 create index if not exists idx_rating_adjustments_player on player_rating_adjustments (player_id);
 create index if not exists idx_rating_adjustments_season on player_rating_adjustments (season_id, round_id);
+
+-- Ahora sí: el trigger de la sección 4, una vez que existe la tabla que consulta.
+drop trigger if exists trg_players_rating_seed on players;
+create trigger trg_players_rating_seed
+  before insert or update on players
+  for each row execute function set_player_rating_seed();
 
 -- ---------------------------------------------------------------------------
 -- 6. Historia: un evento por jugador y partido
@@ -351,10 +384,14 @@ grant select on player_rating_adjustments to authenticated;
 -- Escritura: solo para usuarios con sesión. QUIÉN exactamente lo decide la RLS
 -- ("organizer all"); el grant es la puerta exterior, la policy la interior.
 -- anon queda sin ninguna escritura sobre estas cuatro tablas.
+-- Se conceden los cuatro verbos donde la policy es "organizer all" (for all).
+-- En particular INSERT sobre rating_settings, que solo tiene una fila: sin él, un
+-- panel que use el upsert de PostgREST (.upsert({id:1,…}) emite
+-- INSERT … ON CONFLICT) fallaría con 42501 aunque la fila ya exista.
 grant insert, update, delete on player_rating_events      to authenticated;
 grant insert, update, delete on player_rating_adjustments to authenticated;
-grant insert, update         on rating_category_seeds     to authenticated;
-grant update                 on rating_settings           to authenticated;
+grant insert, update, delete on rating_category_seeds     to authenticated;
+grant insert, update         on rating_settings           to authenticated;
 
 -- ---------------------------------------------------------------------------
 -- 8. Vista pública
@@ -531,8 +568,9 @@ begin
   --     lo revierte. Sin este guard, un re-run dejaría rating_seed con el valor
   --     viejo y rating con el editado: exactamente la desincronización que el
   --     encabezado de esta migración declara imposible.
-  --     Correcto ante fallos: (a) corre ANTES que (b), así que si el script se
-  --     interrumpe y se re-ejecuta, los 88 ya están bien y (b) rellena el resto.
+  --     (a), (b) y (c) viven dentro de un único bloque do $$, que es UNA sola
+  --     sentencia y por tanto atómica: o se aplican los tres o ninguno. No hay
+  --     estado intermedio posible entre ellos.
   update players p
      set rating_seed        = d.rating,
          rating_seed_source = 'dictado'
