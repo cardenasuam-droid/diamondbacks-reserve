@@ -24,16 +24,7 @@ export interface RatingRow {
   rating: number
   rating_matches: number
   position: number
-  /** Menos de MIN_PARTIDOS_FIABLE: el número aún es la semilla, no lo movió la cancha. */
-  provisional: boolean
 }
-
-/**
- * Por debajo de este número de partidos el rating es más semilla que resultado.
- * Coincide con el umbral de RatingChip a propósito: un jugador no puede aparecer
- * marcado como provisional en su ficha y como definitivo en el ranking.
- */
-export const MIN_PARTIDOS_FIABLE = 6
 
 /**
  * Ordena por rating descendente y asigna posición.
@@ -81,7 +72,6 @@ export function rankByRating(players: RatedPlayer[]): RatingRow[] {
       rating: Math.round(p.rating),
       rating_matches: p.rating_matches ?? 0,
       position: posicion,
-      provisional: (p.rating_matches ?? 0) < MIN_PARTIDOS_FIABLE,
     })
   })
 

@@ -162,7 +162,6 @@ function RatingTab({ seasonId, teams }: { seasonId: string; teams: ReturnType<ty
   const teamById = new Map((teams.data ?? []).map((t) => [t.id, t]))
   const photoById = new Map((players.data ?? []).map((p) => [p.id, p.photo_url]))
   const typeOf = new Map((categories.data ?? []).map((c) => [c.code, c.type]))
-  const hayProvisionales = filas.some((f) => f.provisional)
 
   return (
     <div className="space-y-3">
@@ -192,14 +191,8 @@ function RatingTab({ seasonId, teams }: { seasonId: string; teams: ReturnType<ty
                   <td className="hidden px-2 py-2.5 text-center tabular-nums text-slate-600 sm:table-cell">
                     {f.rating_matches}
                   </td>
-                  <td
-                    className={
-                      'px-2 py-2.5 text-center font-bold tabular-nums ' +
-                      (f.provisional ? 'text-slate-500' : 'text-slate-900')
-                    }
-                  >
+                  <td className="px-2 py-2.5 text-center font-bold tabular-nums text-slate-900">
                     {f.rating}
-                    {f.provisional && <span className="ml-0.5 font-normal text-slate-500">*</span>}
                   </td>
                 </tr>
               )
@@ -211,13 +204,6 @@ function RatingTab({ seasonId, teams }: { seasonId: string; teams: ReturnType<ty
       <p className="text-xs text-slate-500">
         El rating mide nivel de juego, no resultados: sube al ganarle a parejas mejor valoradas y baja al
         perder contra las de menos. El marcador influye en cuánto se mueve.
-        {hayProvisionales && (
-          <>
-            {' '}
-            El asterisco marca un rating <strong>provisional</strong>: el jugador aún no ha jugado los
-            partidos suficientes para que la cancha lo haya movido de su valor inicial.
-          </>
-        )}
       </p>
     </div>
   )

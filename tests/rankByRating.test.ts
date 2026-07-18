@@ -1,4 +1,4 @@
-import { rankByRating, MIN_PARTIDOS_FIABLE } from '@/features/rating/rankByRating'
+import { rankByRating } from '@/features/rating/rankByRating'
 import type { RatedPlayer } from '@/features/rating/rankByRating'
 
 function jugador(p: Partial<RatedPlayer> & { id: string; full_name: string }): RatedPlayer {
@@ -40,7 +40,6 @@ describe('rankByRating', () => {
     )
     const filas = rankByRating(plana)
     expect(new Set(filas.map((f) => f.position))).toEqual(new Set([1]))
-    expect(filas.every((f) => f.provisional)).toBe(true)
   })
 
   it('a igual rating ordena primero a quien tiene más partidos, aunque compartan posición', () => {
@@ -70,13 +69,15 @@ describe('rankByRating', () => {
     expect(filas[0].full_name).toBe('Ana')
   })
 
-  it('marca provisional por debajo del umbral y definitivo a partir de él', () => {
+  it('conserva los partidos jugados para mostrarlos en su columna', () => {
+    // Es el único matiz que se publica sobre la solidez de un número: cuántos
+    // partidos lo respaldan. El rating en sí se muestra igual para todos, sin
+    // marcas ni adjetivos (decisión del organizador).
     const filas = rankByRating([
-      jugador({ id: '1', full_name: 'Justa', rating: 1900, rating_matches: MIN_PARTIDOS_FIABLE }),
-      jugador({ id: '2', full_name: 'Corta', rating: 1800, rating_matches: MIN_PARTIDOS_FIABLE - 1 }),
+      jugador({ id: '1', full_name: 'Veterana', rating: 1900, rating_matches: 9 }),
+      jugador({ id: '2', full_name: 'Nueva', rating: 1800, rating_matches: 0 }),
     ])
-    expect(filas[0].provisional).toBe(false)
-    expect(filas[1].provisional).toBe(true)
+    expect(filas.map((f) => f.rating_matches)).toEqual([9, 0])
   })
 
   it('redondea el rating a entero para mostrarlo', () => {
