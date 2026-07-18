@@ -5,6 +5,7 @@ import { useTeams } from '@/features/teams/useTeams'
 import { usePublicPlayers } from '@/features/teams/usePublicPlayers'
 import { useStandings } from '@/features/standings/useStandings'
 import { usePlayerRankings } from '@/features/stats/usePlayerRankings'
+import { rankByRating } from '@/features/rating/rankByRating'
 import { useCategories } from '@/features/categories/useCategories'
 import { categoryColor } from '@/features/categories/categoryColor'
 import { PageHeader } from '@/components/ui/PageHeader'
@@ -15,11 +16,14 @@ import { Badge } from '@/components/ui/Badge'
 import { Avatar } from '@/components/ui/Avatar'
 import { TeamCrest } from '@/components/ui/TeamCrest'
 
-type Tab = 'jugadores' | 'equipos'
+type Tab = 'jugadores' | 'equipos' | 'rating'
+
+const TABS: Tab[] = ['jugadores', 'equipos', 'rating']
 
 export function StatsPage() {
   const [params, setParams] = useSearchParams()
-  const initial: Tab = params.get('tab') === 'equipos' ? 'equipos' : 'jugadores'
+  const desdeUrl = params.get('tab')
+  const initial: Tab = TABS.includes(desdeUrl as Tab) ? (desdeUrl as Tab) : 'jugadores'
   const [tab, setTab] = useState<Tab>(initial)
 
   const season = useActiveSeason()
@@ -28,7 +32,7 @@ export function StatsPage() {
 
   function selectTab(t: Tab) {
     setTab(t)
-    setParams(t === 'equipos' ? { tab: 'equipos' } : {}, { replace: true })
+    setParams(t === 'jugadores' ? {} : { tab: t }, { replace: true })
   }
 
   if (season.isLoading) return <Loader label="Cargando temporada…" />
@@ -46,7 +50,7 @@ export function StatsPage() {
       <PageHeader title="Estadísticas" subtitle={season.data.name} />
 
       <div className="mb-4 inline-flex rounded-lg border border-slate-200 bg-slate-100 p-0.5">
-        {(['jugadores', 'equipos'] as Tab[]).map((t) => (
+        {TABS.map((t) => (
           <button
             key={t}
             onClick={() => selectTab(t)}
@@ -60,11 +64,9 @@ export function StatsPage() {
         ))}
       </div>
 
-      {tab === 'jugadores' ? (
-        <PlayersTab teamIds={teamIds} teams={teams} seasonId={season.data.id} />
-      ) : (
-        <TeamsTab seasonId={season.data.id} teams={teams} />
-      )}
+      {tab === 'jugadores' && <PlayersTab teamIds={teamIds} teams={teams} seasonId={season.data.id} />}
+      {tab === 'equipos' && <TeamsTab seasonId={season.data.id} teams={teams} />}
+      {tab === 'rating' && <RatingTab seasonId={season.data.id} teams={teams} />}
     </div>
   )
 }
@@ -129,6 +131,80 @@ function PlayersTab({
           })}
         </tbody>
       </table>
+    </div>
+  )
+}
+
+// Ranking global por rating ELO (0039). Mezcla las 8 categorías en una sola tabla
+// a propósito: la escalera de siembra es una escala absoluta (FEM_5 y VAR_6
+// arrancan ambos en 1500), así que los números son comparables entre categorías.
+// Los jugadores en lista de espera no salen: players_public les devuelve rating
+// null por decisión del organizador, y rankByRating los descarta.
+function RatingTab({ seasonId, teams }: { seasonId: string; teams: ReturnType<typeof useTeams> }) {
+  const players = usePublicPlayers(seasonId)
+  const categories = useCategories()
+
+  if (players.isLoading || teams.isLoading) return <Loader label="Cargando rating…" />
+  if (players.isError) return <ErrorState onRetry={() => players.refetch()} />
+
+  const filas = rankByRating(players.data ?? [])
+
+  if (filas.length === 0) {
+    return (
+      <EmptyState
+        icon="medal"
+        title="Sin rating todavía"
+        description="Aparecerá cuando se carguen los puntos iniciales de los jugadores."
+      />
+    )
+  }
+
+  const teamById = new Map((teams.data ?? []).map((t) => [t.id, t]))
+  const photoById = new Map((players.data ?? []).map((p) => [p.id, p.photo_url]))
+  const typeOf = new Map((categories.data ?? []).map((c) => [c.code, c.type]))
+
+  return (
+    <div className="space-y-3">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+              <th className="px-2 py-2.5 text-center font-semibold">#</th>
+              <th className="px-2 py-2.5 text-left font-semibold">Jugador</th>
+              <th className="hidden px-2 py-2.5 text-center font-semibold sm:table-cell">PJ</th>
+              <th className="px-2 py-2.5 text-center font-semibold">Rating</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filas.map((f) => {
+              const team = f.team_id ? teamById.get(f.team_id) : undefined
+              return (
+                <tr key={f.id} className="border-b border-slate-100 last:border-0">
+                  <td className="px-2 py-2.5 text-center font-semibold text-slate-500">{f.position}</td>
+                  <td className="px-2 py-2.5">
+                    <Link to={`/jugadores/${f.id}`} className="flex items-center gap-2 hover:opacity-70">
+                      <Avatar name={f.full_name} photoUrl={photoById.get(f.id)} color={team?.color} size={28} />
+                      <span className="font-medium text-slate-800">{f.full_name}</span>
+                      <Badge color={categoryColor(typeOf.get(f.category_code))}>{f.category_code}</Badge>
+                    </Link>
+                  </td>
+                  <td className="hidden px-2 py-2.5 text-center tabular-nums text-slate-600 sm:table-cell">
+                    {f.rating_matches}
+                  </td>
+                  <td className="px-2 py-2.5 text-center font-bold tabular-nums text-slate-900">
+                    {f.rating}
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <p className="text-xs text-slate-500">
+        El rating mide nivel de juego, no resultados: sube al ganarle a parejas mejor valoradas y baja al
+        perder contra las de menos. El marcador influye en cuánto se mueve.
+      </p>
     </div>
   )
 }

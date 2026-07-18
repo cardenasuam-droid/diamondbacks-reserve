@@ -28,6 +28,7 @@ import { LineupEditorPage } from './captain/LineupEditorPage'
 import { OrganizerDashboard } from './organizer/OrganizerDashboard'
 import { OrganizerLineupsPage } from './organizer/OrganizerLineupsPage'
 import { OrganizerResultsPage } from './organizer/OrganizerResultsPage'
+import { OrganizerRatingPage } from './organizer/OrganizerRatingPage'
 import { OrganizerImportPage } from './organizer/OrganizerImportPage'
 import { OrganizerTeamsPage } from './organizer/OrganizerTeamsPage'
 import { OrganizerRosterPage } from './organizer/OrganizerRosterPage'
@@ -107,6 +108,7 @@ export const router = createBrowserRouter([
               { path: 'draft', element: <OrganizerDraftPage /> },
               { path: 'alineaciones', element: <OrganizerLineupsPage /> },
               { path: 'resultados', element: <OrganizerResultsPage /> },
+              { path: 'rating', element: <OrganizerRatingPage /> },
               { path: 'importar', element: <OrganizerImportPage /> },
               { path: 'equipos', element: <OrganizerTeamsPage /> },
               { path: 'equipos/:teamId', element: <OrganizerRosterPage /> },

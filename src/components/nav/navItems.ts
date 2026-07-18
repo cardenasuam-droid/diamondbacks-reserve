@@ -98,6 +98,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: '/app/organizador/draft', label: 'Draft', icon: 'medal', requires: 'organizer' },
       { to: '/app/organizador/alineaciones', label: 'Estado de alineaciones', icon: 'lineups-status', requires: 'organizer' },
       { to: '/app/organizador/resultados', label: 'Resultados', icon: 'results-edit', requires: 'organizer' },
+      { to: '/app/organizador/rating', label: 'Rating', icon: 'stats', requires: 'organizer' },
       { to: '/app/organizador/equipos', label: 'Equipos y jugadores', icon: 'teams', requires: 'organizer' },
       { to: '/app/organizador/importar', label: 'Importar CSV', icon: 'import', requires: 'organizer' },
     ],

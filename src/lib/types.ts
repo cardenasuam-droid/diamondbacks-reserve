@@ -72,6 +72,13 @@ export interface PublicPlayer {
   photo_url: string | null
   is_waitlisted: boolean
   position: PlayerPosition | null
+  // Rating ELO (0039). Público por decisión del organizador. Es entero: el motor
+  // redondea el delta una sola vez por partido. `rating_matches` viaja con él
+  // porque en la jornada 1 todos los jugadores sin rating dictado comparten la
+  // semilla de su categoría — la UI necesita poder decir "aún sin partidos" en
+  // vez de parecer rota. Nullable por si la migración aún no corrió.
+  rating: number | null
+  rating_matches: number
 }
 
 export interface Profile {
