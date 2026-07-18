@@ -20,10 +20,15 @@
 -- incremental: los resultados se sobrescriben con upsert y las alineaciones son
 -- editables después del resultado, así que no hay estado viejo del que partir.
 --
--- Nota de sintaxis: el cuerpo va con etiqueta ($fn$) y no con el delimitador
--- desnudo. Con delimitador desnudo, un par de signos de dólar escrito dentro de
--- un comentario del cuerpo cierra el bloque antes de tiempo — Postgres no lee
--- comentarios ahí dentro. Con etiqueta, eso deja de ser posible.
+-- Nota de sintaxis, aprendida a golpes en 0039 y en el primer intento de esta:
+-- el cuerpo va con el delimitador de dólar DESNUDO, como todas las funciones de
+-- este repo. Una etiqueta con nombre parece más segura, pero el separador de
+-- sentencias del SQL Editor de Supabase no la reconoce: parte el cuerpo en el
+-- primer punto y coma y ejecuta los trozos como SQL suelto.
+-- El riesgo real del delimitador desnudo es otro: Postgres NO lee comentarios
+-- dentro del cuerpo, así que escribir ahí dentro un par de signos de dólar lo
+-- cierra antes de tiempo. Ese riesgo se cubre con una comprobación mecánica
+-- (scratchpad/check_dollar.ps1), no escribiendo el delimitador en prosa.
 
 create or replace function apply_rating_events(
   p_season_id uuid,
@@ -34,7 +39,7 @@ returns jsonb
 language plpgsql
 security definer
 set search_path = public, pg_temp
-as $fn$
+as $$
 declare
   v_events   int;
   v_players  int;
@@ -105,7 +110,7 @@ begin
 
   return jsonb_build_object('ok', true, 'events', v_events, 'players', v_players);
 end
-$fn$;
+$$;
 
 -- La autorización vive DENTRO de la función (is_organizer), no en el grant:
 -- mismo patrón que reset_player_account (0025) y save_lineup (0018).
