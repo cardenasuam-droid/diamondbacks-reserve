@@ -36,6 +36,9 @@ export function OrganizerResultsPage() {
   }
 
   const groups = matches.data ? groupByMatchup(matches.data) : []
+  // Se extrae aquí porque dentro del .map() TypeScript pierde el estrechamiento
+  // del early return de arriba.
+  const seasonId = season.data.id
 
   return (
     <div>
@@ -95,6 +98,7 @@ export function OrganizerResultsPage() {
                         teamA={g.teamA}
                         teamB={g.teamB}
                         roundId={selected as string}
+                        seasonId={seasonId}
                         onDone={() => setOpenMatch(null)}
                       />
                     )}
@@ -121,12 +125,15 @@ function ResultEditor({
   teamA,
   teamB,
   roundId,
+  seasonId,
   onDone,
 }: {
   match: ScheduledMatch
   teamA: TeamLite | null
   teamB: TeamLite | null
   roundId: string
+  /** Necesaria para recalcular el rating al guardar (0039/0040). */
+  seasonId: string
   onDone: () => void
 }) {
   const { profile } = useAuth()
@@ -175,6 +182,7 @@ function ResultEditor({
         walkoverTeamId: walkover ? walkoverTeamId : null,
         profileId: profile?.id ?? null,
         roundId,
+        seasonId,
       })
       onDone()
     } catch {

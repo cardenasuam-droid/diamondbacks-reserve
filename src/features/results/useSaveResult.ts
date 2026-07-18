@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+import { recomputeRatings, invalidateRating } from '@/features/rating/useRecomputeRatings'
 import { deriveResult, type SetInput } from './resultLogic'
 
 export interface SaveResultVars {
@@ -14,6 +15,8 @@ export interface SaveResultVars {
   profileId: string | null
   /** Solo para invalidar la jornada en pantalla. */
   roundId: string
+  /** Para recalcular el rating al guardar. Sin ella, no se recalcula. */
+  seasonId?: string
 }
 
 // Captura/validación directa de un resultado por el organizador. Guarda solo
@@ -70,6 +73,26 @@ async function saveResult(vars: SaveResultVars): Promise<void> {
         : error.message,
     )
   }
+
+  // Rating: recálculo COMPLETO de la temporada (0039/0040). Va después del
+  // upsert y no dentro de él a propósito. El resultado ya está guardado; si el
+  // recálculo falla, el error dice exactamente eso en vez de aparentar que se
+  // perdió el marcador. El organizador puede reintentar desde su panel.
+  //
+  // Completo y no incremental porque este upsert SOBRESCRIBE el resultado
+  // anterior sin dejar rastro: corregir un marcador de la jornada 1 cambia todos
+  // los deltas posteriores y no hay estado viejo del que restar.
+  if (vars.seasonId) {
+    try {
+      await recomputeRatings(vars.seasonId)
+    } catch (e) {
+      throw new Error(
+        'El resultado se guardó correctamente, pero el rating no se pudo recalcular: ' +
+          (e instanceof Error ? e.message : String(e)) +
+          '. Puedes reintentarlo desde el panel de rating.',
+      )
+    }
+  }
 }
 
 export function useSaveResult() {
@@ -80,6 +103,12 @@ export function useSaveResult() {
       void qc.invalidateQueries({ queryKey: ['round-matches', vars.roundId] })
       void qc.invalidateQueries({ queryKey: ['standings'] })
       void qc.invalidateQueries({ queryKey: ['player-rankings'] })
+      // Huecos que ya existían antes del rating: la pantalla pública del partido
+      // y las alineaciones publicadas se quedaban con el marcador viejo tras
+      // corregir un resultado.
+      void qc.invalidateQueries({ queryKey: ['match-detail', vars.matchId] })
+      void qc.invalidateQueries({ queryKey: ['published-lineups'] })
+      invalidateRating(qc)
     },
   })
 }
