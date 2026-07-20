@@ -83,6 +83,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { to: '/app/capitan', label: 'Panel de capitán', icon: 'captain', end: true, requires: 'captain' },
       { to: '/app/capitan/alineacion', label: 'Armar alineación', icon: 'lineup', requires: 'captain' },
+      { to: '/app/capitan/resultados', label: 'Capturar resultados', icon: 'results-edit', requires: 'captain' },
       { to: '/draft', label: 'Draft — hacer picks', icon: 'medal', requires: 'captain' },
       { to: '/app/pool', label: 'Pool de jugadores', icon: 'teams', requires: 'captain-only' },
     ],

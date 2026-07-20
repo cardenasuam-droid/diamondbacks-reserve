@@ -84,9 +84,25 @@ export function OrganizerResultsPage() {
                     >
                       <Badge color={categoryColor(m.category?.type)}>{m.category_code}</Badge>
                       <span className="flex-1 text-sm text-slate-700">{m.category?.name}</span>
-                      <span className="text-sm font-medium tabular-nums text-slate-900">
-                        {hasOfficialResult(m.result) ? scoreLine(m.result) : 'Sin resultado'}
-                      </span>
+                      {/* Reportado por capitana (0043): el marcador se muestra con
+                          la marca "Por validar" — abrir el editor lo pre-llena y
+                          Guardar lo convierte en oficial. Se evalúa ANTES que el
+                          guard de oficial: la rama negativa de un type-guard
+                          estrecha m.result a null y rompería el acceso a status. */}
+                      {m.result && m.result.status === 'reported' && !m.result.is_walkover ? (
+                        <>
+                          <span className="text-sm font-medium tabular-nums text-slate-900">
+                            {scoreLine(m.result)}
+                          </span>
+                          <Badge color="amber">Por validar</Badge>
+                        </>
+                      ) : hasOfficialResult(m.result) ? (
+                        <span className="text-sm font-medium tabular-nums text-slate-900">
+                          {scoreLine(m.result)}
+                        </span>
+                      ) : (
+                        <span className="text-sm text-slate-500">Sin resultado</span>
+                      )}
                       <span className="text-slate-300" aria-hidden>
                         {openMatch === m.id ? '▾' : '›'}
                       </span>

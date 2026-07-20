@@ -25,6 +25,7 @@ import { AccountPage } from './app/AccountPage'
 import { AvisosPage } from './app/AvisosPage'
 import { CaptainDashboard } from './captain/CaptainDashboard'
 import { LineupEditorPage } from './captain/LineupEditorPage'
+import { CaptainResultsPage } from './captain/CaptainResultsPage'
 import { OrganizerDashboard } from './organizer/OrganizerDashboard'
 import { OrganizerLineupsPage } from './organizer/OrganizerLineupsPage'
 import { OrganizerResultsPage } from './organizer/OrganizerResultsPage'
@@ -97,6 +98,8 @@ export const router = createBrowserRouter([
             children: [
               { index: true, element: <CaptainDashboard /> },
               { path: 'alineacion', element: <LineupEditorPage /> },
+              // Captura de resultados por la capitana (reporta; el organizador valida).
+              { path: 'resultados', element: <CaptainResultsPage /> },
             ],
           },
           {

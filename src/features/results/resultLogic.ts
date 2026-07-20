@@ -20,6 +20,24 @@ export interface DerivedResult {
 
 const VALID_COMBOS = new Set(['2-0', '0-2', '2-1', '1-2'])
 
+/**
+ * Set válido de pádel: 6 con margen de 2 (6-0..6-4), 7-5 o 7-6. El tercer set
+ * también es set completo (reglamento: "todos los partidos se juegan a 3 sets").
+ *
+ * Espejo EXACTO de is_valid_padel_set (migración 0043), que es quien manda: esto
+ * solo da feedback instantáneo en el editor de la capitana. Un retiro a media
+ * partida no pasa esta validación a propósito — lo captura el organizador, cuyo
+ * flujo no la aplica.
+ */
+export function validPadelSet(a: number, b: number): boolean {
+  return (
+    (a === 6 && b >= 0 && b <= 4) ||
+    (a === 7 && (b === 5 || b === 6)) ||
+    (b === 6 && a >= 0 && a <= 4) ||
+    (b === 7 && (a === 5 || a === 6))
+  )
+}
+
 export function deriveResult(sets: SetInput[]): DerivedResult {
   let setsA = 0
   let setsB = 0

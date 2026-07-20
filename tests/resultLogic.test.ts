@@ -1,4 +1,25 @@
-import { deriveResult } from '@/features/results/resultLogic'
+import { deriveResult, validPadelSet } from '@/features/results/resultLogic'
+
+describe('validPadelSet', () => {
+  it('acepta los marcadores legales de un set', () => {
+    // 6 con margen de 2, 7-5 y 7-6 — en ambas direcciones.
+    for (const [a, b] of [[6, 0], [6, 4], [7, 5], [7, 6], [0, 6], [4, 6], [5, 7], [6, 7]]) {
+      expect(validPadelSet(a, b)).toBe(true)
+    }
+  })
+
+  it('rechaza marcadores imposibles', () => {
+    // 6-5 no existe (a 5-5 se sigue hasta 7); 7-4 tampoco; empates jamás;
+    // el dedazo "65-0" es el error de tecleo más probable en la cancha.
+    for (const [a, b] of [[6, 5], [5, 6], [7, 4], [4, 7], [6, 6], [7, 7], [5, 5], [0, 0], [8, 6], [65, 0], [-1, 6]]) {
+      expect(validPadelSet(a, b)).toBe(false)
+    }
+  })
+
+  it('rechaza un retiro a media partida (3-1): eso lo captura el organizador', () => {
+    expect(validPadelSet(3, 1)).toBe(false)
+  })
+})
 
 describe('deriveResult', () => {
   it('marcador vacío: indeciso, sin error', () => {
