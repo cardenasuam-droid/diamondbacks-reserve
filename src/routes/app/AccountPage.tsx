@@ -8,7 +8,8 @@ import { useTeams } from '@/features/teams/useTeams'
 import { usePublicPlayers } from '@/features/teams/usePublicPlayers'
 import { useMyPlayer } from '@/features/teams/useMyPlayer'
 import { usePlayerRankings } from '@/features/stats/usePlayerRankings'
-import { useTeamUpcomingMatchups, type UpcomingMatchup } from '@/features/schedule/useTeamUpcomingMatchups'
+import { useMyUpcomingMatches, type MyUpcomingMatch } from '@/features/schedule/useMyUpcomingMatches'
+import { categoryColor } from '@/features/categories/categoryColor'
 import { useSetMyPhoto, useSetMyShirtSize } from '@/features/teams/playerMutations'
 import { teamColor } from '@/lib/color'
 import { imageThumb } from '@/lib/image'
@@ -153,20 +154,22 @@ function GreetingHeader({
   )
 }
 
-// Próximos juegos del equipo del jugador (rol publicado). Personalizado: solo su
-// equipo, ordenado por jornada, con el más próximo destacado.
+// Próximos partidos DEL JUGADOR (no de su equipo): las entradas del rol publicado
+// donde él aparece, con hora, cancha, categoría, pareja y rival. Decisión de la
+// organizadora (2026-07-20): en un enfrentamiento de 11 partidos, al jugador le
+// importa el suyo. Si va dobleteado por excepción, salen sus dos partidos.
 function NextGamesSection({ playerId }: { playerId: string }) {
   const season = useActiveSeason()
   const players = usePublicPlayers(season.data?.id)
-  const me = players.data?.find((p) => p.id === playerId)
-  const upcoming = useTeamUpcomingMatchups(me?.team_id, season.data?.id)
+  const upcoming = useMyUpcomingMatches(playerId, season.data?.id)
 
   const games = upcoming.data ?? []
+  const playerById = new Map((players.data ?? []).map((p) => [p.id, p]))
 
   return (
     <section className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-bold uppercase tracking-wide text-slate-700">Próximos juegos</h2>
+        <h2 className="text-sm font-bold uppercase tracking-wide text-slate-700">Mis próximos partidos</h2>
         <Link to="/rol" className="text-xs font-semibold text-sky-300 hover:underline">
           Ver rol →
         </Link>
@@ -176,12 +179,19 @@ function NextGamesSection({ playerId }: { playerId: string }) {
         <div className="skeleton h-[88px] rounded-2xl" />
       ) : games.length === 0 ? (
         <Card className="p-5 text-sm text-slate-500">
-          Aún no hay rol publicado. Cuando el organizador publique tus próximos juegos, aparecerán aquí.
+          Aún no estás alineado en el rol publicado. Cuando el organizador publique la jornada
+          con tus partidos, aparecerán aquí.
         </Card>
       ) : (
         <div className="space-y-3">
           {games.slice(0, 3).map((g, i) => (
-            <NextGameCard key={g.id} game={g} featured={i === 0} i={i} />
+            <NextGameCard
+              key={g.matchId}
+              game={g}
+              partner={g.partnerId ? playerById.get(g.partnerId) : undefined}
+              featured={i === 0}
+              i={i}
+            />
           ))}
         </div>
       )}
@@ -189,12 +199,25 @@ function NextGamesSection({ playerId }: { playerId: string }) {
   )
 }
 
-function NextGameCard({ game, featured, i }: { game: UpcomingMatchup; featured?: boolean; i: number }) {
+function NextGameCard({
+  game,
+  partner,
+  featured,
+  i,
+}: {
+  game: MyUpcomingMatch
+  partner?: { full_name: string; photo_url: string | null }
+  featured?: boolean
+  i: number
+}) {
   const date = formatRoundDate(game.round.round_date)
+  const horaCancha = [game.timeLabel, game.courtName].filter(Boolean).join(' · ')
   return (
-    <div
+    // La tarjeta enlaza a la pantalla pública del partido (marcador, parejas).
+    <Link
+      to={`/partidos/${game.matchId}`}
       className={
-        'rise-item flex items-center gap-3 rounded-2xl p-4 shadow-sm ' +
+        'rise-item flex items-center gap-3 rounded-2xl p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ' +
         (featured ? 'bg-gradient-to-br from-brand-600/15 to-slate-100 ring-1 ring-brand-500/30' : 'bg-slate-100')
       }
       style={{ ['--d']: i } as CSSProperties}
@@ -206,18 +229,26 @@ function NextGameCard({ game, featured, i }: { game: UpcomingMatchup; featured?:
         size={40}
       />
       <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {featured && <Badge color="emerald">Próximo</Badge>}
           <span className="text-xs font-medium text-slate-500">Jornada {game.round.round_number}</span>
+          <Badge color={categoryColor(game.categoryType ?? undefined)}>{game.categoryCode}</Badge>
         </div>
         <p className="mt-0.5 truncate font-semibold text-slate-900">
           <span className="font-normal text-slate-500">vs</span> {game.opponent.name}
         </p>
+        {partner && (
+          <p className="mt-1 flex items-center gap-1.5 text-xs text-slate-500">
+            <Avatar name={partner.full_name} photoUrl={partner.photo_url} size={18} />
+            <span className="truncate">Con {partner.full_name}</span>
+          </p>
+        )}
       </div>
-      <p className="shrink-0 text-right text-sm font-semibold tabular-nums text-slate-800">
-        {date ?? 'Por confirmar'}
-      </p>
-    </div>
+      <div className="shrink-0 text-right">
+        <p className="text-sm font-semibold tabular-nums text-slate-800">{date ?? 'Por confirmar'}</p>
+        {horaCancha && <p className="mt-0.5 text-xs tabular-nums text-slate-500">{horaCancha}</p>}
+      </div>
+    </Link>
   )
 }
 

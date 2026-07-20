@@ -1,6 +1,6 @@
 import { createBrowserRouter } from 'react-router-dom'
 import { PublicLayout } from './public/PublicLayout'
-import { HomePage } from './public/HomePage'
+import { HomeGate } from './public/HomeGate'
 import { SchedulePage } from './public/SchedulePage'
 import { MatchDetailPage } from './public/MatchDetailPage'
 import { ResultsPage } from './public/ResultsPage'
@@ -55,7 +55,8 @@ export const router = createBrowserRouter([
     path: '/',
     element: <PublicLayout />,
     children: [
-      { index: true, element: <HomePage /> },
+      // Con sesión: directo al dashboard del jugador; anónimo: Home pública.
+      { index: true, element: <HomeGate /> },
       { path: 'rol', element: <SchedulePage /> },
       { path: 'partidos/:matchId', element: <MatchDetailPage /> },
       { path: 'resultados', element: <ResultsPage /> },
