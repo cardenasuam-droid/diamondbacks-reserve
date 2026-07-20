@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { useAuth } from '@/features/auth/context'
 import { useActiveSeason } from '@/features/season/useActiveSeason'
 import { useRounds } from '@/features/schedule/useRounds'
 import { RoundSelector } from '@/features/schedule/RoundSelector'
@@ -15,6 +17,8 @@ import type { TeamLite } from '@/features/schedule/types'
 import type { RoundLineupStatus } from '@/features/lineups/useRoundLineups'
 
 export function OrganizerLineupsPage() {
+  const { role } = useAuth()
+  const canEdit = role === 'organizer' // el viewer solo lee; editar fallaría en RLS
   const season = useActiveSeason()
   const rounds = useRounds(season.data?.id)
   const [roundId, setRoundId] = useState<string | undefined>()
@@ -130,9 +134,9 @@ export function OrganizerLineupsPage() {
               key={mu.id}
               className="overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm"
             >
-              <TeamRow team={mu.team_a} lineups={mu.lineups} />
+              <TeamRow team={mu.team_a} lineups={mu.lineups} matchupId={mu.id} canEdit={canEdit} />
               <div className="border-t border-slate-100" />
-              <TeamRow team={mu.team_b} lineups={mu.lineups} />
+              <TeamRow team={mu.team_b} lineups={mu.lineups} matchupId={mu.id} canEdit={canEdit} />
             </div>
           ))}
         </div>
@@ -141,7 +145,17 @@ export function OrganizerLineupsPage() {
   )
 }
 
-function TeamRow({ team, lineups }: { team: TeamLite | null; lineups: RoundLineupStatus[] }) {
+function TeamRow({
+  team,
+  lineups,
+  matchupId,
+  canEdit,
+}: {
+  team: TeamLite | null
+  lineups: RoundLineupStatus[]
+  matchupId: string
+  canEdit: boolean
+}) {
   const lineup = lineups.find((l) => l.team_id === team?.id)
   const status = lineup?.status
   const published = Boolean(lineup?.locked_at)
@@ -158,6 +172,14 @@ function TeamRow({ team, lineups }: { team: TeamLite | null; lineups: RoundLineu
       <Badge color={published ? 'blue' : done ? 'emerald' : status === 'draft' ? 'amber' : 'slate'}>
         {published ? 'Publicada' : lineupStatusLabel(status)}
       </Badge>
+      {canEdit && team && (
+        <Link
+          to={`/app/organizador/alineaciones/${matchupId}/editar/${team.id}`}
+          className="shrink-0 rounded-md px-2 py-1 text-xs font-medium text-sky-600 hover:bg-slate-50"
+        >
+          Editar
+        </Link>
+      )}
     </div>
   )
 }

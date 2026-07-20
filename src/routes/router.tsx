@@ -111,6 +111,9 @@ export const router = createBrowserRouter([
               { path: 'lista-espera', element: <OrganizerWaitlistPage /> },
               { path: 'draft', element: <OrganizerDraftPage /> },
               { path: 'alineaciones', element: <OrganizerLineupsPage /> },
+              // El organizador edita el rol de cualquier equipo (reusa el editor
+              // del capitán en "modo organizador": sin candado). Solo organizer.
+              { path: 'alineaciones/:teamMatchupId/editar/:teamId', element: <LineupEditorPage /> },
               { path: 'resultados', element: <OrganizerResultsPage /> },
               { path: 'rating', element: <OrganizerRatingPage /> },
               { path: 'importar', element: <OrganizerImportPage /> },

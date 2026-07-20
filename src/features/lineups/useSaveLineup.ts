@@ -62,6 +62,10 @@ export function useSaveLineup() {
     onSuccess: (_id, vars) => {
       void qc.invalidateQueries({ queryKey: lineupQueryKey(vars.matchup.id, vars.teamId) })
       void qc.invalidateQueries({ queryKey: ['change-count', vars.teamId] })
+      // Que un cambio (sobre todo del organizador a un rol publicado) se refleje
+      // en el estado de alineaciones y en el rol público de esa jornada.
+      void qc.invalidateQueries({ queryKey: ['round-lineups'] })
+      void qc.invalidateQueries({ queryKey: ['published-lineups', vars.matchup.round.id] })
     },
   })
 }

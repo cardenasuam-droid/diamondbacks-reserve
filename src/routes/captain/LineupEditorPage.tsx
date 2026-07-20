@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { useAuth } from '@/features/auth/context'
 import { useCategories } from '@/features/categories/useCategories'
 import { categoryColor } from '@/features/categories/categoryColor'
@@ -13,6 +13,7 @@ import { Avatar } from '@/components/ui/Avatar'
 import { TeamCrest } from '@/components/ui/TeamCrest'
 import { useCaptainTeam } from '@/features/lineups/useCaptainTeam'
 import { useCaptainMatchup } from '@/features/lineups/useCaptainMatchup'
+import { useMatchupById } from '@/features/lineups/useMatchupById'
 import { useTeamRoster } from '@/features/lineups/useTeamRoster'
 import { useEligibilityRules } from '@/features/lineups/useEligibilityRules'
 import { useLineup } from '@/features/lineups/useLineup'
@@ -42,9 +43,35 @@ function formatDeadline(roundDate: string): string {
 }
 
 export function LineupEditorPage() {
-  const { profile } = useAuth()
-  const team = useCaptainTeam()
-  const matchup = useCaptainMatchup(team.data?.id, team.data?.season_id)
+  const { profile, role } = useAuth()
+
+  // Modo ORGANIZADOR: llega por ruta con enfrentamiento + equipo elegidos
+  // (/app/organizador/alineaciones/:teamMatchupId/:teamId) para corregir un rol
+  // ya publicado de CUALQUIER equipo. Sin params = modo capitán (su propio
+  // equipo y su próximo enfrentamiento), idéntico a antes.
+  const params = useParams<{ teamMatchupId?: string; teamId?: string }>()
+  const asOrganizer = role === 'organizer' && Boolean(params.teamMatchupId && params.teamId)
+
+  const captainTeam = useCaptainTeam()
+  const captainMatchup = useCaptainMatchup(captainTeam.data?.id, captainTeam.data?.season_id)
+  const orgMatchup = useMatchupById(params.teamMatchupId, params.teamId, asOrganizer)
+
+  // Equipo efectivo. En modo organizador se deriva del enfrentamiento cargado
+  // (su season_id viaja en el round), para no consultar teams por separado.
+  const teamData = asOrganizer
+    ? orgMatchup.data
+      ? { ...orgMatchup.data.myTeam, season_id: orgMatchup.data.seasonId }
+      : undefined
+    : captainTeam.data ?? undefined
+
+  const team = {
+    data: teamData,
+    isLoading: asOrganizer ? orgMatchup.isLoading : captainTeam.isLoading,
+    isError: asOrganizer ? orgMatchup.isError : captainTeam.isError,
+    refetch: asOrganizer ? orgMatchup.refetch : captainTeam.refetch,
+  }
+  const matchup = asOrganizer ? orgMatchup : captainMatchup
+
   const roster = useTeamRoster(team.data?.id)
   const rules = useEligibilityRules()
   const categories = useCategories()
@@ -127,7 +154,7 @@ export function LineupEditorPage() {
   }, [exceptionCats, selections, matchCats, rules.data, roster.data])
 
   // --- estados de carga / vacío ---
-  if (team.isLoading) return <Loader label="Cargando tu equipo…" />
+  if (team.isLoading) return <Loader label={asOrganizer ? 'Cargando enfrentamiento…' : 'Cargando tu equipo…'} />
   if (team.isError) return <ErrorState onRetry={() => team.refetch()} />
   if (!team.data) {
     return (
@@ -135,14 +162,20 @@ export function LineupEditorPage() {
         <PageHeader title="Alineación" />
         <EmptyState
           icon="ban"
-          title="Tu cuenta no está enlazada a un equipo"
-          description="Solo el capitán de un equipo puede armar alineaciones. Avisa al organizador si crees que es un error."
+          title={asOrganizer ? 'No se encontró el enfrentamiento' : 'Tu cuenta no está enlazada a un equipo'}
+          description={
+            asOrganizer
+              ? 'Revisa el enlace desde “Estado de alineaciones”.'
+              : 'Solo el capitán de un equipo puede armar alineaciones. Avisa al organizador si crees que es un error.'
+          }
         />
       </div>
     )
   }
 
-  if (matchup.isLoading) return <Loader label="Buscando tu próximo enfrentamiento…" />
+  if (matchup.isLoading) {
+    return <Loader label={asOrganizer ? 'Cargando enfrentamiento…' : 'Buscando tu próximo enfrentamiento…'} />
+  }
   if (matchup.isError) return <ErrorState onRetry={() => matchup.refetch()} />
   if (!matchup.data) {
     return (
@@ -165,7 +198,9 @@ export function LineupEditorPage() {
 
   const mu = matchup.data
   const cats = matchCats
-  const locked = isLineupLocked(mu.round.round_date)
+  // El organizador nunca está bloqueado por el candado (el servidor también lo
+  // exime): puede corregir un rol antes o después de publicarlo.
+  const locked = asOrganizer ? false : isLineupLocked(mu.round.round_date)
   const usedChanges = changes.data ?? 0
   const status = lineup.data?.status ?? 'draft'
 
@@ -252,7 +287,12 @@ export function LineupEditorPage() {
         </div>
       </section>
 
-      {locked ? (
+      {asOrganizer ? (
+        <div className="rounded-xl border border-brand-500/30 bg-brand-500/10 p-3 text-sm text-brand-200">
+          Editas como organizador: el candado no aplica. Recuerda que un cambio sobre una
+          alineación ya publicada cuenta contra los 5 del equipo.
+        </div>
+      ) : locked ? (
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/15 p-3 text-sm text-amber-200">
           🔒 Bloqueada: pasó el límite (sábado 07:00 antes de la jornada). Solo el
           organizador puede hacer cambios.
@@ -329,8 +369,8 @@ export function LineupEditorPage() {
           </button>
         </div>
         <p className="text-center text-xs text-slate-500">
-          <Link to="/app/capitan" className="underline">
-            Volver al panel
+          <Link to={asOrganizer ? '/app/organizador/alineaciones' : '/app/capitan'} className="underline">
+            {asOrganizer ? 'Volver a estado de alineaciones' : 'Volver al panel'}
           </Link>
         </p>
       </section>

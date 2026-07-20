@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom'
 import { useActiveSeason } from '@/features/season/useActiveSeason'
 import { useRounds } from '@/features/schedule/useRounds'
 import { useRoundMatches } from '@/features/schedule/useRoundMatches'
+import { pickDefaultRound } from '@/features/schedule/defaultRound'
+import { todayISO } from '@/lib/date'
 import { usePublicPlayers } from '@/features/teams/usePublicPlayers'
 import { usePublishedLineups, publishedKey, type PublishedPair } from '@/features/lineups/usePublishedLineups'
 import { groupByMatchup } from '@/features/schedule/groupByMatchup'
@@ -23,10 +25,10 @@ export function SchedulePage() {
   const rounds = useRounds(season.data?.id)
   const [roundId, setRoundId] = useState<string>()
 
-  // Por defecto, la última jornada disponible.
+  // Por defecto, la PRÓXIMA jornada (hoy incluido), no la última de la temporada.
   useEffect(() => {
     if (!roundId && rounds.data && rounds.data.length > 0) {
-      setRoundId(rounds.data[rounds.data.length - 1].id)
+      setRoundId(pickDefaultRound(rounds.data, todayISO(), 'upcoming'))
     }
   }, [rounds.data, roundId])
 

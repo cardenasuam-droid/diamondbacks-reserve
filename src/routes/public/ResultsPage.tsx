@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useActiveSeason } from '@/features/season/useActiveSeason'
 import { useRounds } from '@/features/schedule/useRounds'
 import { useRoundMatches } from '@/features/schedule/useRoundMatches'
+import { pickDefaultRound } from '@/features/schedule/defaultRound'
+import { todayISO } from '@/lib/date'
 import { groupByMatchup } from '@/features/schedule/groupByMatchup'
 import { RoundSelector } from '@/features/schedule/RoundSelector'
 import { MatchupHeader } from '@/features/schedule/MatchupHeader'
@@ -28,9 +30,11 @@ export function ResultsPage() {
   const rounds = useRounds(season.data?.id)
   const [roundId, setRoundId] = useState<string>()
 
+  // Por defecto, la última jornada YA jugada (donde caen los marcadores que se
+  // están revisando), no la última de la temporada.
   useEffect(() => {
     if (!roundId && rounds.data && rounds.data.length > 0) {
-      setRoundId(rounds.data[rounds.data.length - 1].id)
+      setRoundId(pickDefaultRound(rounds.data, todayISO(), 'recent'))
     }
   }, [rounds.data, roundId])
 
