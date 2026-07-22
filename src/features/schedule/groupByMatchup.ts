@@ -18,10 +18,12 @@ function horaDe(m: ScheduledMatch): number {
 // alfabéticamente por equipo A.
 //
 // Dentro de cada grupo manda la HORA y no la categoría: un enfrentamiento son 11
-// partidos repartidos en tres turnos, y el día de juego lo que se busca es "qué
-// se juega ahora". Ordenando por categoría, el primer turno (10:15) aparecía al
-// final de la lista. La categoría sigue siendo el desempate dentro del turno,
-// así que el orden oficial se conserva donde importa.
+// partidos repartidos en cuatro turnos (18:30 · 19:45 · 21:00 · 22:15), y el día
+// de juego lo que se busca es "qué se juega ahora". El orden de categoría no
+// coincide con el del reloj — VAR_5 es de las primeras del catálogo y se juega a
+// las 21:00 —, así que ordenar por categoría mezclaba los turnos. La categoría
+// sigue siendo el desempate DENTRO del turno, así que el orden oficial se
+// conserva donde importa.
 export function groupByMatchup(matches: ScheduledMatch[]): MatchupGroup[] {
   const groups = new Map<string, MatchupGroup>()
 

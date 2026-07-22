@@ -43,8 +43,8 @@ describe('groupByMatchup', () => {
   })
 
   it('la HORA manda sobre la categoría: el primer turno va primero', () => {
-    // El caso real: la categoría que se juega a las 10:15 tiene sort_order alto,
-    // así que con el orden viejo aparecía al final de la lista del duelo.
+    // El caso real: una categoría con sort_order alto que se juega en el primer
+    // turno aparecía al final de la lista del duelo con el orden viejo.
     const matches = [
       match({ id: 'temprano', muId: 'A', teamA: 'Zeta', teamB: 'X', cat: 'MIX_B', sort: 9, turno: 1 }),
       match({ id: 'tarde', muId: 'A', teamA: 'Zeta', teamB: 'X', cat: 'VAR_5', sort: 2, turno: 3 }),
