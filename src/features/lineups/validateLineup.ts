@@ -77,6 +77,61 @@ export function categoryRank(code: string): number | null {
   return m ? parseInt(m[1], 10) : null
 }
 
+// Una regla con required_count 2 son DOS huecos que llenar por separado.
+function expandSlots(rules: EligibilityRule[]): EligibilityRule[] {
+  const slots: EligibilityRule[] = []
+  for (const r of rules) {
+    for (let i = 0; i < r.required_count; i++) slots.push(r)
+  }
+  return slots
+}
+
+/**
+ * Devuelve los jugadores que NO caben en ningún hueco, emparejando jugadores con
+ * huecos de forma óptima (cada hueco a un jugador distinto).
+ *
+ * Antes esto era un bucle codicioso: recorría los huecos en orden y se quedaba
+ * con el primer jugador que encajara. Con la EXCEPCIÓN activada un jugador puede
+ * encajar en varios huecos a la vez, y el bucle se comía al jugador equivocado.
+ *
+ * Caso real que rompía (Legacy, 7a Suma = 1 de 3a + 1 de 4a): con la excepción
+ * puesta, el hueco de 3a se llevaba a la jugadora de 4a —porque "4a es igual o
+ * más débil que 3a" es cierto— y luego la de 3a se quedaba sin hueco y salía
+ * marcada como no elegible. Una alineación perfectamente legal se rechazaba, y
+ * encima ACTIVAR la excepción convertía en inválida una categoría que sin ella
+ * era válida.
+ *
+ * Ahora se busca un emparejamiento completo por caminos aumentantes: si existe
+ * alguna forma de repartir a los jugadores entre los huecos, se encuentra.
+ */
+function jugadoresSinHueco(
+  players: EligiblePlayer[],
+  slots: EligibilityRule[],
+  encaja: (p: EligiblePlayer, slot: EligibilityRule) => boolean,
+): EligiblePlayer[] {
+  const jugadorDelHueco: (number | null)[] = new Array(slots.length).fill(null)
+
+  const intentar = (pi: number, visitados: Set<number>): boolean => {
+    for (let si = 0; si < slots.length; si++) {
+      if (visitados.has(si) || !encaja(players[pi], slots[si])) continue
+      visitados.add(si)
+      const ocupante = jugadorDelHueco[si]
+      // El hueco está libre, o su ocupante puede irse a otro hueco.
+      if (ocupante === null || intentar(ocupante, visitados)) {
+        jugadorDelHueco[si] = pi
+        return true
+      }
+    }
+    return false
+  }
+
+  const sinHueco: EligiblePlayer[] = []
+  for (let pi = 0; pi < players.length; pi++) {
+    if (!intentar(pi, new Set())) sinHueco.push(players[pi])
+  }
+  return sinHueco
+}
+
 // "2 de 4a Varonil" | "1 de 5a Varonil y 1 de 4a Femenil"
 function describeRequirement(
   rules: EligibilityRule[],
@@ -198,34 +253,17 @@ export function validateLineup(
     // válidos y distintos.
     const catRules = rulesByCat.get(code) ?? []
     if (resolved.length === 2 && !duplicateInCat) {
-      const pool = [...resolved]
-      for (const rule of catRules) {
-        let need = rule.required_count
-        const reqRank = categoryRank(rule.required_player_category_code)
-        for (let i = pool.length - 1; i >= 0 && need > 0; i--) {
-          const p = pool[i]
-          let ok: boolean
-          if (isException) {
-            // Excepción: mismo género + categoría IGUAL O MÁS DÉBIL (número mayor).
-            const pr = categoryRank(p.category_code)
-            ok =
-              p.gender === rule.required_gender &&
-              reqRank != null &&
-              pr != null &&
-              pr >= reqRank
-          } else {
-            ok =
-              p.gender === rule.required_gender &&
-              p.category_code === rule.required_player_category_code
-          }
-          if (ok) {
-            pool.splice(i, 1)
-            need--
-          }
-        }
+      const slots = expandSlots(catRules)
+      const encaja = (p: EligiblePlayer, slot: EligibilityRule): boolean => {
+        if (p.gender !== slot.required_gender) return false
+        if (!isException) return p.category_code === slot.required_player_category_code
+        // Excepción: mismo género + categoría IGUAL O MÁS DÉBIL (número mayor).
+        const reqRank = categoryRank(slot.required_player_category_code)
+        const pr = categoryRank(p.category_code)
+        return reqRank != null && pr != null && pr >= reqRank
       }
       // Lo que sobra no encaja en ningún hueco de la categoría.
-      for (const p of pool) {
+      for (const p of jugadoresSinHueco(resolved, slots, encaja)) {
         issues.push({
           category_code: code,
           code: 'ineligible',

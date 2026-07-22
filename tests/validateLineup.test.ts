@@ -158,8 +158,10 @@ describe('validateLineup', () => {
     const issue = res.issues.find((i) => i.code === 'ineligible')
     expect(issue).toBeTruthy()
     // Uno de los dos varoniles ocupa el hueco masculino; el otro sobra (no hay
-    // hueco femenil que lo acepte).
-    expect(issue!.player_id).toBe('VAR_5#1')
+    // hueco femenil que lo acepte). CUÁL de los dos se reporta es arbitrario:
+    // son intercambiables. Lo que importa es que se señale exactamente a uno.
+    expect(['VAR_5#1', 'VAR_5#2']).toContain(issue!.player_id)
+    expect(res.issues.filter((i) => i.code === 'ineligible')).toHaveLength(1)
     expect(issue!.message).toContain('1 de 5a Varonil y 1 de 4a Femenil')
   })
 
