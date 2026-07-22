@@ -12,6 +12,7 @@ function result(p: Partial<MatchResultLite>): MatchResultLite {
     set3_team_a: null,
     set3_team_b: null,
     winner_team_id: null,
+    walkover_team_id: null,
     ...p,
   }
 }

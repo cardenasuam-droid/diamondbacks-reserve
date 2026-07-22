@@ -21,6 +21,35 @@ describe('validPadelSet', () => {
   })
 })
 
+describe('deriveResult — guardas de captura (organizador)', () => {
+  it('rechaza el dedazo de rango: "65" en vez de "6"', () => {
+    const r = deriveResult([{ a: 65, b: 0 }, { a: 6, b: 1 }])
+    expect(r.error).toMatch(/rango/i)
+    expect(r.decided).toBe(false)
+  })
+
+  it('rechaza un set con un solo marcador capturado', () => {
+    const r = deriveResult([{ a: 6, b: null }, { a: 6, b: 1 }])
+    expect(r.error).toMatch(/un solo marcador/i)
+    expect(r.decided).toBe(false)
+  })
+
+  it('sigue aceptando un retiro (3-1): eso lo captura el organizador', () => {
+    // El validador estricto de la capitana (validPadelSet) sí lo rechaza; el del
+    // organizador solo valida rango, para no atarle las manos ante lo atípico.
+    const r = deriveResult([{ a: 3, b: 1 }, { a: 6, b: 2 }])
+    expect(r.error).toBeNull()
+    expect(r.decided).toBe(true)
+    expect(r.winnerSide).toBe('a')
+  })
+
+  it('un set vacío del todo no es error (tercero no jugado)', () => {
+    const r = deriveResult([{ a: 6, b: 4 }, { a: 6, b: 3 }, { a: null, b: null }])
+    expect(r.error).toBeNull()
+    expect(r.decided).toBe(true)
+  })
+})
+
 describe('deriveResult', () => {
   it('marcador vacío: indeciso, sin error', () => {
     const r = deriveResult([])

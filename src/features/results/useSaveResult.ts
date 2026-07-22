@@ -95,20 +95,73 @@ async function saveResult(vars: SaveResultVars): Promise<void> {
   }
 }
 
+// Claves que dependen de un resultado. Se invalidan igual al guardar que al
+// borrar: si divergieran, una de las dos operaciones dejaría pantallas viejas.
+function invalidateResult(
+  qc: ReturnType<typeof useQueryClient>,
+  vars: { roundId: string; matchId: string },
+) {
+  void qc.invalidateQueries({ queryKey: ['round-matches', vars.roundId] })
+  void qc.invalidateQueries({ queryKey: ['standings'] })
+  void qc.invalidateQueries({ queryKey: ['player-rankings'] })
+  // Huecos que ya existían antes del rating: la pantalla pública del partido
+  // y las alineaciones publicadas se quedaban con el marcador viejo tras
+  // corregir un resultado.
+  void qc.invalidateQueries({ queryKey: ['match-detail', vars.matchId] })
+  void qc.invalidateQueries({ queryKey: ['published-lineups'] })
+  // El reporte de la capitana vive en su propia caché.
+  void qc.invalidateQueries({ queryKey: ['captain-round-matchup'] })
+  invalidateRating(qc)
+}
+
 export function useSaveResult() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: saveResult,
-    onSuccess: (_v, vars) => {
-      void qc.invalidateQueries({ queryKey: ['round-matches', vars.roundId] })
-      void qc.invalidateQueries({ queryKey: ['standings'] })
-      void qc.invalidateQueries({ queryKey: ['player-rankings'] })
-      // Huecos que ya existían antes del rating: la pantalla pública del partido
-      // y las alineaciones publicadas se quedaban con el marcador viejo tras
-      // corregir un resultado.
-      void qc.invalidateQueries({ queryKey: ['match-detail', vars.matchId] })
-      void qc.invalidateQueries({ queryKey: ['published-lineups'] })
-      invalidateRating(qc)
-    },
+    onSuccess: (_v, vars) => invalidateResult(qc, vars),
+  })
+}
+
+export interface DeleteResultVars {
+  matchId: string
+  roundId: string
+  seasonId?: string
+}
+
+// Borrar un resultado: para el marcador capturado en el partido equivocado, que
+// hasta ahora quedaba oficial (moviendo tabla y rating) y solo se quitaba con SQL
+// a mano. La RLS "organizer all" ya permitía el DELETE; faltaba la puerta.
+//
+// Tras borrar hay que RECALCULAR: el rating es una reproducción de la temporada
+// y el partido borrado debe dejar de contar. Sin esto, los deltas de ese partido
+// se quedarían fosilizados en el rating de sus cuatro jugadores.
+async function deleteResult(vars: DeleteResultVars): Promise<void> {
+  const { error } = await supabase.from('match_results').delete().eq('match_id', vars.matchId)
+  if (error) {
+    throw new Error(
+      /row-level security/i.test(error.message)
+        ? 'No tienes permiso para borrar resultados.'
+        : error.message,
+    )
+  }
+
+  if (vars.seasonId) {
+    try {
+      await recomputeRatings(vars.seasonId)
+    } catch (e) {
+      throw new Error(
+        'El resultado se borró, pero el rating no se pudo recalcular: ' +
+          (e instanceof Error ? e.message : String(e)) +
+          '. Puedes reintentarlo desde el panel de rating.',
+      )
+    }
+  }
+}
+
+export function useDeleteResult() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: deleteResult,
+    onSuccess: (_v, vars) => invalidateResult(qc, vars),
   })
 }

@@ -9,7 +9,7 @@ import { scoreLine, hasOfficialResult } from '@/features/schedule/score'
 import { categoryColor } from '@/features/categories/categoryColor'
 import { TeamCrest } from '@/components/ui/TeamCrest'
 import { deriveResult, type SetInput } from '@/features/results/resultLogic'
-import { useSaveResult } from '@/features/results/useSaveResult'
+import { useSaveResult, useDeleteResult } from '@/features/results/useSaveResult'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
@@ -154,6 +154,8 @@ function ResultEditor({
 }) {
   const { profile } = useAuth()
   const save = useSaveResult()
+  const del = useDeleteResult()
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const r = match.result
 
   const init = (a: number | null | undefined, b: number | null | undefined) => ({
@@ -164,7 +166,10 @@ function ResultEditor({
   const [s2, setS2] = useState(init(r?.set2_team_a, r?.set2_team_b))
   const [s3, setS3] = useState(init(r?.set3_team_a, r?.set3_team_b))
   const [walkover, setWalkover] = useState(Boolean(r?.is_walkover))
-  const [walkoverTeamId, setWalkoverTeamId] = useState<string>('')
+  // Se pre-llena con el equipo ausente ya guardado: sin esto, reabrir un walkover
+  // obligaba a re-elegirlo de memoria y a ciegas (la fila solo muestra "W.O."), y
+  // errar invierte 3 puntos, sets, juegos y el rating sin ningún aviso.
+  const [walkoverTeamId, setWalkoverTeamId] = useState<string>(r?.walkover_team_id ?? '')
 
   const sets: SetInput[] = [
     { a: num(s1.a), b: num(s1.b) },
@@ -203,6 +208,15 @@ function ResultEditor({
       onDone()
     } catch {
       // se muestra desde save.error
+    }
+  }
+
+  async function handleDelete() {
+    try {
+      await del.mutateAsync({ matchId: match.id, roundId, seasonId })
+      onDone()
+    } catch {
+      // se muestra desde del.error
     }
   }
 
@@ -267,6 +281,11 @@ function ResultEditor({
           {(save.error as Error).message}
         </p>
       )}
+      {del.isError && (
+        <p className="rounded-lg bg-rose-500/15 px-3 py-2 text-sm text-rose-200">
+          {(del.error as Error).message}
+        </p>
+      )}
 
       <div className="flex gap-2">
         <button
@@ -277,12 +296,47 @@ function ResultEditor({
         </button>
         <button
           onClick={handleSave}
-          disabled={!canSave || save.isPending}
+          disabled={!canSave || save.isPending || del.isPending}
           className="flex-1 rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
         >
           {save.isPending ? 'Guardando…' : 'Guardar y validar'}
         </button>
       </div>
+
+      {/* Borrar: solo si YA hay algo guardado. Confirmación inline (no
+          window.confirm, patrón del repo) porque borrar mueve tabla y rating. */}
+      {r && (
+        <div className="border-t border-slate-200 pt-3">
+          {confirmDelete ? (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="flex-1 text-xs text-slate-600">
+                Se borra el marcador y el partido vuelve a “Sin resultado”. La tabla y el rating se
+                recalculan. ¿Seguro?
+              </span>
+              <button
+                onClick={handleDelete}
+                disabled={del.isPending}
+                className="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
+              >
+                {del.isPending ? 'Borrando…' : 'Sí, borrar'}
+              </button>
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="px-2 text-xs text-slate-500 hover:underline"
+              >
+                No
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setConfirmDelete(true)}
+              className="text-xs font-medium text-rose-400 hover:underline"
+            >
+              Borrar resultado
+            </button>
+          )}
+        </div>
+      )}
     </div>
   )
 }

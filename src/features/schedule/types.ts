@@ -17,6 +17,10 @@ export interface MatchResultLite {
   set3_team_a: number | null
   set3_team_b: number | null
   winner_team_id: string | null
+  /** Equipo que NO se presentó. Imprescindible para reabrir un walkover ya
+      guardado sin que el organizador tenga que recordar de memoria quién faltó
+      (elegir mal invierte 3 puntos, sets, juegos y el rating, en silencio). */
+  walkover_team_id: string | null
 }
 
 // Partido con todo lo embebido por PostgREST para rol y resultados.

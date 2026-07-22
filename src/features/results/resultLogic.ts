@@ -38,15 +38,33 @@ export function validPadelSet(a: number, b: number): boolean {
   )
 }
 
+/**
+ * Máximo de juegos en un set. Se valida el RANGO, no la combinación legal: el
+ * organizador debe poder capturar un retiro (3-1) o una corrección atípica, cosa
+ * que la validación estricta de la capitana (validPadelSet) sí rechaza. Lo que
+ * esto ataja es el dedazo — "65" en vez de "6" — que antes se guardaba tal cual.
+ */
+const MAX_JUEGOS = 7
+
 export function deriveResult(sets: SetInput[]): DerivedResult {
   let setsA = 0
   let setsB = 0
   let error: string | null = null
 
   for (const s of sets) {
-    if (s.a == null || s.b == null) continue // set incompleto: se ignora
+    // Un solo lado capturado: antes se ignoraba EN SILENCIO y el set se
+    // persistía a medias. Ahora se avisa.
+    if ((s.a == null) !== (s.b == null)) {
+      error = 'Hay un set con un solo marcador: captura los dos o ninguno.'
+      continue
+    }
+    if (s.a == null || s.b == null) continue // set vacío: se ignora
     if (s.a < 0 || s.b < 0) {
       error = 'Los marcadores no pueden ser negativos.'
+      continue
+    }
+    if (s.a > MAX_JUEGOS || s.b > MAX_JUEGOS) {
+      error = `Marcador fuera de rango: un set no pasa de ${MAX_JUEGOS} juegos.`
       continue
     }
     if (s.a === s.b) {

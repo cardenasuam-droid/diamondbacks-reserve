@@ -15,14 +15,22 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { Loader } from '@/components/ui/Loader'
 import type { PublicPlayer } from '@/lib/types'
-import type { TeamLite } from '@/features/schedule/types'
+import type { TeamLite, MatchResultLite } from '@/features/schedule/types'
 
-// Etiqueta del estado del partido (matches.status).
-const STATUS_LABEL: Record<string, string> = {
-  scheduled: 'Programado',
-  in_progress: 'En juego',
-  completed: 'Finalizado',
-  walkover: 'Walkover',
+// Estado del partido DERIVADO de su resultado, no de matches.status: esa columna
+// nace en 'scheduled' y nadie la actualiza jamás (330 filas así), por lo que la
+// pantalla mostraba "Programado" junto a un marcador oficial.
+function estadoDelPartido(result: MatchResultLite | null | undefined): {
+  label: string
+  color: 'emerald' | 'amber' | 'slate'
+} {
+  if (result?.is_walkover) return { label: 'Walkover', color: 'amber' }
+  // Reportado por la capitana (0043): aún no cuenta para tabla ni rating. Se
+  // comprueba ANTES que hasOfficialResult: su rama negativa estrecha result a
+  // never y el acceso a .status no compilaría.
+  if (result?.status === 'reported') return { label: 'Por validar', color: 'amber' }
+  if (hasOfficialResult(result)) return { label: 'Finalizado', color: 'emerald' }
+  return { label: 'Programado', color: 'slate' }
 }
 
 // Pantalla PÚBLICA del partido (/partidos/:matchId): a ella llegan las tarjetas
@@ -81,9 +89,7 @@ export function MatchDetailPage() {
             <Badge color={categoryColor(m.category?.type)}>{m.category_code}</Badge>
             <span className="font-medium text-slate-800">{m.category?.name}</span>
             <span className="ml-auto">
-              <Badge color={m.status === 'completed' ? 'emerald' : m.status === 'walkover' ? 'amber' : 'slate'}>
-                {STATUS_LABEL[m.status] ?? m.status}
-              </Badge>
+              <Badge color={estadoDelPartido(m.result).color}>{estadoDelPartido(m.result).label}</Badge>
             </span>
           </div>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500">
