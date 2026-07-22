@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import { useActiveSeason } from '@/features/season/useActiveSeason'
 import { useTeams } from '@/features/teams/useTeams'
@@ -6,6 +6,8 @@ import { usePublicPlayers } from '@/features/teams/usePublicPlayers'
 import { useStandings } from '@/features/standings/useStandings'
 import { usePlayerRankings } from '@/features/stats/usePlayerRankings'
 import { rankByRating } from '@/features/rating/rankByRating'
+import { filterStatsRows } from '@/features/stats/filterRows'
+import { StatsFilters } from '@/features/stats/StatsFilters'
 import { useCategories } from '@/features/categories/useCategories'
 import { categoryColor } from '@/features/categories/categoryColor'
 import { PageHeader } from '@/components/ui/PageHeader'
@@ -54,8 +56,11 @@ export function StatsPage() {
           <button
             key={t}
             onClick={() => selectTab(t)}
+            aria-pressed={tab === t}
             className={
-              'rounded-md px-4 py-1.5 text-sm font-medium capitalize transition ' +
+              // min-h 44px: PRODUCT.md exige táctiles de al menos 44px y estas
+              // pestañas medían 30 — el objetivo más pulsado de la pantalla.
+              'min-h-[44px] rounded-md px-4 text-sm font-medium capitalize transition ' +
               (tab === t ? 'bg-brand-600 text-white' : 'text-slate-600 hover:bg-slate-100')
             }
           >
@@ -83,10 +88,19 @@ function PlayersTab({
   const ranking = usePlayerRankings(teamIds)
   const categories = useCategories()
   const players = usePublicPlayers(seasonId)
+  const [query, setQuery] = useState('')
+  const [category, setCategory] = useState('')
+  const [teamId, setTeamId] = useState('')
+
+  const todos = ranking.data ?? []
+  const filtrados = useMemo(
+    () => filterStatsRows(todos, { query, category, teamId }),
+    [todos, query, category, teamId],
+  )
 
   if (ranking.isLoading || teams.isLoading) return <Loader label="Cargando ranking…" />
   if (ranking.isError) return <ErrorState onRetry={() => ranking.refetch()} />
-  if (!ranking.data || ranking.data.length === 0) {
+  if (todos.length === 0) {
     return <EmptyState icon="medal" title="Sin ranking todavía" description="Se llena cuando hay alineaciones y resultados." />
   }
 
@@ -95,6 +109,23 @@ function PlayersTab({
   const typeOf = new Map((categories.data ?? []).map((c) => [c.code, c.type]))
 
   return (
+    <div>
+      <StatsFilters
+        query={query}
+        onQuery={setQuery}
+        category={category}
+        onCategory={setCategory}
+        teamId={teamId}
+        onTeam={setTeamId}
+        categories={(categories.data ?? []).filter((c) => c.is_ranking)}
+        teams={teams.data ?? []}
+        total={todos.length}
+        shown={filtrados.length}
+      />
+
+      {filtrados.length === 0 ? (
+        <EmptyState icon="search" title="Sin resultados" description="Ningún jugador coincide con los filtros." />
+      ) : (
     <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm">
       <table className="w-full text-sm">
         <thead>
@@ -107,7 +138,7 @@ function PlayersTab({
           </tr>
         </thead>
         <tbody>
-          {ranking.data.map((p) => {
+          {filtrados.map((p) => {
             const team = teamById.get(p.team_id)
             return (
               <tr key={p.player_id} className="border-b border-slate-100 last:border-0">
@@ -132,6 +163,8 @@ function PlayersTab({
         </tbody>
       </table>
     </div>
+      )}
+    </div>
   )
 }
 
@@ -143,13 +176,23 @@ function PlayersTab({
 function RatingTab({ seasonId, teams }: { seasonId: string; teams: ReturnType<typeof useTeams> }) {
   const players = usePublicPlayers(seasonId)
   const categories = useCategories()
+  const [query, setQuery] = useState('')
+  const [category, setCategory] = useState('')
+  const [teamId, setTeamId] = useState('')
+
+  // Se ordena ANTES de filtrar: así la posición mostrada es la del ranking
+  // completo. Filtrar por categoría y ver "#1, #2, #3" sería una posición
+  // inventada que no existe en la tabla real.
+  const todas = useMemo(() => rankByRating(players.data ?? []), [players.data])
+  const filas = useMemo(
+    () => filterStatsRows(todas, { query, category, teamId }),
+    [todas, query, category, teamId],
+  )
 
   if (players.isLoading || teams.isLoading) return <Loader label="Cargando rating…" />
   if (players.isError) return <ErrorState onRetry={() => players.refetch()} />
 
-  const filas = rankByRating(players.data ?? [])
-
-  if (filas.length === 0) {
+  if (todas.length === 0) {
     return (
       <EmptyState
         icon="medal"
@@ -165,13 +208,31 @@ function RatingTab({ seasonId, teams }: { seasonId: string; teams: ReturnType<ty
 
   return (
     <div className="space-y-3">
+      <StatsFilters
+        query={query}
+        onQuery={setQuery}
+        category={category}
+        onCategory={setCategory}
+        teamId={teamId}
+        onTeam={setTeamId}
+        categories={(categories.data ?? []).filter((c) => c.is_ranking)}
+        teams={teams.data ?? []}
+        total={todas.length}
+        shown={filas.length}
+      />
+
+      {filas.length === 0 ? (
+        <EmptyState icon="search" title="Sin resultados" description="Ningún jugador coincide con los filtros." />
+      ) : (
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
               <th className="px-2 py-2.5 text-center font-semibold">#</th>
               <th className="px-2 py-2.5 text-left font-semibold">Jugador</th>
-              <th className="hidden px-2 py-2.5 text-center font-semibold sm:table-cell">PJ</th>
+              {/* PJ visible también en móvil: es el matiz que dice si el rating
+                  ya lo movió la cancha o sigue siendo el inicial. */}
+              <th className="px-2 py-2.5 text-center font-semibold">PJ</th>
               <th className="px-2 py-2.5 text-center font-semibold">Rating</th>
             </tr>
           </thead>
@@ -188,7 +249,7 @@ function RatingTab({ seasonId, teams }: { seasonId: string; teams: ReturnType<ty
                       <Badge color={categoryColor(typeOf.get(f.category_code))}>{f.category_code}</Badge>
                     </Link>
                   </td>
-                  <td className="hidden px-2 py-2.5 text-center tabular-nums text-slate-600 sm:table-cell">
+                  <td className="px-2 py-2.5 text-center tabular-nums text-slate-600">
                     {f.rating_matches}
                   </td>
                   <td className="px-2 py-2.5 text-center font-bold tabular-nums text-slate-900">
@@ -200,6 +261,7 @@ function RatingTab({ seasonId, teams }: { seasonId: string; teams: ReturnType<ty
           </tbody>
         </table>
       </div>
+      )}
 
       <p className="text-xs text-slate-500">
         El rating mide nivel de juego, no resultados: sube al ganarle a parejas mejor valoradas y baja al

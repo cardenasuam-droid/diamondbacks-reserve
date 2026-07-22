@@ -103,10 +103,13 @@ function PlayerRow({ player, team }: { player: PublicPlayer; team: Team | null }
         className="flex items-center gap-3 px-4 py-2.5 transition hover:bg-slate-100"
       >
         <Avatar name={player.full_name} photoUrl={player.photo_url} color={team?.color} size={44} />
-        <span className="min-w-0 flex-1 truncate font-medium text-slate-800">
-          {player.full_name}
-          {player.is_captain && <span title="Capitán"> ⭐</span>}
-          {player.is_cocaptain && <span title="Co-capitán"> ☆</span>}
+        {/* Capitanía como etiqueta de texto, no como estrella con `title`: en
+            móvil no hay hover, así que ⭐/☆ aparecían sin explicación posible.
+            Mismo lenguaje que el roster del equipo. */}
+        <span className="flex min-w-0 flex-1 items-center gap-1.5">
+          <span className="min-w-0 truncate font-medium text-slate-800">{player.full_name}</span>
+          {player.is_captain && <Badge color="amber">Cap.</Badge>}
+          {player.is_cocaptain && <Badge color="blue">Co-cap.</Badge>}
         </span>
         <PositionChip position={player.position} />
         {team ? (

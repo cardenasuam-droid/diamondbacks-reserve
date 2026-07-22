@@ -41,6 +41,13 @@ export function SchedulePage() {
   )
   const nameOf = (id: string | null) => (id ? nameById.get(id) ?? '—' : '—')
 
+  // ¿Alguna pareja publicada de esta jornada se armó con excepción? Decide si se
+  // muestra la leyenda del ⚠️ al pie.
+  const hayExcepciones = useMemo(
+    () => [...(published.data?.values() ?? [])].some((p) => p.is_exception),
+    [published.data],
+  )
+
   if (season.isLoading) return <Loader label="Cargando temporada…" />
   if (!season.data) {
     return (
@@ -102,8 +109,16 @@ export function SchedulePage() {
                           <div className="px-3 py-2">
                             <div className="flex items-center gap-2">
                               <Badge color={categoryColor(m.category?.type)}>{m.category_code}</Badge>
-                              <span className="ml-auto shrink-0 text-right text-xs text-slate-500">
-                                {m.time_block?.label} · {m.court?.name}
+                              {/* Hora y cancha son EL dato del día de juego: la hora
+                                  va destacada y la cancha debajo, en vez de los dos
+                                  en el texto más pequeño de la tarjeta. */}
+                              <span className="ml-auto shrink-0 text-right">
+                                <span className="block text-sm font-semibold tabular-nums text-slate-800">
+                                  {m.time_block?.label ?? '—'}
+                                </span>
+                                <span className="block text-[11px] text-slate-500">
+                                  {m.court?.name ?? 'Cancha por definir'}
+                                </span>
                               </span>
                               <Icon name="chevron-right" size={14} className="shrink-0 text-slate-400" />
                             </div>
@@ -124,6 +139,20 @@ export function SchedulePage() {
                   </ul>
                 </div>
               ))}
+
+              {/* Leyenda del ⚠️. Antes su único significado vivía en un `title`,
+                  que en móvil no existe: el símbolo aparecía sin explicación.
+                  Solo se muestra si esta jornada tiene alguna excepción. */}
+              {hayExcepciones && (
+                <p className="flex items-start gap-1.5 px-1 text-xs text-slate-500">
+                  <span aria-hidden>⚠️</span>
+                  <span>
+                    Pareja formada con una <strong className="font-semibold">excepción</strong> a la
+                    regla de categorías: la capitana alineó a alguien de categoría igual o más débil,
+                    o repitió a un jugador, por falta de gente.
+                  </span>
+                </p>
+              )}
             </div>
           )}
         </>
