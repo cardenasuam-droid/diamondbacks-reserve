@@ -1,1 +1,6 @@
-/*    /index.html   200
+# Espejo de netlify.toml para el despliegue por arrastrar-y-soltar. El orden
+# manda: los assets se excluyen del comodín ANTES del catch-all, para que un
+# asset borrado por un despliegue nuevo devuelva 404 y no index.html disfrazado
+# de JavaScript (ver el comentario largo en netlify.toml).
+/assets/*   /assets/:splat   404
+/*          /index.html      200

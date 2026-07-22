@@ -6,6 +6,22 @@
 [build.environment]
   NODE_VERSION = "22"
 
+# Los assets NO entran al comodín de la SPA. Va ANTES del catch-all porque la
+# primera regla que casa es la que manda.
+#
+# Sin esto, tras un despliegue una pestaña vieja pide /assets/index-VIEJO.js —
+# que ya no existe— y el comodín le devolvía index.html con status 200. El
+# navegador recibía HTML donde esperaba un módulo JavaScript y, con nosniff
+# activo, fallaba en seco: pantalla en blanco hasta reinstalar la app. Con un 404
+# limpio, el fallo es detectable y `vite:preloadError` (main.tsx) recarga.
+#
+# Las reglas solo se aplican cuando NO existe el archivo, así que un asset
+# presente se sigue sirviendo con normalidad.
+[[redirects]]
+  from = "/assets/*"
+  to = "/assets/:splat"
+  status = 404
+
 # SPA: cualquier ruta desconocida sirve index.html (el router del cliente decide).
 # (También está public/_redirects para que funcione en drag-and-drop.)
 [[redirects]]

@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom'
 import { PublicLayout } from './public/PublicLayout'
 import { HomeGate } from './public/HomeGate'
+import { RouteError } from './RouteError'
 import { SchedulePage } from './public/SchedulePage'
 import { MatchDetailPage } from './public/MatchDetailPage'
 import { ResultsPage } from './public/ResultsPage'
@@ -55,6 +56,9 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: <PublicLayout />,
+    // Red de seguridad: cualquier throw dentro del área pública cae aquí en vez
+    // de en la pantalla por defecto de react-router (en inglés y sin salida).
+    errorElement: <RouteError />,
     children: [
       // Con sesión: directo al dashboard del jugador; anónimo: Home pública.
       { index: true, element: <HomeGate /> },
@@ -79,6 +83,7 @@ export const router = createBrowserRouter([
   {
     path: '/app',
     element: <RequireAuth />,
+    errorElement: <RouteError />,
     children: [
       {
         element: <AppLayout />,

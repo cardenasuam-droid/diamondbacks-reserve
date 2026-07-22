@@ -37,6 +37,33 @@ export default defineConfig({
               cacheableResponse: { statuses: [0, 200] },
             },
           },
+          {
+            // Lectura offline del rol y la alineación en cancha — el objetivo
+            // declarado de la PWA (CLAUDE.md §1), que hasta ahora no se cumplía:
+            // solo se precacheaba el shell, así que sin señal la pantalla se
+            // quedaba cargando y acababa en error.
+            //
+            // NetworkFirst y no CacheFirst: con señal SIEMPRE gana el dato
+            // fresco; la caché solo entra si la red no responde en 4 s. En una
+            // cancha con mala cobertura, esos 4 s son la diferencia entre ver el
+            // rol y ver un spinner eterno.
+            //
+            // La lista de tablas es una LISTA BLANCA a propósito. Quedan fuera
+            // `players` y `players_contact` (teléfonos) y `profiles`: cachear
+            // respuestas con datos personales las dejaría legibles sin sesión
+            // hasta que expire la caché. Lo que se cachea es lo que ya es
+            // público o lo que el propio equipo necesita en cancha.
+            urlPattern:
+              /\/rest\/v1\/(rounds|matches|team_matchups|teams|match_categories|time_blocks|courts|seasons|players_public|team_standings|player_rankings|head_to_head|lineups|lineup_entries)\?/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'liga-datos',
+              networkTimeoutSeconds: 4,
+              // Un día: pasada una jornada, un dato viejo ya no ayuda.
+              expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 },
+              cacheableResponse: { statuses: [200] },
+            },
+          },
         ],
       },
       manifest: {
