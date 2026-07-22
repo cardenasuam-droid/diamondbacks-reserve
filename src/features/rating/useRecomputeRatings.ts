@@ -32,6 +32,7 @@ interface FilaPartido {
   result: {
     status: string
     is_walkover: boolean
+    walkover_team_id: string | null
     set1_team_a: number | null
     set1_team_b: number | null
     set2_team_a: number | null
@@ -106,7 +107,7 @@ async function leerPartidos(seasonId: string): Promise<RatingMatch[]> {
       `id, round_id, category_code, scheduled_at,
        round:rounds!inner(round_number, season_id),
        matchup:team_matchups(team_a_id, team_b_id),
-       result:match_results(status, is_walkover,
+       result:match_results(status, is_walkover, walkover_team_id,
          set1_team_a, set1_team_b, set2_team_a, set2_team_b, set3_team_a, set3_team_b),
        entries:lineup_entries(player_1_id, player_2_id, lineup:lineups(team_id))`,
     )
@@ -141,6 +142,7 @@ async function leerPartidos(seasonId: string): Promise<RatingMatch[]> {
       ],
       result_status: f.result.status,
       is_walkover: f.result.is_walkover,
+      walkover_team_id: f.result.walkover_team_id,
       pair_a: parejaDe(f.matchup.team_a_id),
       pair_b: parejaDe(f.matchup.team_b_id),
     })

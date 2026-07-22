@@ -79,6 +79,51 @@ function h2hPointsWithin(teamId: string, group: StandingRow[], lookup: H2HLookup
 }
 
 /**
+ * Resuelve un grupo empatado por duelo directo, RECURSIVAMENTE.
+ *
+ * Con 3+ equipos empatados no basta una pasada: el H2H puede separar a uno y
+ * dejar a los otros dos igualados *dentro del grupo grande*, aunque entre ellos
+ * dos sí haya un ganador. La forma correcta es recalcular el duelo directo
+ * solo entre los que siguen empatados — que es lo que dice el reglamento
+ * ("pairwise SOLO entre los empatados", CLAUDE.md §4).
+ *
+ * Termina siempre: si un subgrupo tiene el mismo tamaño que su grupo padre, el
+ * H2H no separó nada y se marca como empate real en vez de recursar.
+ */
+function resolveTieGroup(
+  group: StandingRow[],
+  lookup: H2HLookup,
+): Array<{ row: StandingRow; unresolved: boolean }> {
+  if (group.length === 1) return [{ row: group[0], unresolved: false }]
+
+  const pts = new Map(group.map((t) => [t.team_id, h2hPointsWithin(t.team_id, group, lookup)]))
+  const sorted = [...group].sort(
+    (a, b) =>
+      (pts.get(b.team_id) ?? 0) - (pts.get(a.team_id) ?? 0) ||
+      a.team_name.localeCompare(b.team_name, 'es'),
+  )
+
+  const out: Array<{ row: StandingRow; unresolved: boolean }> = []
+  let i = 0
+  while (i < sorted.length) {
+    let j = i + 1
+    while (j < sorted.length && pts.get(sorted[j].team_id) === pts.get(sorted[i].team_id)) j++
+    const sub = sorted.slice(i, j)
+
+    if (sub.length === 1) {
+      out.push({ row: sub[0], unresolved: false })
+    } else if (sub.length === group.length) {
+      // El duelo directo no separó a nadie: empate real, lo decide el organizador.
+      for (const row of sub) out.push({ row, unresolved: true })
+    } else {
+      out.push(...resolveTieGroup(sub, lookup))
+    }
+    i = j
+  }
+  return out
+}
+
+/**
  * Ordena la tabla aplicando el desempate por enfrentamiento directo dentro de
  * cada grupo empatado en (puntos, ganados, dif. sets, dif. juegos). Si el H2H
  * tampoco rompe el empate, cae a orden alfabético y se marca `tiedUnresolved`.
@@ -96,23 +141,11 @@ export function resolveStandings(rows: StandingRow[], h2h: H2HRow[]): RankedTeam
     while (j < sorted.length && sameBase(sorted[i], sorted[j])) j++
     const group = sorted.slice(i, j)
 
-    if (group.length > 1) {
-      group.sort((a, b) => {
-        const diff = h2hPointsWithin(b.team_id, group, lookup) - h2hPointsWithin(a.team_id, group, lookup)
-        return diff || a.team_name.localeCompare(b.team_name, 'es')
-      })
-    }
-
-    for (const row of group) {
-      // Empate sin resolver: mismo base Y mismo H2H que algún otro del grupo.
-      const tiedUnresolved =
-        group.length > 1 &&
-        group.some(
-          (o) =>
-            o.team_id !== row.team_id &&
-            h2hPointsWithin(o.team_id, group, lookup) ===
-              h2hPointsWithin(row.team_id, group, lookup),
-        )
+    for (const { row, unresolved } of resolveTieGroup(group, lookup)) {
+      // Antes de que se juegue nada, los 6 equipos están empatados a 0 y la
+      // tabla se llenaba de asteriscos de "empate sin resolver". No hay nada que
+      // resolver mientras nadie ha jugado: es el estado inicial, no un conflicto.
+      const tiedUnresolved = unresolved && row.played > 0
       out.push({ ...row, position: out.length + 1, tiedUnresolved })
     }
     i = j

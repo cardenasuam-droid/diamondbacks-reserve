@@ -1,0 +1,38 @@
+# CI mínimo: typecheck + tests en cada push y PR.
+#
+# Por qué existe: el build de Netlify ya corre `tsc --noEmit` (package.json), así
+# que un error de tipos NO llega a producción — pero los 184 tests no corrían en
+# ningún punto automático. Un cambio que rompa validateLineup, computeRating o
+# replaySeason (la lógica que decide alineaciones legales, puntos y rating)
+# llegaba a producción si tipaba bien. Esto lo cierra.
+#
+# Deliberadamente pequeño: ~2 minutos, sin linters ni matrices de versiones. La
+# app tiene un mantenedor; un CI que tarda o falla por ruido se acaba ignorando.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # `npm ci` y no `npm install`: instala exactamente el package-lock,
+      # así el CI prueba las mismas versiones que se despliegan.
+      - run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Tests
+        run: npm test

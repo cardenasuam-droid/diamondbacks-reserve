@@ -14,6 +14,7 @@ function partido(p: Partial<RatingMatch> & { match_id: string }): RatingMatch {
     sets: [{ a: 6, b: 3 }, { a: 6, b: 4 }, { a: null, b: null }],
     result_status: 'validated',
     is_walkover: false,
+    walkover_team_id: null,
     pair_a: ['a1', 'a2'],
     pair_b: ['b1', 'b2'],
     ...p,
@@ -93,13 +94,49 @@ describe('replaySeason', () => {
     expect(finales.get('a1')?.rating).toBe(1800)
   })
 
-  it('cuenta el walkover si se activa en los ajustes', () => {
-    const { events } = replaySeason({
+  it('cuenta el walkover si se activa en los ajustes, sintetizando el 6-0 6-0', () => {
+    // Un walkover REAL se guarda con los seis sets en NULL (useSaveResult) y el
+    // ausente en walkover_team_id. Antes este test lo alimentaba con sets
+    // 6-0 6-0, que nunca ocurren, y así "pasaba" mientras el flag no hacía nada:
+    // con sets nulos el partido caía en 'marcador_indeciso'.
+    const { events, descartes } = replaySeason({
       seeds: SEMILLAS,
-      matches: [partido({ match_id: 'm1', is_walkover: true, result_status: 'walkover', sets: [{ a: 6, b: 0 }, { a: 6, b: 0 }, { a: null, b: null }] })],
+      matches: [
+        partido({
+          match_id: 'm1',
+          is_walkover: true,
+          walkover_team_id: 'B',
+          result_status: 'walkover',
+          sets: [{ a: null, b: null }, { a: null, b: null }, { a: null, b: null }],
+        }),
+      ],
       settings: { ...DEFAULT_RATING_SETTINGS, count_walkovers: true },
     })
+    expect(descartes).toHaveLength(0)
     expect(events).toHaveLength(4)
+    // El equipo A (presente) gana con el 6-0 6-0 del reglamento.
+    const ganador = events.find((e) => e.team_id === 'A')
+    expect(ganador?.won).toBe(true)
+    expect(ganador?.games_for).toBe(12)
+    expect(ganador?.games_against).toBe(0)
+  })
+
+  it('un walkover marcado para contar pero sin equipo ausente se descarta y se reporta', () => {
+    const { events, descartes } = replaySeason({
+      seeds: SEMILLAS,
+      matches: [
+        partido({
+          match_id: 'm1',
+          is_walkover: true,
+          walkover_team_id: null,
+          result_status: 'walkover',
+          sets: [{ a: null, b: null }, { a: null, b: null }, { a: null, b: null }],
+        }),
+      ],
+      settings: { ...DEFAULT_RATING_SETTINGS, count_walkovers: true },
+    })
+    expect(events).toHaveLength(0)
+    expect(descartes[0].motivo).toBe('walkover_sin_equipo')
   })
 
   it('descarta el partido sin alineación en vez de inventarse la pareja', () => {

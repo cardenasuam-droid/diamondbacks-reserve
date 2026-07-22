@@ -8,6 +8,7 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
+    "check:standings": "node scripts/check-standings.mjs",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
   },

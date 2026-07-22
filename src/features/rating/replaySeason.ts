@@ -15,6 +15,7 @@ import {
   matchDelta,
   pairRating,
   tallyMatch,
+  type MatchTally,
   type RatingSettings,
   type SetScore,
 } from './computeRating'
@@ -37,6 +38,12 @@ export interface RatingMatch {
   sets: SetScore[]
   result_status: string
   is_walkover: boolean
+  /**
+   * Equipo que NO se presentó. Imprescindible si `count_walkovers` está activo:
+   * un walkover real se guarda con los seis sets en NULL (useSaveResult), así
+   * que sin este dato no hay forma de saber quién ganó.
+   */
+  walkover_team_id: string | null
   /** Los dos jugadores alineados por el equipo A; null si falta la alineación. */
   pair_a: readonly [string, string] | null
   pair_b: readonly [string, string] | null
@@ -52,6 +59,7 @@ export interface RatingAdjustment {
 export type MotivoDescarte =
   | 'no_oficial'
   | 'walkover'
+  | 'walkover_sin_equipo'
   | 'sin_alineacion'
   | 'marcador_indeciso'
   | 'jugador_sin_semilla'
@@ -164,10 +172,30 @@ export function replaySeason({ seeds, matches, adjustments = [], settings }: Rep
       continue
     }
 
-    const t = tallyMatch(m.sets)
-    if (t.ganador === null) {
-      descartes.push({ match_id: m.match_id, motivo: 'marcador_indeciso' })
-      continue
+    // Un walkover que SÍ cuenta (count_walkovers activo) no puede leerse de los
+    // sets: se guardan en NULL. Se sintetiza el 6-0 6-0 del reglamento, igual
+    // que hace per_team_match (0003_views.sql) para la tabla. Sin esto el flag
+    // sería mentira: el partido caería en 'marcador_indeciso' y no contaría.
+    let t: MatchTally
+    if (m.is_walkover) {
+      if (!m.walkover_team_id) {
+        descartes.push({ match_id: m.match_id, motivo: 'walkover_sin_equipo' })
+        continue
+      }
+      const ganaA = m.walkover_team_id !== m.team_a_id
+      t = {
+        setsA: ganaA ? 2 : 0,
+        setsB: ganaA ? 0 : 2,
+        juegosA: ganaA ? 12 : 0,
+        juegosB: ganaA ? 0 : 12,
+        ganador: ganaA ? 'a' : 'b',
+      }
+    } else {
+      t = tallyMatch(m.sets)
+      if (t.ganador === null) {
+        descartes.push({ match_id: m.match_id, motivo: 'marcador_indeciso' })
+        continue
+      }
     }
 
     const cuatro = [...m.pair_a, ...m.pair_b]
