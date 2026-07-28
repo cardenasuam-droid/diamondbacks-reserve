@@ -77,3 +77,41 @@ export function rankByRating(players: RatedPlayer[]): RatingRow[] {
 
   return filas
 }
+
+/**
+ * Top N de cada categoría, para el dashboard de rating. Recibe las filas YA
+ * ordenadas por rankByRating (dentro de cada categoría quedan en orden de
+ * rating) y devuelve, por categoría, las primeras N con su posición LOCAL (1..N),
+ * compartida en los empates.
+ *
+ * Antes de que se juegue nada, una categoría sembrada plana (los varoniles, todos
+ * en el mismo rating de semilla) sale con sus tres en posición 1: es honesto
+ * —nadie se ha separado todavía— y se diferencia solo cuando llegan resultados.
+ * Los femeniles, con ratings dictados distintos, forman un podio real desde el
+ * primer día.
+ */
+export function topByCategory(rows: RatingRow[], n: number): Map<string, RatingRow[]> {
+  const porCategoria = new Map<string, RatingRow[]>()
+  for (const r of rows) {
+    const list = porCategoria.get(r.category_code)
+    if (list) list.push(r)
+    else porCategoria.set(r.category_code, [r])
+  }
+
+  const out = new Map<string, RatingRow[]>()
+  for (const [cat, list] of porCategoria) {
+    const top: RatingRow[] = []
+    let posicion = 0
+    let ratingPrevio: number | null = null
+    for (let i = 0; i < list.length && top.length < n; i++) {
+      const r = list[i]
+      if (ratingPrevio === null || r.rating !== ratingPrevio) {
+        posicion = i + 1 // i es el índice LOCAL dentro de la categoría
+        ratingPrevio = r.rating
+      }
+      top.push({ ...r, position: posicion })
+    }
+    out.set(cat, top)
+  }
+  return out
+}

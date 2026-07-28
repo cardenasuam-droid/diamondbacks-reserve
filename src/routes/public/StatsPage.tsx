@@ -5,7 +5,7 @@ import { useTeams } from '@/features/teams/useTeams'
 import { usePublicPlayers } from '@/features/teams/usePublicPlayers'
 import { useStandings } from '@/features/standings/useStandings'
 import { usePlayerRankings } from '@/features/stats/usePlayerRankings'
-import { rankByRating } from '@/features/rating/rankByRating'
+import { rankByRating, topByCategory, type RatingRow } from '@/features/rating/rankByRating'
 import { filterStatsRows } from '@/features/stats/filterRows'
 import { StatsFilters } from '@/features/stats/StatsFilters'
 import { useCategories } from '@/features/categories/useCategories'
@@ -17,6 +17,7 @@ import { Loader } from '@/components/ui/Loader'
 import { Badge } from '@/components/ui/Badge'
 import { Avatar } from '@/components/ui/Avatar'
 import { TeamCrest } from '@/components/ui/TeamCrest'
+import type { MatchCategory, Team } from '@/lib/types'
 
 type Tab = 'jugadores' | 'equipos' | 'rating'
 
@@ -189,6 +190,11 @@ function RatingTab({ seasonId, teams }: { seasonId: string; teams: ReturnType<ty
     [todas, query, category, teamId],
   )
 
+  // Vista por defecto (sin ningún filtro): dashboard con el podio de cada
+  // categoría. Al buscar o filtrar, se pasa a la tabla plana.
+  const sinFiltros = query.trim() === '' && category === '' && teamId === ''
+  const podios = useMemo(() => topByCategory(todas, 3), [todas])
+
   if (players.isLoading || teams.isLoading) return <Loader label="Cargando rating…" />
   if (players.isError) return <ErrorState onRetry={() => players.refetch()} />
 
@@ -221,7 +227,14 @@ function RatingTab({ seasonId, teams }: { seasonId: string; teams: ReturnType<ty
         shown={filas.length}
       />
 
-      {filas.length === 0 ? (
+      {sinFiltros ? (
+        <RatingDashboard
+          podios={podios}
+          categories={(categories.data ?? []).filter((c) => c.is_ranking)}
+          teamById={teamById}
+          photoById={photoById}
+        />
+      ) : filas.length === 0 ? (
         <EmptyState icon="search" title="Sin resultados" description="Ningún jugador coincide con los filtros." />
       ) : (
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm">
@@ -268,6 +281,77 @@ function RatingTab({ seasonId, teams }: { seasonId: string; teams: ReturnType<ty
         perder contra las de menos. El marcador influye en cuánto se mueve.
       </p>
     </div>
+  )
+}
+
+// Dashboard de rating: el podio (top 3) de cada categoría de ranking, en el orden
+// del catálogo. Es la vista de entrada de la pestaña; buscar o filtrar la
+// reemplaza por la tabla plana.
+function RatingDashboard({
+  podios,
+  categories,
+  teamById,
+  photoById,
+}: {
+  podios: Map<string, RatingRow[]>
+  categories: MatchCategory[]
+  teamById: Map<string, Team>
+  photoById: Map<string, string | null>
+}) {
+  const conJugadores = categories.filter((c) => (podios.get(c.code)?.length ?? 0) > 0)
+  if (conJugadores.length === 0) {
+    return <EmptyState icon="medal" title="Sin rating todavía" />
+  }
+  return (
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      {conJugadores.map((cat) => (
+        <section
+          key={cat.code}
+          className="overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-100 shadow-sm"
+        >
+          <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-3 py-2">
+            <span className="text-sm font-bold text-slate-800">{cat.name}</span>
+            <Badge color={categoryColor(cat.type)}>{cat.code}</Badge>
+          </div>
+          <ul className="divide-y divide-slate-100">
+            {(podios.get(cat.code) ?? []).map((p) => {
+              const team = p.team_id ? teamById.get(p.team_id) : undefined
+              return (
+                <li key={p.id}>
+                  <Link to={`/jugadores/${p.id}`} className="flex items-center gap-2.5 px-3 py-2 hover:bg-slate-50">
+                    <PodiumMedal position={p.position} />
+                    <Avatar name={p.full_name} photoUrl={photoById.get(p.id) ?? undefined} color={team?.color} size={30} />
+                    <span className="min-w-0 flex-1 truncate text-sm font-medium text-slate-800">{p.full_name}</span>
+                    <span className="shrink-0 font-bold tabular-nums text-slate-900">{p.rating}</span>
+                  </Link>
+                </li>
+              )
+            })}
+          </ul>
+        </section>
+      ))}
+    </div>
+  )
+}
+
+// Medalla de posición: oro (1º), plata (2º), bronce (3º). Con empate, varios
+// jugadores comparten posición y por tanto medalla (tres “1º” = nadie separado).
+function PodiumMedal({ position }: { position: number }) {
+  const estilo =
+    position === 1
+      ? 'bg-gold-500/20 text-gold-300 ring-gold-500/40'
+      : position === 2
+        ? 'bg-slate-300/20 text-slate-200 ring-white/20'
+        : position === 3
+          ? 'bg-amber-700/25 text-amber-300 ring-amber-600/40'
+          : 'bg-slate-200/70 text-slate-500 ring-white/10'
+  return (
+    <span
+      className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ring-1 ring-inset ${estilo}`}
+      aria-label={`Posición ${position}`}
+    >
+      {position}
+    </span>
   )
 }
 
