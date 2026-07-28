@@ -7,7 +7,7 @@ import { usePublicPlayers } from '@/features/teams/usePublicPlayers'
 import { MatchupHeader } from '@/features/schedule/MatchupHeader'
 import { categoryColor } from '@/features/categories/categoryColor'
 import { scoreLine, hasOfficialResult } from '@/features/schedule/score'
-import { teamColor } from '@/lib/color'
+import { readableOnDark } from '@/lib/color'
 import { formatRoundDate } from '@/lib/date'
 import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
@@ -110,11 +110,12 @@ export function MatchDetailPage() {
       {official && (
         <section className="rounded-xl border border-slate-200 bg-slate-100 p-4 text-center shadow-sm">
           <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Marcador</p>
-          {/* Sin color de ganador cae a la tinta del tema (text-slate-900): el hex
-              inline solo cuando hay color de equipo (tema oscuro, 0 hardcodes). */}
+          {/* Color del ganador aclarado para que se lea sobre la superficie oscura
+              (readableOnDark): con el color crudo, un azul/verde oscuro de equipo
+              era ilegible. Sin ganador cae a la tinta del tema (text-slate-900). */}
           <p
             className="mt-1 text-2xl font-bold tabular-nums text-slate-900"
-            style={winner?.color ? { color: teamColor(winner.color, '#f1f6f0') } : undefined}
+            style={winner?.color ? { color: readableOnDark(winner.color) } : undefined}
           >
             {scoreLine(m.result!)}
           </p>

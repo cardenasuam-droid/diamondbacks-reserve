@@ -9,7 +9,7 @@ import { RoundSelector } from '@/features/schedule/RoundSelector'
 import { MatchupHeader } from '@/features/schedule/MatchupHeader'
 import { categoryColor } from '@/features/categories/categoryColor'
 import { scoreLine, hasOfficialResult } from '@/features/schedule/score'
-import { teamColor } from '@/lib/color'
+import { readableOnDark } from '@/lib/color'
 import { formatRoundDate } from '@/lib/date'
 import type { ScheduledMatch, TeamLite } from '@/features/schedule/types'
 import { PageHeader } from '@/components/ui/PageHeader'
@@ -18,11 +18,14 @@ import { ErrorState } from '@/components/ui/ErrorState'
 import { Loader } from '@/components/ui/Loader'
 import { Badge } from '@/components/ui/Badge'
 
+// Color del marcador = color del equipo GANADOR, aclarado hasta que se lea sobre
+// la superficie oscura (readableOnDark). Con el color crudo, cuatro de los seis
+// equipos tenían marcadores ilegibles (azules/verdes oscuros sobre fondo verde).
 function winnerColor(m: ScheduledMatch, teamA: TeamLite | null, teamB: TeamLite | null): string {
   const w = m.result?.winner_team_id
-  if (w && teamA && w === teamA.id) return teamColor(teamA.color, '#0f172a')
-  if (w && teamB && w === teamB.id) return teamColor(teamB.color, '#0f172a')
-  return '#475569'
+  if (w && teamA && w === teamA.id) return readableOnDark(teamA.color)
+  if (w && teamB && w === teamB.id) return readableOnDark(teamB.color)
+  return '#cbd5c4' // sin ganador claro: gris verdoso claro, legible
 }
 
 export function ResultsPage() {
