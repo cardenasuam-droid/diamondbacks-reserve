@@ -26,6 +26,20 @@
       "runtimeArgs": ["--prefix", "C:\\Dev\\AUP-Cobranza", "run", "dev"],
       "port": 5182,
       "autoPort": true
+    },
+    {
+      "name": "aup-visita",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "C:\\Dev\\AUP-Cobranza", "run", "dev:visita", "--", "--port", "5183"],
+      "port": 5183,
+      "autoPort": true
+    },
+    {
+      "name": "aup-captura",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "C:\\Dev\\AUP-Cobranza", "run", "dev:captura", "--", "--port", "5184"],
+      "port": 5184,
+      "autoPort": true
     }
   ]
 }

@@ -15,6 +15,7 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { Loader } from '@/components/ui/Loader'
 import { Badge } from '@/components/ui/Badge'
+import { Icon } from '@/components/ui/Icon'
 import type { ScheduledMatch, TeamLite } from '@/features/schedule/types'
 
 export function OrganizerResultsPage() {
@@ -157,6 +158,9 @@ function ResultEditor({
   const del = useDeleteResult()
   const [confirmDelete, setConfirmDelete] = useState(false)
   const r = match.result
+  // Un reporte de capitana (0043) aún no cuenta para tabla ni rating: borrarlo es
+  // "descartar", no "corregir un oficial". El walkover se guarda como oficial.
+  const esReporte = r?.status === 'reported' && !r.is_walkover
 
   const init = (a: number | null | undefined, b: number | null | undefined) => ({
     a: a == null ? '' : String(a),
@@ -303,22 +307,27 @@ function ResultEditor({
         </button>
       </div>
 
-      {/* Borrar: solo si YA hay algo guardado. Confirmación inline (no
-          window.confirm, patrón del repo) porque borrar mueve tabla y rating. */}
+      {/* Borrar: solo si YA hay algo guardado. El texto cambia según el estado
+          porque son dos acciones distintas para el organizador:
+            · reportado por capitana → DESCARTAR el reporte (no contaba aún).
+            · validado/walkover      → BORRAR un resultado oficial (sí contaba;
+              la tabla y el rating se recalculan).
+          Confirmación inline (no window.confirm, patrón del repo). */}
       {r && (
         <div className="border-t border-slate-200 pt-3">
           {confirmDelete ? (
             <div className="flex flex-wrap items-center gap-2">
               <span className="flex-1 text-xs text-slate-600">
-                Se borra el marcador y el partido vuelve a “Sin resultado”. La tabla y el rating se
-                recalculan. ¿Seguro?
+                {esReporte
+                  ? 'Se descarta el reporte de la capitana y el partido vuelve a “Sin resultado”. Podrá volver a capturarse. ¿Seguro?'
+                  : 'Se borra el marcador oficial y el partido vuelve a “Sin resultado”. La tabla y el rating se recalculan. ¿Seguro?'}
               </span>
               <button
                 onClick={handleDelete}
                 disabled={del.isPending}
                 className="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
               >
-                {del.isPending ? 'Borrando…' : 'Sí, borrar'}
+                {del.isPending ? 'Borrando…' : esReporte ? 'Sí, descartar' : 'Sí, borrar'}
               </button>
               <button
                 onClick={() => setConfirmDelete(false)}
@@ -330,9 +339,11 @@ function ResultEditor({
           ) : (
             <button
               onClick={() => setConfirmDelete(true)}
-              className="text-xs font-medium text-rose-400 hover:underline"
+              disabled={save.isPending}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-rose-300 px-3 py-2 text-sm font-medium text-rose-600 hover:bg-rose-50 disabled:opacity-50"
             >
-              Borrar resultado
+              <Icon name="ban" size={16} />
+              {esReporte ? 'Descartar reporte' : 'Borrar resultado'}
             </button>
           )}
         </div>
