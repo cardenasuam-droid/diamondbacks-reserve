@@ -108,6 +108,9 @@ function invalidateResult(
   // y las alineaciones publicadas se quedaban con el marcador viejo tras
   // corregir un resultado.
   void qc.invalidateQueries({ queryKey: ['match-detail', vars.matchId] })
+  // El desglose por equipo del detalle lee per_team_match: cambia con cada
+  // guardado/borrado igual que el marcador.
+  void qc.invalidateQueries({ queryKey: ['match-team-stats', vars.matchId] })
   void qc.invalidateQueries({ queryKey: ['published-lineups'] })
   // El reporte de la capitana vive en su propia caché.
   void qc.invalidateQueries({ queryKey: ['captain-round-matchup'] })

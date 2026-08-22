@@ -4,42 +4,98 @@
     {
       "name": "dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
       "port": 5173,
       "autoPort": true
     },
     {
       "name": "rol-app",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["--prefix", "C:\\Dev\\Rol-aPP", "run", "dev", "--", "--port", "5180"],
+      "runtimeArgs": [
+        "--prefix",
+        "C:\\Dev\\Rol-aPP",
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "5180"
+      ],
       "port": 5180
     },
     {
       "name": "padelscore-live",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["--prefix", "C:\\Dev\\padelscore-live", "run", "dev", "--", "--port", "5181"],
+      "runtimeArgs": [
+        "--prefix",
+        "C:\\Dev\\padelscore-live",
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "5181"
+      ],
       "port": 5181
     },
     {
       "name": "aup-cobranza",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["--prefix", "C:\\Dev\\AUP-Cobranza", "run", "dev"],
+      "runtimeArgs": [
+        "--prefix",
+        "C:\\Dev\\AUP-Cobranza",
+        "run",
+        "dev"
+      ],
       "port": 5182,
       "autoPort": true
     },
     {
       "name": "aup-visita",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["--prefix", "C:\\Dev\\AUP-Cobranza", "run", "dev:visita", "--", "--port", "5183"],
+      "runtimeArgs": [
+        "--prefix",
+        "C:\\Dev\\AUP-Cobranza",
+        "run",
+        "dev:visita",
+        "--",
+        "--port",
+        "5183"
+      ],
       "port": 5183,
       "autoPort": true
     },
     {
       "name": "aup-captura",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["--prefix", "C:\\Dev\\AUP-Cobranza", "run", "dev:captura", "--", "--port", "5184"],
+      "runtimeArgs": [
+        "--prefix",
+        "C:\\Dev\\AUP-Cobranza",
+        "run",
+        "dev:captura",
+        "--",
+        "--port",
+        "5184"
+      ],
       "port": 5184,
       "autoPort": true
+    },
+    {
+      "name": "rol-app-demo",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "C:\\Dev\\Rol-aPP",
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "5185",
+        "--mode",
+        "demo"
+      ],
+      "port": 5185
     }
   ]
 }

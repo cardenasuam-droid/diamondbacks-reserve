@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useActiveSeason } from '@/features/season/useActiveSeason'
 import { useMatchDetail } from '@/features/schedule/useMatchDetail'
+import { useMatchTeamStats } from '@/features/schedule/useMatchTeamStats'
 import { usePublishedLineups, publishedKey, type PublishedPair } from '@/features/lineups/usePublishedLineups'
 import { usePublicPlayers } from '@/features/teams/usePublicPlayers'
 import { MatchupHeader } from '@/features/schedule/MatchupHeader'
@@ -10,6 +11,7 @@ import { scoreLine, hasOfficialResult } from '@/features/schedule/score'
 import { readableOnDark } from '@/lib/color'
 import { formatRoundDate } from '@/lib/date'
 import { Avatar } from '@/components/ui/Avatar'
+import { TeamCrest } from '@/components/ui/TeamCrest'
 import { Badge } from '@/components/ui/Badge'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
@@ -43,6 +45,7 @@ export function MatchDetailPage() {
   const match = useMatchDetail(matchId)
   const published = usePublishedLineups(match.data?.round_id)
   const players = usePublicPlayers(season.data?.id)
+  const stats = useMatchTeamStats(matchId)
 
   const playersById = useMemo(
     () => new Map<string, PublicPlayer>((players.data ?? []).map((p) => [p.id, p])),
@@ -106,24 +109,61 @@ export function MatchDetailPage() {
         </div>
       </section>
 
-      {/* Marcador oficial */}
+      {/* Resultado: marcador + desglose POR EQUIPO en una sola tarjeta cohesiva
+          (jugadores, sets, juegos, diferencias y puntos ganados). Los números
+          salen de per_team_match — los MISMOS que suma la tabla de posiciones —
+          nunca recalculados aquí (CLAUDE.md §3.4). */}
       {official && (
-        <section className="rounded-xl border border-slate-200 bg-slate-100 p-4 text-center shadow-sm">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Marcador</p>
-          {/* Color del ganador aclarado para que se lea sobre la superficie oscura
-              (readableOnDark): con el color crudo, un azul/verde oscuro de equipo
-              era ilegible. Sin ganador cae a la tinta del tema (text-slate-900). */}
-          <p
-            className="mt-1 text-2xl font-bold tabular-nums text-slate-900"
-            style={winner?.color ? { color: readableOnDark(winner.color) } : undefined}
-          >
-            {scoreLine(m.result!)}
-          </p>
-          {winner && <p className="mt-1 text-sm text-slate-600">Ganó {winner.name}</p>}
+        <section className="overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm">
+          <div className="p-4 text-center">
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Marcador</p>
+            {/* Color del ganador aclarado para que se lea sobre la superficie oscura
+                (readableOnDark): con el color crudo, un azul/verde oscuro de equipo
+                era ilegible. Sin ganador cae a la tinta del tema (text-slate-900). */}
+            <p
+              className="mt-1 text-2xl font-bold tabular-nums text-slate-900"
+              style={winner?.color ? { color: readableOnDark(winner.color) } : undefined}
+            >
+              {scoreLine(m.result!)}
+            </p>
+            {winner && <p className="mt-1 text-sm text-slate-600">Ganó {winner.name}</p>}
+            {m.result?.is_walkover && (
+              <p className="mt-1 text-xs text-slate-500">
+                Walkover: el reglamento lo cuenta como 6-0, 6-0.
+              </p>
+            )}
+          </div>
+
+          {stats.isError ? (
+            <div className="border-t border-slate-100 p-4">
+              <ErrorState onRetry={() => stats.refetch()} />
+            </div>
+          ) : stats.isPending || published.isPending || players.isPending ? (
+            <div className="border-t border-slate-100 p-4">
+              <Loader label="Cargando desglose…" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 divide-x divide-slate-100 border-t border-slate-100">
+              <TeamBreakdown
+                team={teamA}
+                pair={pairA}
+                stat={teamA ? stats.data?.get(teamA.id) : undefined}
+                playersById={playersById}
+              />
+              <TeamBreakdown
+                team={teamB}
+                pair={pairB}
+                stat={teamB ? stats.data?.get(teamB.id) : undefined}
+                playersById={playersById}
+              />
+            </div>
+          )}
         </section>
       )}
 
-      {/* Alineaciones publicadas */}
+      {/* Alineaciones publicadas: solo cuando AÚN no hay resultado oficial (con
+          resultado, las parejas ya viven dentro del desglose por equipo). */}
+      {!official && (
       <section className="overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm">
         <p className="border-b border-slate-100 bg-slate-50 px-4 py-2 text-xs font-bold uppercase tracking-wide text-slate-600">
           Alineaciones
@@ -159,6 +199,80 @@ export function MatchDetailPage() {
           </p>
         )}
       </section>
+      )}
+    </div>
+  )
+}
+
+const signed = (n: number) => (n > 0 ? `+${n}` : String(n))
+
+// Columna de UN equipo dentro del desglose del resultado: escudo + nombre, su
+// pareja (con links a las fichas), y sus números — sets, juegos, diferencias y
+// puntos ganados. Las dos columnas comparten la misma tarjeta para que el
+// partido se lea como una unidad, no como dos pantallas.
+function TeamBreakdown({
+  team,
+  pair,
+  stat,
+  playersById,
+}: {
+  team: TeamLite | null
+  pair: PublishedPair | undefined
+  stat: import('@/features/schedule/useMatchTeamStats').MatchTeamStats | undefined
+  playersById: Map<string, PublicPlayer>
+}) {
+  return (
+    <div className="min-w-0 p-3">
+      <div className="flex items-center gap-2">
+        <TeamCrest name={team?.name ?? '—'} logoUrl={team?.logo_url} color={team?.color} size={24} />
+        <span className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-800">
+          {team?.name ?? '—'}
+        </span>
+        {stat?.won && <Badge color="emerald">Ganador</Badge>}
+      </div>
+
+      <div className="mt-2 border-b border-slate-100 pb-2">
+        {pair && (pair.player_1_id || pair.player_2_id) ? (
+          <>
+            {pair.is_exception && (
+              <p className="text-[10px] font-medium text-amber-600">⚠️ Excepción a la regla</p>
+            )}
+            {[pair.player_1_id, pair.player_2_id].map((id, i) => (
+              <PlayerLine key={id ?? i} player={id ? playersById.get(id) : undefined} team={team} align="left" />
+            ))}
+          </>
+        ) : (
+          <p className="py-1 text-xs text-slate-400">Sin alineación</p>
+        )}
+      </div>
+
+      {stat ? (
+        <dl className="mt-2 space-y-1">
+          <StatRow label="Sets" value={`${stat.sets_won}–${stat.sets_lost}`} />
+          <StatRow label="Juegos" value={`${stat.games_won}–${stat.games_lost}`} />
+          <StatRow label="Dif. sets" value={signed(stat.sets_won - stat.sets_lost)} />
+          <StatRow label="Dif. juegos" value={signed(stat.games_won - stat.games_lost)} />
+          <StatRow label="Puntos" value={String(stat.points)} destacada />
+        </dl>
+      ) : (
+        <p className="mt-2 text-xs text-slate-400">Sin datos del partido.</p>
+      )}
+    </div>
+  )
+}
+
+function StatRow({ label, value, destacada }: { label: string; value: string; destacada?: boolean }) {
+  return (
+    <div className="flex items-baseline justify-between gap-2">
+      <dt className="text-xs text-slate-500">{label}</dt>
+      <dd
+        className={
+          'tabular-nums ' +
+          (destacada ? 'text-sm font-bold text-gold-300' : 'text-sm font-semibold text-slate-800')
+        }
+      >
+        {value}
+      </dd>
     </div>
   )
 }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useActiveSeason } from '@/features/season/useActiveSeason'
 import { useRounds } from '@/features/schedule/useRounds'
 import { useRoundMatches } from '@/features/schedule/useRoundMatches'
@@ -17,6 +18,7 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { Loader } from '@/components/ui/Loader'
 import { Badge } from '@/components/ui/Badge'
+import { Icon } from '@/components/ui/Icon'
 
 // Color del marcador = color del equipo GANADOR, aclarado hasta que se lea sobre
 // la superficie oscura (readableOnDark). Con el color crudo, cuatro de los seis
@@ -86,21 +88,31 @@ export function ResultsPage() {
                     {g.matches.map((m) => {
                       const official = hasOfficialResult(m.result)
                       return (
-                        <li key={m.id} className="flex items-center justify-between gap-2 px-3 py-2">
-                          <span className="flex items-center gap-2">
-                            <Badge color={categoryColor(m.category?.type)}>{m.category_code}</Badge>
-                            <span className="text-sm text-slate-700">{m.category?.name}</span>
-                          </span>
-                          {official ? (
-                            <span
-                              className="shrink-0 font-semibold tabular-nums"
-                              style={{ color: winnerColor(m, g.teamA, g.teamB) }}
-                            >
-                              {scoreLine(m.result!)}
+                        <li key={m.id}>
+                          {/* Toda la fila enlaza al detalle del partido (jugadores,
+                              desglose por equipo y puntos), igual que en el rol. */}
+                          <Link
+                            to={`/partidos/${m.id}`}
+                            className="flex min-h-[44px] items-center justify-between gap-2 px-3 py-2 transition hover:bg-slate-50"
+                          >
+                            <span className="flex items-center gap-2">
+                              <Badge color={categoryColor(m.category?.type)}>{m.category_code}</Badge>
+                              <span className="text-sm text-slate-700">{m.category?.name}</span>
                             </span>
-                          ) : (
-                            <span className="shrink-0 text-xs text-slate-500">Pendiente</span>
-                          )}
+                            <span className="flex shrink-0 items-center gap-1.5">
+                              {official ? (
+                                <span
+                                  className="font-semibold tabular-nums"
+                                  style={{ color: winnerColor(m, g.teamA, g.teamB) }}
+                                >
+                                  {scoreLine(m.result!)}
+                                </span>
+                              ) : (
+                                <span className="text-xs text-slate-500">Pendiente</span>
+                              )}
+                              <Icon name="chevron-right" size={14} className="text-slate-400" />
+                            </span>
+                          </Link>
                         </li>
                       )
                     })}
