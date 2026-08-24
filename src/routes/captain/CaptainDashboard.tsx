@@ -96,8 +96,8 @@ export function CaptainDashboard() {
 
       <section className="grid grid-cols-2 gap-3">
         <div className="rounded-xl border border-slate-200 bg-slate-100 p-4 text-center shadow-sm">
-          <div className="text-2xl font-bold text-slate-900">{used}/5</div>
-          <div className="text-xs text-slate-500">Cambios usados</div>
+          <div className="text-2xl font-bold text-slate-900">{used}/4</div>
+          <div className="text-xs text-slate-500">Swaps usados</div>
         </div>
         <Link
           to={`/equipos/${team.data.id}`}

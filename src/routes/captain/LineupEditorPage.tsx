@@ -290,7 +290,7 @@ export function LineupEditorPage() {
       {asOrganizer ? (
         <div className="rounded-xl border border-brand-500/30 bg-brand-500/10 p-3 text-sm text-brand-200">
           Editas como organizador: el candado no aplica. Recuerda que un cambio sobre una
-          alineación ya publicada cuenta contra los 5 del equipo.
+          alineación ya publicada cuenta como swap (4 por equipo y temporada).
         </div>
       ) : locked ? (
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/15 p-3 text-sm text-amber-200">
@@ -329,8 +329,8 @@ export function LineupEditorPage() {
       <section className="sticky bottom-0 space-y-3 rounded-xl border border-slate-200 bg-slate-100 p-4 shadow-sm">
         <div className="flex items-center justify-between text-sm">
           <span className="text-slate-600">
-            Cambios usados:{' '}
-            <span className="font-semibold text-slate-900">{usedChanges}/5</span>
+            Swaps usados:{' '}
+            <span className="font-semibold text-slate-900">{usedChanges}/4</span>
           </span>
           <span className="text-slate-600">
             {validation?.valid ? (

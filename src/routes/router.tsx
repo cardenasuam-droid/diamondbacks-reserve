@@ -27,6 +27,7 @@ import { AvisosPage } from './app/AvisosPage'
 import { CaptainDashboard } from './captain/CaptainDashboard'
 import { LineupEditorPage } from './captain/LineupEditorPage'
 import { CaptainResultsPage } from './captain/CaptainResultsPage'
+import { CambiosPage } from './app/CambiosPage'
 import { OrganizerDashboard } from './organizer/OrganizerDashboard'
 import { OrganizerLineupsPage } from './organizer/OrganizerLineupsPage'
 import { OrganizerResultsPage } from './organizer/OrganizerResultsPage'
@@ -96,6 +97,13 @@ export const router = createBrowserRouter([
             path: 'pool',
             element: <RequireRole roles={['captain', 'organizer', 'viewer']} />,
             children: [{ index: true, element: <OrganizerPoolPage /> }],
+          },
+          {
+            // Swaps y dobleteos: transparencia para capitanas, organizador y
+            // observador (todas ven los conteos de todos los equipos).
+            path: 'cambios',
+            element: <RequireRole roles={['captain', 'organizer', 'viewer']} />,
+            children: [{ index: true, element: <CambiosPage /> }],
           },
           {
             path: 'capitan',

@@ -78,7 +78,8 @@ export function categoryRank(code: string): number | null {
 }
 
 // Una regla con required_count 2 son DOS huecos que llenar por separado.
-function expandSlots(rules: EligibilityRule[]): EligibilityRule[] {
+// Exportada: el conteo de dobleteos (dobleteos.ts) resuelve huecos igual.
+export function expandSlots(rules: EligibilityRule[]): EligibilityRule[] {
   const slots: EligibilityRule[] = []
   for (const r of rules) {
     for (let i = 0; i < r.required_count; i++) slots.push(r)
