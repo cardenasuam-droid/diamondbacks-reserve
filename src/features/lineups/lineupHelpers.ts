@@ -78,11 +78,22 @@ export function slotRequirements(
   return slots.slice(0, 2)
 }
 
+// Excepciones puntuales al límite, autorizadas por la organizadora. Clave =
+// round_date, valor = instante límite en ISO. La jornada 6 (viernes 28-ago-2026)
+// cierra el jueves 27 a las 08:00 de México, no el sábado anterior.
+const DEADLINE_EXCEPTIONS: Record<string, string> = {
+  '2026-08-28': '2026-08-27T14:00:00Z',
+}
+
 // Fecha/hora LÍMITE para enviar o editar una alineación: el sábado inmediatamente
 // anterior a la jornada, 07:00 hora de México (America/Mexico_City = UTC-6 todo el
-// año desde 2023, sin horario de verano). Debe coincidir con lineup_deadline() del
-// servidor (migración 0035). `roundDate` es 'YYYY-MM-DD'.
+// año desde 2023, sin horario de verano), salvo las excepciones de arriba. Debe
+// coincidir con lineup_deadline() del servidor (migraciones 0035 y 0048): el
+// servidor manda, esto solo pinta el banner y el botón. `roundDate` es 'YYYY-MM-DD'.
 export function lineupDeadline(roundDate: string): Date {
+  const exception = DEADLINE_EXCEPTIONS[roundDate]
+  if (exception) return new Date(exception)
+
   const [y, m, d] = roundDate.split('-').map(Number)
   // getUTCDay sobre una fecha UTC pura: 0=domingo .. 6=sábado.
   const dow = new Date(Date.UTC(y, m - 1, d)).getUTCDay()

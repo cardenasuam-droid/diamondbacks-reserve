@@ -30,7 +30,8 @@ import { validateLineup, categoryRank, type LineupSelection } from '@/features/l
 import type { TeamPlayer } from '@/features/lineups/types'
 import type { MatchCategory } from '@/lib/types'
 
-// Formatea la fecha/hora límite (sábado 07:00) en hora de México para mostrarla.
+// Formatea la fecha/hora límite (normalmente el sábado 07:00, salvo jornadas con
+// excepción) en hora de México para mostrarla.
 function formatDeadline(roundDate: string): string {
   return new Intl.DateTimeFormat('es-MX', {
     weekday: 'long',
@@ -294,8 +295,8 @@ export function LineupEditorPage() {
         </div>
       ) : locked ? (
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/15 p-3 text-sm text-amber-200">
-          🔒 Bloqueada: pasó el límite (sábado 07:00 antes de la jornada). Solo el
-          organizador puede hacer cambios.
+          🔒 Bloqueada: pasó el límite{mu.round.round_date ? ` (${formatDeadline(mu.round.round_date)})` : ''}.
+          Solo el organizador puede hacer cambios.
         </div>
       ) : mu.round.round_date ? (
         <div className="rounded-xl border border-slate-200 bg-slate-100 p-3 text-sm text-slate-600">
