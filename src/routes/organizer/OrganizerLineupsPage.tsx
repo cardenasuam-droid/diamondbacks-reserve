@@ -6,7 +6,8 @@ import { useRounds } from '@/features/schedule/useRounds'
 import { RoundSelector } from '@/features/schedule/RoundSelector'
 import { useRoundLineups } from '@/features/lineups/useRoundLineups'
 import { useFinalizeRound } from '@/features/lineups/useFinalizeRound'
-import { lineupStatusLabel } from '@/features/lineups/lineupHelpers'
+import { useLineupDeadline } from '@/features/lineups/useLineupDeadline'
+import { lineupStatusLabel, formatDeadline } from '@/features/lineups/lineupHelpers'
 import { TeamCrest } from '@/components/ui/TeamCrest'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { EmptyState } from '@/components/ui/EmptyState'
@@ -24,6 +25,10 @@ export function OrganizerLineupsPage() {
   const [roundId, setRoundId] = useState<string | undefined>()
   const selected = roundId ?? rounds.data?.[0]?.id
   const lineups = useRoundLineups(selected)
+  // La hora de cierre sale del servidor (misma función que usan los triggers),
+  // nunca de una frase fija: las jornadas con excepción no cierran en sábado.
+  const selectedRound = rounds.data?.find((r) => r.id === selected)
+  const deadlineQuery = useLineupDeadline(selectedRound?.round_date)
   const finalize = useFinalizeRound()
   const [confirm, setConfirm] = useState(false)
 
@@ -67,7 +72,10 @@ export function OrganizerLineupsPage() {
               </p>
               <p className="mt-0.5 text-xs text-slate-500">
                 Genera alineación aleatoria para los equipos que no la enviaron y publica todas
-                (visibles para todos). Hazlo el sábado a las 07:00.
+                (visibles para todos).
+                {deadlineQuery.data
+                  ? ` Hazlo al cerrar el plazo de esta jornada: ${formatDeadline(deadlineQuery.data)}`
+                  : ''}
               </p>
             </div>
             {anyPublished && <Badge color="emerald">Publicada</Badge>}

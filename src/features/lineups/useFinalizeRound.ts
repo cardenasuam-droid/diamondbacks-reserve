@@ -3,7 +3,9 @@ import { supabase } from '@/lib/supabase'
 import type { EligibilityRule } from './validateLineup'
 import { generateRandomLineup, type GenPlayer } from './generateRandomLineup'
 
-// "Cerrar y publicar jornada" (organizador). A la hora del cierre (sábado 07:00):
+// "Cerrar y publicar jornada" (organizador). Al vencer el plazo de la jornada
+// (lineup_deadline en el servidor — normalmente el sábado 07:00, salvo jornadas
+// con excepción):
 //  1. A cada equipo que NO envió alineación se le genera una ALEATORIA VÁLIDA (en el
 //     cliente, con lógica testeada) y se guarda con save_lineup (el organizador salta
 //     el candado).

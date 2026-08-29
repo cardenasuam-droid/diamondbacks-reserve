@@ -78,36 +78,30 @@ export function slotRequirements(
   return slots.slice(0, 2)
 }
 
-// Excepciones puntuales al límite, autorizadas por la organizadora. Clave =
-// round_date, valor = instante límite en ISO. La jornada 6 (viernes 28-ago-2026)
-// cierra el jueves 27 a las 08:00 de México, no el sábado anterior.
-const DEADLINE_EXCEPTIONS: Record<string, string> = {
-  '2026-08-28': '2026-08-27T14:00:00Z',
+// El instante LÍMITE ya no se calcula aquí: lo devuelve el servidor
+// (useLineupDeadline → RPC lineup_deadline). Estos dos helpers solo COMPARAN y
+// FORMATEAN esa fecha, así que no pueden desincronizarse de la base.
+
+// ¿Ya pasó el límite? Mientras no se conozca la fecha (cargando, o jornada sin
+// fecha), la UI no bloquea: el trigger del servidor es el guardián real.
+export function isPastDeadline(
+  deadline: Date | null | undefined,
+  now: number = Date.now(),
+): boolean {
+  if (!deadline) return false
+  return now >= deadline.getTime()
 }
 
-// Fecha/hora LÍMITE para enviar o editar una alineación: el sábado inmediatamente
-// anterior a la jornada, 07:00 hora de México (America/Mexico_City = UTC-6 todo el
-// año desde 2023, sin horario de verano), salvo las excepciones de arriba. Debe
-// coincidir con lineup_deadline() del servidor (migraciones 0035 y 0048): el
-// servidor manda, esto solo pinta el banner y el botón. `roundDate` es 'YYYY-MM-DD'.
-export function lineupDeadline(roundDate: string): Date {
-  const exception = DEADLINE_EXCEPTIONS[roundDate]
-  if (exception) return new Date(exception)
-
-  const [y, m, d] = roundDate.split('-').map(Number)
-  // getUTCDay sobre una fecha UTC pura: 0=domingo .. 6=sábado.
-  const dow = new Date(Date.UTC(y, m - 1, d)).getUTCDay()
-  const back = (dow + 1) % 7 === 0 ? 7 : (dow + 1) % 7
-  const sat = new Date(Date.UTC(y, m - 1, d - back))
-  const yy = sat.getUTCFullYear()
-  const mm = String(sat.getUTCMonth() + 1).padStart(2, '0')
-  const dd = String(sat.getUTCDate()).padStart(2, '0')
-  return new Date(`${yy}-${mm}-${dd}T07:00:00-06:00`)
-}
-
-// ¿Ya pasó el límite? (candado del lado cliente; el trigger de servidor es el
-// guardián real). Sin fecha de jornada, no bloquea.
-export function isLineupLocked(roundDate: string | null | undefined, now: number = Date.now()): boolean {
-  if (!roundDate) return false
-  return now >= lineupDeadline(roundDate).getTime()
+// Texto del límite en hora de México. Se deriva SIEMPRE de la fecha que devolvió
+// el servidor — nunca de una frase fija — para que una jornada con excepción se
+// lea correctamente sin tocar código.
+export function formatDeadline(deadline: Date): string {
+  return new Intl.DateTimeFormat('es-MX', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'America/Mexico_City',
+  }).format(deadline)
 }

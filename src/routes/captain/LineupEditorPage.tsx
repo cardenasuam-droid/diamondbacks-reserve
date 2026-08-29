@@ -18,30 +18,18 @@ import { useTeamRoster } from '@/features/lineups/useTeamRoster'
 import { useEligibilityRules } from '@/features/lineups/useEligibilityRules'
 import { useLineup } from '@/features/lineups/useLineup'
 import { useChangeCount } from '@/features/lineups/useChangeCount'
+import { useLineupDeadline } from '@/features/lineups/useLineupDeadline'
 import { useSaveLineup } from '@/features/lineups/useSaveLineup'
 import {
   lineupStatusLabel,
   selectionsFromEntries,
   slotRequirements,
-  lineupDeadline,
-  isLineupLocked,
+  isPastDeadline,
+  formatDeadline,
 } from '@/features/lineups/lineupHelpers'
 import { validateLineup, categoryRank, type LineupSelection } from '@/features/lineups/validateLineup'
 import type { TeamPlayer } from '@/features/lineups/types'
 import type { MatchCategory } from '@/lib/types'
-
-// Formatea la fecha/hora límite (normalmente el sábado 07:00, salvo jornadas con
-// excepción) en hora de México para mostrarla.
-function formatDeadline(roundDate: string): string {
-  return new Intl.DateTimeFormat('es-MX', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    hour: '2-digit',
-    minute: '2-digit',
-    timeZone: 'America/Mexico_City',
-  }).format(lineupDeadline(roundDate))
-}
 
 export function LineupEditorPage() {
   const { profile, role } = useAuth()
@@ -78,6 +66,11 @@ export function LineupEditorPage() {
   const categories = useCategories()
   const lineup = useLineup(matchup.data?.id, team.data?.id)
   const changes = useChangeCount(team.data?.id, team.data?.season_id)
+  // El límite lo dicta el servidor. En modo organizador no aplica candado, así
+  // que ni se consulta.
+  const deadlineQuery = useLineupDeadline(
+    asOrganizer ? null : matchup.data?.round.round_date,
+  )
   const save = useSaveLineup()
 
   const [selections, setSelections] = useState<Record<string, LineupSelection>>({})
@@ -201,7 +194,13 @@ export function LineupEditorPage() {
   const cats = matchCats
   // El organizador nunca está bloqueado por el candado (el servidor también lo
   // exime): puede corregir un rol antes o después de publicarlo.
-  const locked = asOrganizer ? false : isLineupLocked(mu.round.round_date)
+  const deadline = deadlineQuery.data ?? null
+  const locked = asOrganizer ? false : isPastDeadline(deadline)
+  // Mientras no sepamos el límite no afirmamos que esté abierto: se deshabilita
+  // el guardado (sin pintar el candado) hasta que responda el servidor. Ojo: una
+  // jornada SIN fecha no tiene límite que consultar y el servidor tampoco la
+  // bloquea (lineup_deadline devuelve null), así que ahí no se deshabilita nada.
+  const deadlineUnknown = !asOrganizer && Boolean(mu.round.round_date) && !deadline
   const usedChanges = changes.data ?? 0
   const status = lineup.data?.status ?? 'draft'
 
@@ -293,16 +292,32 @@ export function LineupEditorPage() {
           Editas como organizador: el candado no aplica. Recuerda que un cambio sobre una
           alineación ya publicada cuenta como swap (4 por equipo y temporada).
         </div>
-      ) : locked ? (
+      ) : locked && deadline ? (
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/15 p-3 text-sm text-amber-200">
-          🔒 Bloqueada: pasó el límite{mu.round.round_date ? ` (${formatDeadline(mu.round.round_date)})` : ''}.
-          Solo el organizador puede hacer cambios.
+          🔒 Bloqueada: el límite fue el{' '}
+          <span className="font-semibold">{formatDeadline(deadline)}</span> — solo el
+          organizador puede hacer cambios.
         </div>
-      ) : mu.round.round_date ? (
+      ) : deadlineQuery.isError ? (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/15 p-3 text-sm text-amber-200">
+          No se pudo consultar la fecha límite.{' '}
+          <button
+            type="button"
+            onClick={() => deadlineQuery.refetch()}
+            className="font-semibold underline underline-offset-2"
+          >
+            Reintentar
+          </button>
+        </div>
+      ) : deadlineUnknown ? (
+        <div className="rounded-xl border border-slate-200 bg-slate-100 p-3 text-sm text-slate-500">
+          Consultando la fecha límite…
+        </div>
+      ) : deadline ? (
         <div className="rounded-xl border border-slate-200 bg-slate-100 p-3 text-sm text-slate-600">
           ⏰ Puedes enviar o editar tu alineación hasta el{' '}
-          <span className="font-semibold text-slate-800">{formatDeadline(mu.round.round_date)}</span>.
-          Después de esa hora se bloquea.
+          <span className="font-semibold text-slate-800">{formatDeadline(deadline)}</span>{' '}
+          — después de esa hora se bloquea.
         </div>
       ) : null}
 
@@ -320,7 +335,7 @@ export function LineupEditorPage() {
             usedElsewhere={usedElsewhere}
             exception={exceptionCats.has(cat.code)}
             onToggleException={toggleException}
-            disabled={locked || save.isPending}
+            disabled={locked || deadlineUnknown || save.isPending}
             onChange={setSlot}
           />
         ))}
@@ -356,14 +371,14 @@ export function LineupEditorPage() {
         <div className="flex gap-2">
           <button
             onClick={() => handleSave(false)}
-            disabled={locked || save.isPending}
+            disabled={locked || deadlineUnknown || save.isPending}
             className="flex-1 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50"
           >
             Guardar borrador
           </button>
           <button
             onClick={() => handleSave(true)}
-            disabled={locked || save.isPending || !validation?.valid}
+            disabled={locked || deadlineUnknown || save.isPending || !validation?.valid}
             className="flex-1 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
           >
             {save.isPending ? 'Guardando…' : 'Enviar alineación'}

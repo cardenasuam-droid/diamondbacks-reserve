@@ -16,6 +16,8 @@ import { Badge } from '@/components/ui/Badge'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { Loader } from '@/components/ui/Loader'
+import { useLineupDeadline } from '@/features/lineups/useLineupDeadline'
+import { formatDeadline } from '@/features/lineups/lineupHelpers'
 import type { PublicPlayer } from '@/lib/types'
 import type { TeamLite, MatchResultLite } from '@/features/schedule/types'
 
@@ -44,6 +46,9 @@ export function MatchDetailPage() {
   const season = useActiveSeason()
   const match = useMatchDetail(matchId)
   const published = usePublishedLineups(match.data?.round_id)
+  // Las alineaciones se publican al vencer el plazo de la jornada, que dicta el
+  // servidor (hay jornadas con excepción): no anunciar una hora fija.
+  const deadlineQuery = useLineupDeadline(match.data?.round?.round_date)
   const players = usePublicPlayers(season.data?.id)
   const stats = useMatchTeamStats(matchId)
 
@@ -195,7 +200,10 @@ export function MatchDetailPage() {
           </div>
         ) : (
           <p className="p-4 text-sm text-slate-500">
-            Aún sin alineaciones publicadas. Se publican el sábado a las 07:00 antes de la jornada.
+            Aún sin alineaciones publicadas.
+            {deadlineQuery.data
+              ? ` Se publican al cerrar el plazo de la jornada: ${formatDeadline(deadlineQuery.data)}`
+              : ' Se publican poco antes de la jornada.'}
           </p>
         )}
       </section>

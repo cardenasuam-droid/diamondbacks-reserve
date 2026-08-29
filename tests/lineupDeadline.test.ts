@@ -1,60 +1,49 @@
-import { lineupDeadline, isLineupLocked } from '@/features/lineups/lineupHelpers'
+import { isPastDeadline, formatDeadline } from '@/features/lineups/lineupHelpers'
 
-// El límite es el sábado inmediatamente anterior a la jornada, 07:00 hora de
-// México (UTC-6, sin horario de verano) → 13:00 UTC.
-describe('lineupDeadline', () => {
-  it('jornada en lunes → sábado anterior 07:00 MX', () => {
-    // 2026-07-20 es lunes → sábado 2026-07-18.
-    expect(lineupDeadline('2026-07-20').toISOString()).toBe('2026-07-18T13:00:00.000Z')
+// El límite ya NO se calcula en el cliente: lo devuelve el servidor por RPC
+// (lineup_deadline, la misma función que usan los triggers). Aquí se prueba lo
+// único que queda del lado de la app: comparar ese instante contra ahora y
+// escribirlo en pantalla.
+//
+// Las cadenas de abajo son respuestas REALES del RPC, copiadas verbatim, para
+// que el test falle si cambia el formato con el que llega la fecha.
+const RPC_J6 = '2026-08-27T14:00:00+00:00' // jornada 6, viernes 28-ago (excepción)
+const RPC_J7 = '2026-08-30T14:00:00+00:00' // jornada 7, lunes 31-ago (excepción)
+const RPC_J8 = '2026-09-05T13:00:00+00:00' // jornada 8, lunes 7-sep (regla general)
+
+describe('formatDeadline', () => {
+  it('escribe la fecha que devolvió el servidor, en hora de México', () => {
+    expect(formatDeadline(new Date(RPC_J7))).toBe('domingo, 30 de agosto, 08:00 a.m.')
+    expect(formatDeadline(new Date(RPC_J6))).toBe('jueves, 27 de agosto, 08:00 a.m.')
   })
 
-  it('jornada en domingo → el sábado es el día anterior', () => {
-    // 2026-07-19 es domingo → sábado 2026-07-18.
-    expect(lineupDeadline('2026-07-19').toISOString()).toBe('2026-07-18T13:00:00.000Z')
+  it('una jornada sin excepción se sigue leyendo como sábado 07:00', () => {
+    expect(formatDeadline(new Date(RPC_J8))).toBe('sábado, 5 de septiembre, 07:00 a.m.')
+  })
+})
+
+describe('isPastDeadline', () => {
+  it('false antes del límite, true en el instante exacto y después', () => {
+    const dl = new Date(RPC_J8)
+    expect(isPastDeadline(dl, dl.getTime() - 1000)).toBe(false)
+    expect(isPastDeadline(dl, dl.getTime())).toBe(true)
+    expect(isPastDeadline(dl, dl.getTime() + 1000)).toBe(true)
   })
 
-  it('jornada en sábado → retrocede al sábado ANTERIOR (estrictamente)', () => {
-    // 2026-07-18 es sábado → sábado previo 2026-07-11.
-    expect(lineupDeadline('2026-07-18').toISOString()).toBe('2026-07-11T13:00:00.000Z')
+  it('sin fecha no bloquea: manda el trigger del servidor, no la UI', () => {
+    // Cubre "aún cargando" y "jornada sin fecha".
+    expect(isPastDeadline(null)).toBe(false)
+    expect(isPastDeadline(undefined)).toBe(false)
   })
 
-  it('todas las jornadas 2026 (lunes) caen el sábado dos días antes', () => {
-    expect(lineupDeadline('2026-07-27').toISOString()).toBe('2026-07-25T13:00:00.000Z')
-    expect(lineupDeadline('2026-09-21').toISOString()).toBe('2026-09-19T13:00:00.000Z')
-  })
-
-  // Excepción autorizada por la organizadora: la jornada 6 cae en VIERNES y su
-  // sábado anterior quedaría casi una semana antes. Debe coincidir con
-  // lineup_deadline() del servidor (migración 0048).
-  it('jornada 6 (viernes 28-ago-2026) → jueves 27 08:00 MX, no el sábado anterior', () => {
-    expect(lineupDeadline('2026-08-28').toISOString()).toBe('2026-08-27T14:00:00.000Z')
-    // La fórmula normal habría dado el sábado 22-ago 07:00 MX (13:00 UTC).
-    expect(lineupDeadline('2026-08-28').toISOString()).not.toBe('2026-08-22T13:00:00.000Z')
-  })
-
-  it('la excepción es SOLO de esa fecha: las jornadas vecinas mantienen el sábado', () => {
-    // 2026-08-24 es lunes → sábado 2026-08-22.
-    expect(lineupDeadline('2026-08-24').toISOString()).toBe('2026-08-22T13:00:00.000Z')
-    // 2026-08-31 es lunes → sábado 2026-08-29.
-    expect(lineupDeadline('2026-08-31').toISOString()).toBe('2026-08-29T13:00:00.000Z')
-    // Un viernes cualquiera SIN excepción sigue la fórmula: 2026-09-04 → sáb 29-ago.
-    expect(lineupDeadline('2026-09-04').toISOString()).toBe('2026-08-29T13:00:00.000Z')
-  })
-
-  it('isLineupLocked usa el límite de la excepción en la jornada 6', () => {
-    const dl = Date.parse('2026-08-27T14:00:00Z')
-    expect(isLineupLocked('2026-08-28', dl - 1000)).toBe(false)
-    expect(isLineupLocked('2026-08-28', dl)).toBe(true)
-    // Antes seguía abierta bien pasado el viejo límite del sábado 22.
-    expect(isLineupLocked('2026-08-28', Date.parse('2026-08-25T00:00:00Z'))).toBe(false)
-  })
-
-  it('isLineupLocked: false antes del límite, true en/después; sin fecha no bloquea', () => {
-    const dl = lineupDeadline('2026-07-20').getTime()
-    expect(isLineupLocked('2026-07-20', dl - 1000)).toBe(false)
-    expect(isLineupLocked('2026-07-20', dl)).toBe(true)
-    expect(isLineupLocked('2026-07-20', dl + 1000)).toBe(true)
-    expect(isLineupLocked(null)).toBe(false)
-    expect(isLineupLocked(undefined)).toBe(false)
+  // REGRESIÓN del bug que motivó el cambio: la fórmula local decía que la J7
+  // cerraba el sábado 29 a las 07:00 México y la app bloqueaba la carga ese
+  // mismo día, cuando el servidor la tenía abierta hasta el domingo 30.
+  it('la jornada 7 sigue ABIERTA el sábado 29, que era cuando la UI la bloqueaba', () => {
+    const sabado29 = Date.parse('2026-08-29T13:00:00Z') // sáb 29-ago 07:00 México
+    expect(isPastDeadline(new Date(RPC_J7), sabado29)).toBe(false)
+    // Y sigue abierta hasta el domingo: cierra en el instante que dice el servidor.
+    expect(isPastDeadline(new Date(RPC_J7), Date.parse('2026-08-30T13:59:59Z'))).toBe(false)
+    expect(isPastDeadline(new Date(RPC_J7), Date.parse('2026-08-30T14:00:00Z'))).toBe(true)
   })
 })
