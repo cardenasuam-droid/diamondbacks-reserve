@@ -1,4 +1,4 @@
-import { setScores, scoreLine, hasOfficialResult } from '@/features/schedule/score'
+import { setScores, scoreLine, scoreLineFor, hasOfficialResult } from '@/features/schedule/score'
 import type { MatchResultLite } from '@/features/schedule/types'
 
 function result(p: Partial<MatchResultLite>): MatchResultLite {
@@ -39,5 +39,13 @@ describe('score helpers', () => {
     expect(hasOfficialResult(result({ status: 'validated' }))).toBe(true)
     expect(hasOfficialResult(result({ status: 'reported' }))).toBe(false)
     expect(hasOfficialResult(null)).toBe(false)
+  })
+
+  it('scoreLineFor voltea los sets cuando el equipo propio es el B', () => {
+    const r = result({ set1_team_a: 6, set1_team_b: 4, set2_team_a: 4, set2_team_b: 6, set3_team_a: 6, set3_team_b: 3 })
+    expect(scoreLineFor(r, true)).toBe('6-4  4-6  6-3')
+    expect(scoreLineFor(r, false)).toBe('4-6  6-4  3-6')
+    // W.O. no tiene lados que voltear.
+    expect(scoreLineFor(result({ is_walkover: true, status: 'walkover' }), false)).toBe('W.O.')
   })
 })

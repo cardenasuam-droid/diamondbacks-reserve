@@ -31,3 +31,16 @@ export function scoreLine(r: MatchResultLite): string {
   if (sets.length === 0) return '—'
   return sets.map((s) => `${s.a}-${s.b}`).join('  ')
 }
+
+/**
+ * Marcador visto DESDE un lado: con `asTeamA=false` voltea cada set para que el
+ * primer número sea el del equipo propio. Para pantallas personales (historial
+ * del jugador), donde "6-4" debe leerse "mi pareja 6, rival 4" sin importar si
+ * su equipo quedó como A o B en el enfrentamiento.
+ */
+export function scoreLineFor(r: MatchResultLite, asTeamA: boolean): string {
+  if (r.is_walkover) return 'W.O.'
+  const sets = setScores(r)
+  if (sets.length === 0) return '—'
+  return sets.map((s) => (asTeamA ? `${s.a}-${s.b}` : `${s.b}-${s.a}`)).join('  ')
+}
