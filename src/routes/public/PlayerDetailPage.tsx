@@ -7,8 +7,10 @@ import { usePublicPlayers } from '@/features/teams/usePublicPlayers'
 import { useContactPhones } from '@/features/teams/usePoolPlayers'
 import { useResetPlayerAccount } from '@/features/teams/playerMutations'
 import { usePlayerRankings } from '@/features/stats/usePlayerRankings'
+import { usePlayerHistory } from '@/features/stats/usePlayerHistory'
 import { useCategories } from '@/features/categories/useCategories'
 import { categoryColor } from '@/features/categories/categoryColor'
+import { scoreLineFor, hasOfficialResult } from '@/features/schedule/score'
 import { teamColor } from '@/lib/color'
 import { initialsOf } from '@/components/ui/Avatar'
 import { imageThumb } from '@/lib/image'
@@ -177,8 +179,112 @@ export function PlayerDetailPage() {
         />
       )}
 
+      {/* Historial de juegos: cada partido donde fue alineado (rol publicado),
+          con su pareja, la pareja rival y el marcador desde su lado. */}
+      <HistorySection
+        playerId={player.id}
+        seasonId={season.data?.id}
+        playerName={player.full_name}
+        nameOf={(id) => (id ? (players.data ?? []).find((p) => p.id === id)?.full_name ?? '—' : '—')}
+      />
+
       {role === 'organizer' && <ResetAccountCard playerId={player.id} name={player.full_name} />}
     </div>
+  )
+}
+
+// Historial de juegos del jugador: una fila por partido donde fue alineado
+// (solo rol publicado), clicable hacia /partidos/:id. El marcador se muestra
+// desde el lado de SU pareja (scoreLineFor voltea los sets si su equipo es el B)
+// y se colorea por ganado/perdido. Si no hay historial, la sección no se pinta
+// (el EmptyState de estadísticas ya cubre el mensaje).
+function HistorySection({
+  playerId,
+  seasonId,
+  playerName,
+  nameOf,
+}: {
+  playerId: string
+  seasonId: string | undefined
+  playerName: string
+  nameOf: (id: string | null) => string
+}) {
+  const history = usePlayerHistory(playerId, seasonId)
+
+  if (!seasonId) return null
+  if (history.isError) {
+    return (
+      <section className="mt-5 space-y-3">
+        <h2 className="text-sm font-bold uppercase tracking-wide text-slate-700">Historial de juegos</h2>
+        <ErrorState onRetry={() => history.refetch()} />
+      </section>
+    )
+  }
+  if (history.isPending) {
+    return (
+      <section className="mt-5">
+        <Loader label="Cargando historial…" />
+      </section>
+    )
+  }
+  const items = history.data
+  if (items.length === 0) return null
+
+  return (
+    <section className="mt-5 space-y-3">
+      <h2 className="text-sm font-bold uppercase tracking-wide text-slate-700">Historial de juegos</h2>
+      <ul className="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm">
+        {items.map((it) => {
+          const official = hasOfficialResult(it.result)
+          const scoreClass = official
+            ? it.won === true
+              ? 'text-emerald-300'
+              : it.won === false
+                ? 'text-rose-300'
+                : 'text-slate-900'
+            : 'text-slate-500'
+          return (
+            <li key={it.matchId}>
+              <Link to={`/partidos/${it.matchId}`} className="block px-3 py-2 transition hover:bg-slate-50">
+                <div className="flex items-center gap-2">
+                  <span className="w-8 shrink-0 text-xs font-semibold text-slate-500">J{it.roundNumber}</span>
+                  <Badge color={categoryColor(it.categoryType ?? undefined)}>{it.categoryCode}</Badge>
+                  {it.isException && (
+                    <span className="text-xs" title="Excepción a la regla">
+                      ⚠️
+                    </span>
+                  )}
+                  <span className={`ml-auto shrink-0 text-sm font-semibold tabular-nums ${scoreClass}`}>
+                    {official ? scoreLineFor(it.result!, it.isTeamA) : 'Pendiente'}
+                  </span>
+                </div>
+                <div className="mt-1 grid grid-cols-[1fr_auto_1fr] items-center gap-x-2 text-xs text-slate-600">
+                  <span className="min-w-0 truncate">
+                    {it.partnerId ? `${playerName} · ${nameOf(it.partnerId)}` : playerName}
+                  </span>
+                  <span className="text-[10px] font-medium text-slate-400">vs</span>
+                  <span className="flex min-w-0 items-center justify-end gap-1.5">
+                    <TeamCrest
+                      name={it.opponent.name}
+                      logoUrl={it.opponent.logo_url}
+                      color={it.opponent.color}
+                      size={14}
+                    />
+                    <span className="min-w-0 truncate text-right">
+                      {it.rivalIds.length ? it.rivalIds.map((id) => nameOf(id)).join(' · ') : 'Por definir'}
+                    </span>
+                  </span>
+                </div>
+              </Link>
+            </li>
+          )
+        })}
+      </ul>
+      <p className="text-xs text-slate-500">
+        Solo alineaciones publicadas. El marcador se lee desde el lado de su pareja; toca un juego para ver el
+        detalle.
+      </p>
+    </section>
   )
 }
 
