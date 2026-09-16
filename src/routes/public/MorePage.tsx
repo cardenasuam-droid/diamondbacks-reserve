@@ -18,6 +18,8 @@ const ITEMS: MoreItem[] = [
   { icon: 'stats', label: 'Estadísticas de equipo', desc: 'Rendimiento por equipo', to: '/estadisticas?tab=equipos' },
   { icon: 'news', label: 'Noticias', desc: 'Avisos y comunicados', to: '/noticias' },
   { icon: 'rules', label: 'Reglamento', desc: 'Documento oficial (PDF)', to: '/reglamento' },
+  // Plataforma multi-liga: volver al selector (la elección se re-recuerda).
+  { icon: 'medal', label: 'Cambiar de liga', desc: 'Diamondbacks Pádel · ligas y torneos', to: '/ligas' },
 ]
 
 export function MorePage() {

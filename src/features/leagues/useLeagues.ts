@@ -53,6 +53,40 @@ export function useLeagueOpenSeason(leagueSlug: string | undefined) {
   })
 }
 
+export interface LeagueWithSeason {
+  league: League
+  /** Edición vigente (mayor edition_number), o null si aún no tiene. */
+  season: Season | null
+  registrationOpen: boolean
+}
+
+// Ligas activas con su edición vigente — el selector de entrada (F4-lite).
+export function useActiveLeagues() {
+  return useQuery({
+    queryKey: ['leagues', 'active'],
+    queryFn: async (): Promise<LeagueWithSeason[]> => {
+      const { data, error } = await supabase
+        .from('leagues')
+        .select('*, seasons(*)')
+        .eq('is_active', true)
+        .order('sort_order')
+      if (error) throw error
+      const rows = (data ?? []) as unknown as (League & { seasons: Season[] })[]
+      return rows.map(({ seasons, ...league }) => {
+        const sorted = [...(seasons ?? [])].sort(
+          (a, b) => (b.edition_number ?? 0) - (a.edition_number ?? 0)
+        )
+        return {
+          league,
+          season: sorted[0] ?? null,
+          registrationOpen: (seasons ?? []).some((s) => s.registration_open),
+        }
+      })
+    },
+    staleTime: 5 * 60_000,
+  })
+}
+
 // La edición VIGENTE de una liga (la de mayor edition_number), tenga o no la
 // inscripción abierta: la usan el rol/tabla públicos y el panel del
 // organizador, que siguen vivos después de cerrar inscripciones.

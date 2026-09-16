@@ -28,10 +28,15 @@ export function LeagueShell({
     <div data-league={slug} className="min-h-full bg-slate-50">
       <div className="mx-auto flex min-h-full max-w-md flex-col px-4 pb-12 pt-safe">
         <header className="pt-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-300">
-            {leagueName}
-            {seasonName ? ` · ${seasonName}` : ''}
-          </p>
+          <div className="flex items-baseline justify-between gap-2">
+            <p className="min-w-0 truncate text-xs font-semibold uppercase tracking-[0.16em] text-brand-300">
+              {leagueName}
+              {seasonName ? ` · ${seasonName}` : ''}
+            </p>
+            <Link to="/ligas" className="shrink-0 text-[11px] font-medium text-sky-300 underline">
+              Cambiar de liga
+            </Link>
+          </div>
           <nav className="mt-3 grid grid-cols-3 gap-2" aria-label="Secciones de la liga">
             {tabs.map((t) => (
               <Link
