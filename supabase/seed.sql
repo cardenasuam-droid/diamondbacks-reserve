@@ -48,10 +48,11 @@ on conflict (label) do update
   set start_time = excluded.start_time, sort_order = excluded.sort_order;
 
 -- ---------------------------------------------------------------------------
--- Canchas (9)
+-- Canchas (10) — la 10 se añadió para la Liga Femenil (0049).
 -- ---------------------------------------------------------------------------
 insert into courts (name, number) values
   ('Cancha 1', 1), ('Cancha 2', 2), ('Cancha 3', 3),
   ('Cancha 4', 4), ('Cancha 5', 5), ('Cancha 6', 6),
-  ('Cancha 7', 7), ('Cancha 8', 8), ('Cancha 9', 9)
+  ('Cancha 7', 7), ('Cancha 8', 8), ('Cancha 9', 9),
+  ('Cancha 10', 10)
 on conflict (number) do update set name = excluded.name;

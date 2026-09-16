@@ -73,6 +73,17 @@ completa se carga después. Queda además un **login por correo** oculto como
 respaldo de emergencia (cuenta creada en el panel de Supabase). Requiere en
 Supabase: Email provider ON y **Confirm email OFF**.
 
+### 3.3-bis Multi-liga (2026-09-16): `leagues` → `seasons` (ediciones)
+La plataforma aloja varias ligas/torneos en ESTE mismo proyecto de Supabase.
+`leagues` (slug, kind: team_league | americano | tournament, theme) contiene a
+sus ediciones: `seasons.league_id` es obligatorio y cada edición define sus
+catálogos en `season_categories` y `season_time_blocks` (data-driven, no
+hardcodees listas por liga). La identidad visual por liga se aplica por slug
+(`[data-league="…"]` en index.css) y se registra en `leagues.theme`. El plan
+maestro vive en `plan_plataforma_multi_liga.md`; la identidad por persona
+(persons) y el selector liga→edición llegan en fases posteriores — mientras
+tanto `useActiveSeason` sigue mandando en las páginas existentes de Reserve.
+
 ### 3.4 Puntos, tabla y ranking se DERIVAN, no se almacenan
 `match_results` guarda solo marcadores por set + ganador + flag de walkover. Los
 puntos (3/1/0), sets y juegos se calculan en **vistas SQL** (`team_standings`,
