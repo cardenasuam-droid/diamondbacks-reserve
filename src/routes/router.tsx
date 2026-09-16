@@ -19,6 +19,9 @@ import { DevPage } from './dev/DevPage'
 import { NotFoundPage } from './NotFoundPage'
 import { LoginPage } from './auth/LoginPage'
 import { RegisterPage } from './registro/RegisterPage'
+import { RegistrationHubPage } from './registro/RegistrationHubPage'
+import { RegisterAmericanoPage } from './registro/RegisterAmericanoPage'
+import { LeagueLandingPage } from './public/LeagueLandingPage'
 import { DraftPage } from './draft/DraftPage'
 import { RequireAuth, RequireRole } from './guards'
 import { AppLayout } from './app/AppLayout'
@@ -49,9 +52,13 @@ import { AvisosManagerPage } from './content/AvisosManagerPage'
 //   '/app'   área autenticada (RequireAuth). Paneles por rol llegan en su módulo.
 export const router = createBrowserRouter([
   // Inscripción pública AISLADA: su propia pantalla, sin el shell con menú ni
-  // login. Un link aparte (/registro) que comparte la base de datos pero no da
-  // acceso a la app.
-  { path: '/registro', element: <RegisterPage /> },
+  // login. /registro es un hub multi-liga (0049): con una sola edición abierta
+  // redirige a su formulario; 'reserve' (estático) gana sobre ':leagueSlug'.
+  { path: '/registro', element: <RegistrationHubPage /> },
+  { path: '/registro/reserve', element: <RegisterPage /> },
+  { path: '/registro/:leagueSlug', element: <RegisterAmericanoPage /> },
+  // Landing pública de la Liga Femenil (F1): compartible, con su identidad.
+  { path: '/femenil', element: <LeagueLandingPage slug="femenil" /> },
   // Draft en vivo: board público + participante (capitanas eligen en su turno).
   { path: '/draft', element: <DraftPage /> },
   {

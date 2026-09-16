@@ -279,3 +279,47 @@ textarea {
     transform: none;
   }
 }
+
+/* ===========================================================================
+   Tema por LIGA (0049, plan §4.4): cada liga redefine las variables de la
+   paleta dentro de su ámbito [data-league="…"]. Las utilidades de Tailwind v4
+   resuelven var() en el punto de uso, así que basta envolver la página en
+   <div data-league="femenil"> para que brand/slate/sombras cambien sin tocar
+   componentes. Reserve no necesita bloque: su tema es el @theme base.
+
+   FEMENIL — paleta PROVISIONAL (rosa mexicano sobre ónix-ciruela). Pendiente
+   heredar los colores de la app anterior; al recibirlos, se cambian estos
+   valores y leagues.theme (0049) y nada más. El ORO se conserva: es el acento
+   del club, común a todas las ligas.
+   =========================================================================== */
+[data-league='femenil'] {
+  /* Marca — ROSA MEXICANO (brand-* y su alias sky-*). */
+  --color-brand-50:  #fdeef5;  --color-sky-50:  #fdeef5;
+  --color-brand-100: #fad7e7;  --color-sky-100: #fad7e7;
+  --color-brand-200: #f5aecd;  --color-sky-200: #f5aecd;
+  --color-brand-300: #ef7fb1;  --color-sky-300: #ef7fb1;
+  --color-brand-400: #e35595;  --color-sky-400: #e35595;
+  --color-brand-500: #d6367f;  --color-sky-500: #d6367f;
+  --color-brand-600: #b32468;  --color-sky-600: #b32468;
+  --color-brand-700: #8f1c53;  --color-sky-700: #8f1c53;
+  --color-brand-800: #6f1741;  --color-sky-800: #6f1741;
+  --color-brand-900: #571233;  --color-sky-900: #571233;
+  --color-brand-950: #33081d;  --color-sky-950: #33081d;
+
+  /* Neutros ÓNIX-CIRUELA (mismo papel que los ónix-esmeralda del tema base). */
+  --color-slate-50:  #171015;
+  --color-slate-100: #1e151c;
+  --color-slate-200: #2d2029;
+  --color-slate-300: #43303d;
+  --color-slate-400: #6a5262;
+  --color-slate-500: #a08a99;
+  --color-slate-600: #b8a5b1;
+  --color-slate-700: #d3c4cd;
+  --color-slate-800: #e9dee5;
+  --color-slate-900: #f6eef3;
+  --color-slate-950: #ffffff;
+
+  /* Relieve dual sobre la base ciruela. */
+  --shadow-sm: 4px 4px 9px #0b070a, -4px -4px 9px #241922;
+  --shadow-md: 7px 7px 16px #0a0609, -7px -7px 16px #271b24;
+}

@@ -7,12 +7,34 @@ export type UserRole = 'player' | 'captain' | 'organizer' | 'web_manager' | 'vie
 
 export type SeasonStatus = 'draft' | 'active' | 'finished'
 
+// Liga/torneo por encima de sus ediciones (0049). `kind` decide qué módulo la
+// opera; `theme` es la identidad visual registrada como datos (la aplica el
+// CSS por slug: [data-league] en index.css).
+export type LeagueKind = 'team_league' | 'americano' | 'tournament'
+
+export interface League {
+  id: string
+  slug: string
+  name: string
+  kind: LeagueKind
+  theme: { primary?: string; accent?: string; label?: string; provisional?: boolean } | null
+  sort_order: number
+  is_active: boolean
+}
+
 export interface Season {
   id: string
   name: string
   start_date: string | null
   end_date: string | null
   status: SeasonStatus
+  // Multi-liga (0049): toda temporada es una EDICIÓN de una liga.
+  league_id: string
+  edition_number: number | null
+  slug: string | null
+  registration_open: boolean
+  max_players: number | null
+  payment_instructions: string | null
   created_at: string
   updated_at: string
 }
