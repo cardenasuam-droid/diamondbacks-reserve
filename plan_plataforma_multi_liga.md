@@ -14,24 +14,30 @@ Diamondbacks (7a, por confirmar) y sus inscripciones deben abrir ya.
 
 ---
 
-## 1. Decisiones ya tomadas (2026-09-16)
+## 1. Decisiones ya tomadas (2026-09-16, actualizadas el mismo día)
 
 1. **Formato de la liga femenil:** americano individual — 8 jornadas de fase
    regular con pareja rotativa asignada por jornada; después, **parejas fijas
-   formadas por resultados** para playoffs. Es una nueva edición de la Liga
-   Diamondbacks de siempre (la app vieja sirvió la 5a edición).
-2. **Historial de la liga vieja:** no se rescata como backend; si se importa,
+   formadas por resultados** para playoffs. Es la **6a Edición** de la Liga
+   Diamondbacks (confirmado por el organizador; la app vieja sirvió la 5a).
+2. **Calendario de la 6a:** arranca el **lunes 12 de octubre de 2026**, 8
+   lunes consecutivos (última jornada 30-nov). Las fechas van justas, así que
+   la inscripción pregunta **disponibilidad de horarios, no de fechas** (no
+   hay semana de descanso). Horarios: **6:30, 7:45 y 9:00 pm** (bloques
+   18:30/19:45/21:00, que ya existían en el catálogo). **Cupo: 120 jugadoras**
+   = 10 canchas × 3 horarios × 4.
+3. **Identidad visual por liga:** cada liga tiene sus colores propios
+   (`leagues.theme` + `[data-league]` en index.css). La femenil usará los
+   colores de la app anterior; mientras el organizador los pasa, corre una
+   paleta PROVISIONAL (rosa mexicano sobre ónix-ciruela).
+4. **Historial de la liga vieja:** no se rescata como backend; si se importa,
    es **solo como historial de juegos y estadísticas** por jugadora. La fuente
-   ya está localizada: las hojas de Drive (ver §2.3) — no hace falta tocar la
-   app vieja.
-3. **Rating:** las jugadoras que estén en Reserve entran con **su rating de
+   ya está localizada: las hojas de Drive (ver §2.3).
+5. **Rating:** las jugadoras que estén en Reserve entran con **su rating de
    Reserve** (vía la capa de personas); a las que no estén, el organizador les
    dicta rating después.
-4. **peak-padel queda aparte.** Solo se copia el patrón que vale oro: **subir
-   comprobante de pago** en la inscripción, con revisión del organizador.
-5. **Fechas:** jornadas los **lunes**, empezando en octubre (día exacto
-   pendiente; el primer lunes de octubre de 2026 es el día 5). Inscripciones:
-   cuanto antes.
+6. **peak-padel queda aparte.** Solo se copió el patrón que vale oro: **subir
+   comprobante de pago** en la inscripción, con verificación del organizador.
 
 ---
 
@@ -107,11 +113,9 @@ hojas están en el Drive del organizador y de ahí salió el modelo completo:
 
 ### 2.4 Numeración de ediciones
 
-Drive documenta 3a (2025), 4a (2025-26) y 5a (mar–may 2026, la de la app). No
-hay rastro de una "6a" femenil; la cadencia (~2 por año) sugiere que la **Team
-League 2026 (Reserve, jul–sep) ocupa el lugar de la 6a** en la cuenta del
-organizador — lo que haría de la nueva femenil la **7a**, como él recuerda.
-**Por confirmar** antes de publicar textos ("7a edición") en la app.
+Drive documenta 3a (2025), 4a (2025-26) y 5a (mar–may 2026, la de la app).
+**Confirmado por el organizador: la nueva femenil es la 6a Edición** — la
+numeración sigue a la liga femenil americano, no cuenta a la Team League.
 
 ---
 
@@ -280,7 +284,7 @@ reconstruye las jornadas ya jugadas como si siempre hubieran estado.
 
 | Fase | Qué entrega | Necesita | Ventana objetivo |
 |---|---|---|---|
-| **F1 — Liga creada + inscripciones abiertas** | `leagues` + edición femenil (draft), `season_categories`, formulario v2 (§4.6) con comprobante de pago, landing mínima "inscríbete", panel del organizador para revisar/aprobar con pagos | fechas y costo de inscripción; confirmar "7a" | **esta semana** — no toca tablas de la liga viva |
+| **F1 — Liga creada + inscripciones abiertas** · ✅ **HECHA (16-sep; 0049/0050 aplicadas al proyecto live)** | `leagues` + 6a Edición (12-oct, cupo 120, FEM_3–7, bloques 6:30/7:45/9:00 pm) con inscripción abierta; hub `/registro` multi-liga; formulario americano `/registro/femenil` (cumpleaños, veto de horarios máx. 2, talla, posición, comentario, comprobante a bucket privado); landing `/femenil` con tema por liga; banner en la Home; panel del organizador con pestañas por edición, cupo, comprobante (URL firmada) y verificación de pago; cupo 120 con trigger en el servidor. Pendiente: `payment_instructions` para encender la sección de pago | — | entregada |
 | **F2 — Módulo americano núcleo** | tablas §4.5, captura/edición de calendario por jornada, resultados, tabla individual por categoría (vista + tests), roster femenil desde inscripciones aprobadas | F1 | listo antes de la J1 (≈ 5-oct) |
 | **F3 — Identidad `persons`** | tabla, backfill de Reserve + inscritas femenil con cola de cotejo, claim v2 (persona con cuenta → mismo login en todas las ligas) | cierre de Team League 2026 (28-sep) para el corte de auth | fin sep – med oct |
 | **F4 — Selector liga→edición** | landing selector, `/l/<liga>/<edición>/...` + redirects, `useCompetition`, contenido por liga, dashboard multi-liga | F3 (para "tus ligas") | oct |
@@ -313,17 +317,15 @@ Notas:
 5. **Un solo proyecto Supabase:** backups verificados antes de F3 + ensayo en
    branch/dev.
 
-## 7. Pendientes del organizador (ya no bloquean el arranque, salvo el 1º)
+## 7. Pendientes del organizador
 
-1. **Fechas y costo:** día exacto de la J1 de octubre, fecha límite de
-   inscripción, cuota y datos de pago (para el formulario y la landing).
-2. **Confirmar numeración:** ¿la nueva femenil es la 7a? (Drive documenta
-   hasta la 5a; encaja si la Team League cuenta como 6a.)
+1. **Cuota y datos de pago** (y fecha límite de inscripción, si la hay): con
+   eso se rellena `seasons.payment_instructions` y el formulario muestra la
+   sección de pago con subida de comprobante (hoy está oculta a propósito).
+2. **Colores de la liga femenil:** los de la app anterior. Mientras, corre la
+   paleta provisional. Si prefieres que los tome yo directamente, la red de
+   este entorno necesita permitir `diamondbacksleague.netlify.app`
+   (claude.ai/code → tu entorno → configuración de red) — con eso también
+   puedo revisar la UI vieja con el acceso que ofreciste.
 3. **Ratings dictados** de las jugadoras que no estén en Reserve — pueden
    llegar hasta antes de la J1 (F5 los aplica con el mecanismo auditado).
-4. **Opcional:** si quieres que explore la app vieja visualmente (con el
-   acceso que ofreciste), la red de este entorno necesita permitir ese
-   dominio: en claude.ai/code → tu entorno → configuración de red, añade
-   `diamondbacksleague.netlify.app` (o usa un entorno con red completa) y
-   dímelo. Con las hojas de Drive ya reconstruí datos y formato, así que esto
-   solo aportaría detalles de UI que quieras conservar.
