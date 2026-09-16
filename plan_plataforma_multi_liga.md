@@ -290,7 +290,7 @@ reconstruye las jornadas ya jugadas como si siempre hubieran estado.
 | **F1 — Liga creada + inscripciones abiertas** · ✅ **HECHA (16-sep; 0049/0050 aplicadas al proyecto live)** | `leagues` + 6a Edición (12-oct, cupo 120, FEM_3–7, bloques 6:30/7:45/9:00 pm) con inscripción abierta; hub `/registro` multi-liga; formulario americano `/registro/femenil` (cumpleaños, veto de horarios máx. 2, talla, posición, comentario, comprobante a bucket privado); landing `/femenil` con tema por liga; banner en la Home; panel del organizador con pestañas por edición, cupo, comprobante (URL firmada) y verificación de pago; cupo 120 con trigger en el servidor. Pendiente: `payment_instructions` para encender la sección de pago | — | entregada |
 | **F2 — Módulo americano núcleo** · ✅ **HECHA (16-sep; 0051 aplicada al proyecto live)** | ind_matches/players/results + ind_penalties + season_pairs con candados de servidor (temporada, una jugadora por jornada, choques de cancha, walkover coherente); vistas per_player_ind_match e ind_standings (3/1/0, consolación, walkover 12-0, penalizaciones, desempates de la 5a) con espejo TS y tests; 8 jornadas de la 6a sembradas (12-oct→30-nov, borrador); páginas públicas `/femenil/rol` y `/femenil/tabla`; panel `/app/organizador/liga/femenil` (publicar jornadas, juegos de 4, captura de resultados, penalizaciones). Falta: generador de jornadas (F6) y playoffs (F7) | F1 | entregada |
 | **F3 — Identidad `persons`** | tabla, backfill de Reserve + inscritas femenil con cola de cotejo, claim v2 (persona con cuenta → mismo login en todas las ligas) | cierre de Team League 2026 (28-sep) para el corte de auth | fin sep – med oct |
-| **F4 — Selector liga→edición** | landing selector, `/l/<liga>/<edición>/...` + redirects, `useCompetition`, contenido por liga, dashboard multi-liga | F3 (para "tus ligas") | oct |
+| **F4 — Selector liga→edición** · ◐ **selector de entrada ENTREGADO (16-sep)** | Hecho: `/` resuelve primero la liga (recordada en el dispositivo; sesión sin preferencia = Reserve para no friccionar a las 160 cuentas; visitante nuevo → `/ligas`, selector aislado con la identidad y edición vigente de cada liga) + "Cambiar de liga" en Más (Reserve) y en el cascarón femenil. Pendiente tras F3: rutas `/l/<liga>/<edición>`, `useCompetition`, contenido por liga, dashboard multi-liga | F3 (para "tus ligas") | oct |
 | **F5 — Rating global** | eventos con `person_id`, recálculo multi-competencia por fecha, siembra femenil (Reserve vía persona / dictado / categoría), ficha de trayectoria; tests de invariantes | F3; ratings dictados de las nuevas | oct – nov (retroactivo a J1 por recálculo) |
 | **F6 — Generador de jornadas** | propuesta automática de juegos respetando disponibilidad/descansos/rotación de parejas; el organizador ajusta y publica | F2 | antes de la J2 idealmente; mientras, captura manual asistida |
 | **F7 — Playoffs** | parejas fijas desde la tabla + fase final | F2 (y la recta final de la regular) | nov |
@@ -328,10 +328,15 @@ Notas:
 2. **Colores femenil:** aplicados desde el flyer (violeta + azul). Revisar en
    el deploy y ajustar si no coinciden con el recuerdo; si existe el escudo
    real en algún archivo, con pasarlo se recalibra la paleta.
-3. **Ratings de la liga pasada (app Slicewin):** ese servicio es externo (app
-   Android, liga "DIAMONDBACKS" dentro) y no es accesible desde este entorno.
-   Camino práctico: capturas de pantalla del Classement (todas las categorías
-   y páginas) o un export si la app lo ofrece — de ahí se leen los números y
-   se cotejan por nombre como semillas dictadas (mecanismo auditado de 0039).
-   Si no llegan, vale el plan B del organizador: corregir ratings al momento
-   de aprobar inscripciones.
+3. **Ratings de la liga pasada (Slicewin): DATOS COMPLETOS en staging.** El
+   organizador exportó miembros (194, con correos — tabla privada
+   `slicewin_members`, 0052) y partidos (634 con el cambio de Elo por jugadora
+   y UID estable — tablas privadas `slicewin_players`/`slicewin_matches`,
+   0053). Confirmado: los Elo INICIALES de Slicewin son la misma escalera que
+   Reserve femenil. Por tanto F5 puede COMPUTAR el rating final de cada
+   jugadora: semilla de su categoría (hoja de la 5a) + suma de deltas de sus
+   partidos `validated_results` con `elo_applied` — y usarlo como semilla
+   dictada auditada de la 6a, con cotejo por nombre/correo y revisión humana
+   de ambiguos (hay homónimas y cuentas duplicadas en el export). Los datos
+   personales NO viven en el repo público: solo en la base, tras RLS de
+   organizador.
