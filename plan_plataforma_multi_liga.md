@@ -27,9 +27,12 @@ Diamondbacks (7a, por confirmar) y sus inscripciones deben abrir ya.
    18:30/19:45/21:00, que ya existían en el catálogo). **Cupo: 120 jugadoras**
    = 10 canchas × 3 horarios × 4.
 3. **Identidad visual por liga:** cada liga tiene sus colores propios
-   (`leagues.theme` + `[data-league]` en index.css). La femenil usará los
-   colores de la app anterior; mientras el organizador los pasa, corre una
-   paleta PROVISIONAL (rosa mexicano sobre ónix-ciruela).
+   (`leagues.theme` + `[data-league]` en index.css). Femenil: **violeta +
+   azul eléctrico sobre ónix-violeta**, derivada del wordmark "DIAMONDBACKS"
+   del flyer de la liga pasada (`diamondbacks.jpg` en Drive, único material
+   de marca localizado; la app vieja sigue inaccesible por red). El oro se
+   conserva como acento del club en todas las ligas. Sujeta a revisión del
+   organizador al verla desplegada.
 4. **Historial de la liga vieja:** no se rescata como backend; si se importa,
    es **solo como historial de juegos y estadísticas** por jugadora. La fuente
    ya está localizada: las hojas de Drive (ver §2.3).
@@ -285,7 +288,7 @@ reconstruye las jornadas ya jugadas como si siempre hubieran estado.
 | Fase | Qué entrega | Necesita | Ventana objetivo |
 |---|---|---|---|
 | **F1 — Liga creada + inscripciones abiertas** · ✅ **HECHA (16-sep; 0049/0050 aplicadas al proyecto live)** | `leagues` + 6a Edición (12-oct, cupo 120, FEM_3–7, bloques 6:30/7:45/9:00 pm) con inscripción abierta; hub `/registro` multi-liga; formulario americano `/registro/femenil` (cumpleaños, veto de horarios máx. 2, talla, posición, comentario, comprobante a bucket privado); landing `/femenil` con tema por liga; banner en la Home; panel del organizador con pestañas por edición, cupo, comprobante (URL firmada) y verificación de pago; cupo 120 con trigger en el servidor. Pendiente: `payment_instructions` para encender la sección de pago | — | entregada |
-| **F2 — Módulo americano núcleo** | tablas §4.5, captura/edición de calendario por jornada, resultados, tabla individual por categoría (vista + tests), roster femenil desde inscripciones aprobadas | F1 | listo antes de la J1 (≈ 5-oct) |
+| **F2 — Módulo americano núcleo** · ✅ **HECHA (16-sep; 0051 aplicada al proyecto live)** | ind_matches/players/results + ind_penalties + season_pairs con candados de servidor (temporada, una jugadora por jornada, choques de cancha, walkover coherente); vistas per_player_ind_match e ind_standings (3/1/0, consolación, walkover 12-0, penalizaciones, desempates de la 5a) con espejo TS y tests; 8 jornadas de la 6a sembradas (12-oct→30-nov, borrador); páginas públicas `/femenil/rol` y `/femenil/tabla`; panel `/app/organizador/liga/femenil` (publicar jornadas, juegos de 4, captura de resultados, penalizaciones). Falta: generador de jornadas (F6) y playoffs (F7) | F1 | entregada |
 | **F3 — Identidad `persons`** | tabla, backfill de Reserve + inscritas femenil con cola de cotejo, claim v2 (persona con cuenta → mismo login en todas las ligas) | cierre de Team League 2026 (28-sep) para el corte de auth | fin sep – med oct |
 | **F4 — Selector liga→edición** | landing selector, `/l/<liga>/<edición>/...` + redirects, `useCompetition`, contenido por liga, dashboard multi-liga | F3 (para "tus ligas") | oct |
 | **F5 — Rating global** | eventos con `person_id`, recálculo multi-competencia por fecha, siembra femenil (Reserve vía persona / dictado / categoría), ficha de trayectoria; tests de invariantes | F3; ratings dictados de las nuevas | oct – nov (retroactivo a J1 por recálculo) |
@@ -322,10 +325,13 @@ Notas:
 1. **Cuota y datos de pago** (y fecha límite de inscripción, si la hay): con
    eso se rellena `seasons.payment_instructions` y el formulario muestra la
    sección de pago con subida de comprobante (hoy está oculta a propósito).
-2. **Colores de la liga femenil:** los de la app anterior. Mientras, corre la
-   paleta provisional. Si prefieres que los tome yo directamente, la red de
-   este entorno necesita permitir `diamondbacksleague.netlify.app`
-   (claude.ai/code → tu entorno → configuración de red) — con eso también
-   puedo revisar la UI vieja con el acceso que ofreciste.
-3. **Ratings dictados** de las jugadoras que no estén en Reserve — pueden
-   llegar hasta antes de la J1 (F5 los aplica con el mecanismo auditado).
+2. **Colores femenil:** aplicados desde el flyer (violeta + azul). Revisar en
+   el deploy y ajustar si no coinciden con el recuerdo; si existe el escudo
+   real en algún archivo, con pasarlo se recalibra la paleta.
+3. **Ratings de la liga pasada (app Slicewin):** ese servicio es externo (app
+   Android, liga "DIAMONDBACKS" dentro) y no es accesible desde este entorno.
+   Camino práctico: capturas de pantalla del Classement (todas las categorías
+   y páginas) o un export si la app lo ofrece — de ahí se leen los números y
+   se cotejan por nombre como semillas dictadas (mecanismo auditado de 0039).
+   Si no llegan, vale el plan B del organizador: corregir ratings al momento
+   de aprobar inscripciones.
