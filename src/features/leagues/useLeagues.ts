@@ -53,6 +53,27 @@ export function useLeagueOpenSeason(leagueSlug: string | undefined) {
   })
 }
 
+// La edición VIGENTE de una liga (la de mayor edition_number), tenga o no la
+// inscripción abierta: la usan el rol/tabla públicos y el panel del
+// organizador, que siguen vivos después de cerrar inscripciones.
+export function useLeagueSeason(leagueSlug: string | undefined) {
+  return useQuery({
+    queryKey: ['league-season', leagueSlug],
+    queryFn: async (): Promise<OpenRegistrationSeason | null> => {
+      const { data, error } = await supabase
+        .from('seasons')
+        .select('*, league:leagues!inner(*)')
+        .eq('leagues.slug', leagueSlug!)
+      if (error) throw error
+      const rows = (data ?? []) as unknown as OpenRegistrationSeason[]
+      if (rows.length === 0) return null
+      return [...rows].sort((a, b) => (b.edition_number ?? 0) - (a.edition_number ?? 0))[0]
+    },
+    enabled: Boolean(leagueSlug),
+    staleTime: 60_000,
+  })
+}
+
 // Categorías que JUEGA una edición (season_categories → match_categories).
 export function useSeasonCategories(seasonId: string | undefined) {
   return useQuery({

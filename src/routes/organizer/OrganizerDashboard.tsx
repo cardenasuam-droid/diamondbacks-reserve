@@ -55,6 +55,12 @@ const SECTIONS = [
     title: 'Importar CSV',
     desc: 'Cargar equipos, jugadores y rol',
   },
+  {
+    to: '/app/organizador/liga/femenil',
+    icon: '🎾',
+    title: 'Liga Femenil',
+    desc: 'Jornadas, juegos y resultados de la 6a Edición',
+  },
 ]
 
 export function OrganizerDashboard() {

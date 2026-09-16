@@ -287,39 +287,54 @@ textarea {
    <div data-league="femenil"> para que brand/slate/sombras cambien sin tocar
    componentes. Reserve no necesita bloque: su tema es el @theme base.
 
-   FEMENIL — paleta PROVISIONAL (rosa mexicano sobre ónix-ciruela). Pendiente
-   heredar los colores de la app anterior; al recibirlos, se cambian estos
-   valores y leagues.theme (0049) y nada más. El ORO se conserva: es el acento
-   del club, común a todas las ligas.
+   FEMENIL — VIOLETA + AZUL ELÉCTRICO sobre ónix-violeta, deportiva premium.
+   Derivada del wordmark "DIAMONDBACKS" del flyer de la liga pasada (violeta
+   con contorno azul), único material de marca disponible; el organizador la
+   revisará. brand-* = violeta (primario); sky-* deja de ser alias del brand y
+   se vuelve el AZUL eléctrico (enlaces, chips secundarios). El ORO se
+   conserva: es el acento del club, común a todas las ligas.
    =========================================================================== */
 [data-league='femenil'] {
-  /* Marca — ROSA MEXICANO (brand-* y su alias sky-*). */
-  --color-brand-50:  #fdeef5;  --color-sky-50:  #fdeef5;
-  --color-brand-100: #fad7e7;  --color-sky-100: #fad7e7;
-  --color-brand-200: #f5aecd;  --color-sky-200: #f5aecd;
-  --color-brand-300: #ef7fb1;  --color-sky-300: #ef7fb1;
-  --color-brand-400: #e35595;  --color-sky-400: #e35595;
-  --color-brand-500: #d6367f;  --color-sky-500: #d6367f;
-  --color-brand-600: #b32468;  --color-sky-600: #b32468;
-  --color-brand-700: #8f1c53;  --color-sky-700: #8f1c53;
-  --color-brand-800: #6f1741;  --color-sky-800: #6f1741;
-  --color-brand-900: #571233;  --color-sky-900: #571233;
-  --color-brand-950: #33081d;  --color-sky-950: #33081d;
+  /* Marca — VIOLETA. */
+  --color-brand-50:  #f3eefe;
+  --color-brand-100: #e4d9fd;
+  --color-brand-200: #c9b4fa;
+  --color-brand-300: #a78bfa;
+  --color-brand-400: #8b5cf6;
+  --color-brand-500: #7c3aed;
+  --color-brand-600: #6a2fd0;
+  --color-brand-700: #5626a8;
+  --color-brand-800: #451f86;
+  --color-brand-900: #371a6a;
+  --color-brand-950: #21103f;
 
-  /* Neutros ÓNIX-CIRUELA (mismo papel que los ónix-esmeralda del tema base). */
-  --color-slate-50:  #171015;
-  --color-slate-100: #1e151c;
-  --color-slate-200: #2d2029;
-  --color-slate-300: #43303d;
-  --color-slate-400: #6a5262;
-  --color-slate-500: #a08a99;
-  --color-slate-600: #b8a5b1;
-  --color-slate-700: #d3c4cd;
-  --color-slate-800: #e9dee5;
-  --color-slate-900: #f6eef3;
+  /* Secundario — AZUL ELÉCTRICO (el contorno del wordmark). */
+  --color-sky-50:  #eaf6ff;
+  --color-sky-100: #d3edfe;
+  --color-sky-200: #a6dcfd;
+  --color-sky-300: #67c5fb;
+  --color-sky-400: #38b6f8;
+  --color-sky-500: #17a3ef;
+  --color-sky-600: #0d87cc;
+  --color-sky-700: #0c6ca3;
+  --color-sky-800: #0e5682;
+  --color-sky-900: #104766;
+  --color-sky-950: #0a2c40;
+
+  /* Neutros ÓNIX-VIOLETA (mismo papel que los ónix-esmeralda del tema base). */
+  --color-slate-50:  #100f17;
+  --color-slate-100: #16151f;
+  --color-slate-200: #23212e;
+  --color-slate-300: #363344;
+  --color-slate-400: #5b5770;
+  --color-slate-500: #948fa8;
+  --color-slate-600: #aca7bd;
+  --color-slate-700: #cbc7d8;
+  --color-slate-800: #e4e1ec;
+  --color-slate-900: #f3f1f8;
   --color-slate-950: #ffffff;
 
-  /* Relieve dual sobre la base ciruela. */
-  --shadow-sm: 4px 4px 9px #0b070a, -4px -4px 9px #241922;
-  --shadow-md: 7px 7px 16px #0a0609, -7px -7px 16px #271b24;
+  /* Relieve dual sobre la base ónix-violeta. */
+  --shadow-sm: 4px 4px 9px #08070c, -4px -4px 9px #221f2e;
+  --shadow-md: 7px 7px 16px #07060a, -7px -7px 16px #252231;
 }

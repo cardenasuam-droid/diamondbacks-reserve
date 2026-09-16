@@ -22,6 +22,9 @@ import { RegisterPage } from './registro/RegisterPage'
 import { RegistrationHubPage } from './registro/RegistrationHubPage'
 import { RegisterAmericanoPage } from './registro/RegisterAmericanoPage'
 import { LeagueLandingPage } from './public/LeagueLandingPage'
+import { AmericanoSchedulePage } from './public/AmericanoSchedulePage'
+import { AmericanoStandingsPage } from './public/AmericanoStandingsPage'
+import { AmericanoAdminPage } from './organizer/AmericanoAdminPage'
 import { DraftPage } from './draft/DraftPage'
 import { RequireAuth, RequireRole } from './guards'
 import { AppLayout } from './app/AppLayout'
@@ -57,8 +60,11 @@ export const router = createBrowserRouter([
   { path: '/registro', element: <RegistrationHubPage /> },
   { path: '/registro/reserve', element: <RegisterPage /> },
   { path: '/registro/:leagueSlug', element: <RegisterAmericanoPage /> },
-  // Landing pública de la Liga Femenil (F1): compartible, con su identidad.
+  // Páginas públicas de la Liga Femenil (F1/F2): landing, rol y tabla, con la
+  // identidad de la liga. En F4 se cuelgan del selector liga→edición.
   { path: '/femenil', element: <LeagueLandingPage slug="femenil" /> },
+  { path: '/femenil/rol', element: <AmericanoSchedulePage slug="femenil" /> },
+  { path: '/femenil/tabla', element: <AmericanoStandingsPage slug="femenil" /> },
   // Draft en vivo: board público + participante (capitanas eligen en su turno).
   { path: '/draft', element: <DraftPage /> },
   {
@@ -139,6 +145,8 @@ export const router = createBrowserRouter([
               { path: 'importar', element: <OrganizerImportPage /> },
               { path: 'equipos', element: <OrganizerTeamsPage /> },
               { path: 'equipos/:teamId', element: <OrganizerRosterPage /> },
+              // Ligas formato americano (0051): jornadas, juegos, resultados.
+              { path: 'liga/:leagueSlug', element: <AmericanoAdminPage /> },
             ],
           },
           {
