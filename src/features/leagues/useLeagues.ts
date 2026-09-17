@@ -160,6 +160,23 @@ export function useSeasonTimeBlocks(seasonId: string | undefined) {
   })
 }
 
+// Lugares PAGADOS de una edición (RPC season_paid_count, 0056): el cupo se
+// aparta al confirmar el pago, no al aprobar (mecanismo del torneo de Peak).
+// Devuelve solo un número; la bandeja sigue siendo privada.
+export function useSeasonPaidCount(seasonId: string | undefined) {
+  return useQuery({
+    queryKey: ['season-paid-count', seasonId],
+    queryFn: async (): Promise<number> => {
+      const { data, error } = await supabase.rpc('season_paid_count', {
+        p_season_id: seasonId!,
+      })
+      if (error) throw error
+      return (data as number) ?? 0
+    },
+    enabled: Boolean(seasonId),
+  })
+}
+
 // Fichas activas de una edición (contador de cupo). Lee la vista pública, así
 // el "quedan N lugares" también puede mostrarse sin sesión. La clave arranca
 // con ['players_public', seasonId] para que las invalidaciones existentes del

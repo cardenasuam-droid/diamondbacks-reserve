@@ -322,9 +322,11 @@ Notas:
 
 ## 7. Pendientes del organizador
 
-1. **Cuota y datos de pago** (y fecha límite de inscripción, si la hay): con
-   eso se rellena `seasons.payment_instructions` y el formulario muestra la
-   sección de pago con subida de comprobante (hoy está oculta a propósito).
+1. **Pago: ACTIVO (17-sep).** `payment_instructions` de la 6a lleva el link de
+   Mercado Pago y la CLABE HSBC; el formulario sube comprobante de pago y,
+   opcional, el del torneo de Peak Padel (descuento $250, 0056). El cupo se
+   cuenta por pagos verificados (`season_paid_count`). Falta solo el **monto
+   de la cuota** para escribirlo en el texto (un UPDATE cuando lo dé).
 2. **Colores femenil:** aplicados desde el flyer (violeta + azul). Revisar en
    el deploy y ajustar si no coinciden con el recuerdo; si existe el escudo
    real en algún archivo, con pasarlo se recalibra la paleta.

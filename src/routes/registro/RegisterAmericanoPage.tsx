@@ -8,7 +8,7 @@ import {
   useLeagueOpenSeason,
   useSeasonCategories,
   useSeasonTimeBlocks,
-  useSeasonPlayerCount,
+  useSeasonPaidCount,
 } from '@/features/leagues/useLeagues'
 import {
   americanoRegistrationSchema,
@@ -40,7 +40,8 @@ export function RegisterAmericanoPage() {
   const season = seasonQ.data
   const categoriesQ = useSeasonCategories(season?.id)
   const blocksQ = useSeasonTimeBlocks(season?.id)
-  const countQ = useSeasonPlayerCount(season?.id)
+  // El cupo se cuenta por PAGOS confirmados (0056), no por aprobaciones.
+  const countQ = useSeasonPaidCount(season?.id)
   const submit = useSubmitAmericanoRegistration(season?.id)
 
   const [fullName, setFullName] = useState('')
@@ -52,6 +53,7 @@ export function RegisterAmericanoPage() {
   const [blockedSlots, setBlockedSlots] = useState<string[]>([])
   const [comment, setComment] = useState('')
   const [receiptFile, setReceiptFile] = useState<File | null>(null)
+  const [discountFile, setDiscountFile] = useState<File | null>(null)
   const [website, setWebsite] = useState('') // honeypot
   const [errors, setErrors] = useState<FieldErrors>({})
   const [done, setDone] = useState(false)
@@ -113,6 +115,7 @@ export function RegisterAmericanoPage() {
     setBlockedSlots([])
     setComment('')
     setReceiptFile(null)
+    setDiscountFile(null)
     setWebsite('')
     setErrors({})
     submit.reset()
@@ -144,7 +147,10 @@ export function RegisterAmericanoPage() {
       return
     }
     setErrors({})
-    submit.mutate({ ...parsed.data, receiptFile, website }, { onSuccess: () => setDone(true) })
+    submit.mutate(
+      { ...parsed.data, receiptFile, discountFile, website },
+      { onSuccess: () => setDone(true) }
+    )
   }
 
   if (seasonQ.isLoading) {
@@ -388,11 +394,13 @@ export function RegisterAmericanoPage() {
                   <div className="rounded-2xl bg-slate-50 p-4">
                     <p className="text-sm font-medium text-slate-700">Pago de inscripción</p>
                     <p className="mt-1 whitespace-pre-line text-xs leading-relaxed text-slate-500">
-                      {season.payment_instructions}
+                      {linkify(season.payment_instructions)}
                     </p>
                     <label className="neu-raised mt-3 flex cursor-pointer items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700">
                       <Icon name="plus" size={16} />
-                      {receiptFile ? receiptFile.name : 'Subir comprobante (opcional)'}
+                      <span className="min-w-0 truncate">
+                        {receiptFile ? receiptFile.name : 'Subir comprobante de pago'}
+                      </span>
                       <input
                         type="file"
                         accept="image/jpeg,image/png,image/webp,image/heic,application/pdf"
@@ -400,8 +408,23 @@ export function RegisterAmericanoPage() {
                         onChange={(e) => setReceiptFile(e.target.files?.[0] ?? null)}
                       />
                     </label>
+                    <label className="neu-raised mt-2 flex cursor-pointer items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700">
+                      <Icon name="medal" size={16} />
+                      <span className="min-w-0 truncate">
+                        {discountFile
+                          ? discountFile.name
+                          : 'Comprobante torneo Peak Padel (descuento $250)'}
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/heic,application/pdf"
+                        className="hidden"
+                        onChange={(e) => setDiscountFile(e.target.files?.[0] ?? null)}
+                      />
+                    </label>
                     <p className="mt-1.5 text-center text-[11px] text-slate-500">
-                      Imagen o PDF, máx. 5 MB. También puedes enviarlo después a la organizadora.
+                      Ambos opcionales al enviar · imagen o PDF, máx. 5 MB. Tu lugar se
+                      aparta cuando el comité confirma tu pago.
                     </p>
                   </div>
                 )}
@@ -436,6 +459,26 @@ export function RegisterAmericanoPage() {
         <footer className="pt-6 text-center text-xs text-slate-600">{league.name}</footer>
       </div>
     </div>
+  )
+}
+
+// URLs del texto de pago como enlaces reales (el texto vive en la base,
+// seasons.payment_instructions, y se edita sin deploy).
+function linkify(text: string): React.ReactNode[] {
+  return text.split(/(https?:\/\/[^\s]+)/g).map((part, i) =>
+    /^https?:\/\//.test(part) ? (
+      <a
+        key={i}
+        href={part}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="break-all text-sky-300 underline"
+      >
+        {part}
+      </a>
+    ) : (
+      <span key={i}>{part}</span>
+    )
   )
 }
 
