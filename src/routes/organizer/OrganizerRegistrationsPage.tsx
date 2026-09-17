@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import {
   useOpenRegistrationSeasons,
   useSeasonCategories,
@@ -39,7 +40,15 @@ export function OrganizerRegistrationsPage() {
   const open = useOpenRegistrationSeasons()
   const seasons = open.data ?? []
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const selected = seasons.find((s) => s.id === selectedId) ?? seasons[0] ?? null
+  // ?liga=<slug> preselecciona la pestaña (los paneles por liga llegan aquí
+  // con su liga puesta); un tap manual del organizador siempre gana.
+  const [searchParams] = useSearchParams()
+  const paramSlug = searchParams.get('liga')
+  const selected =
+    seasons.find((s) => s.id === selectedId) ??
+    seasons.find((s) => s.league.slug === paramSlug) ??
+    seasons[0] ??
+    null
 
   if (open.isLoading) return <Loader label="Cargando…" />
   if (!selected) {

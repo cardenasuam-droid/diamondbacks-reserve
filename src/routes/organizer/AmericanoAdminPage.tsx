@@ -30,9 +30,10 @@ import { Loader } from '@/components/ui/Loader'
 import { Icon } from '@/components/ui/Icon'
 import type { SetInput } from '@/features/results/resultLogic'
 
-// Panel del organizador de una liga AMERICANO (/app/organizador/liga/:slug):
-// jornadas (publicar/despublicar), juegos de 4 con sus candados, captura de
-// resultados y penalizaciones. Los candados reales viven en el servidor
+// Jornadas de una liga AMERICANO (/app/organizador/liga/:slug/jornadas):
+// publicar/despublicar, juegos de 4 con sus candados, captura de resultados
+// y penalizaciones. El hub del panel por liga vive una ruta arriba
+// (OrganizerLeaguePanelPage). Los candados reales viven en el servidor
 // (0051); aquí solo hay avisos y comodidad.
 export function AmericanoAdminPage() {
   const { leagueSlug } = useParams<{ leagueSlug: string }>()

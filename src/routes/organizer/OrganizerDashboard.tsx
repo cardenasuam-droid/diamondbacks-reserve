@@ -8,7 +8,15 @@ import { Loader } from '@/components/ui/Loader'
 
 const SECTIONS = [
   {
-    to: '/app/organizador/inscripciones',
+    // Cada liga tiene su panel: este dashboard es el de RESERVE y la femenil
+    // vive en su hub propio.
+    to: '/app/organizador/liga/femenil',
+    icon: '🎾',
+    title: 'Panel Liga Femenil',
+    desc: 'Inscripciones, jornadas y resultados de la 6a Edición',
+  },
+  {
+    to: '/app/organizador/inscripciones?liga=reserve',
     icon: '📨',
     title: 'Inscripciones',
     desc: 'Revisar y aprobar jugadores nuevos',
@@ -55,12 +63,6 @@ const SECTIONS = [
     title: 'Importar CSV',
     desc: 'Cargar equipos, jugadores y rol',
   },
-  {
-    to: '/app/organizador/liga/femenil',
-    icon: '🎾',
-    title: 'Liga Femenil',
-    desc: 'Jornadas, juegos y resultados de la 6a Edición',
-  },
 ]
 
 export function OrganizerDashboard() {
@@ -82,7 +84,7 @@ export function OrganizerDashboard() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Panel organizador" subtitle={season.data.name} />
+      <PageHeader title="Panel · Liga Reserve" subtitle={season.data.name} />
 
       <section className="grid grid-cols-3 gap-3">
         <Stat value={teams.data?.length ?? '—'} label="Equipos" />

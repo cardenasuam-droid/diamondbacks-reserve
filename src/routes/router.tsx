@@ -27,6 +27,7 @@ import { LeagueLandingPage } from './public/LeagueLandingPage'
 import { AmericanoSchedulePage } from './public/AmericanoSchedulePage'
 import { AmericanoStandingsPage } from './public/AmericanoStandingsPage'
 import { AmericanoAdminPage } from './organizer/AmericanoAdminPage'
+import { OrganizerLeaguePanelPage } from './organizer/OrganizerLeaguePanelPage'
 import { DraftPage } from './draft/DraftPage'
 import { RequireAuth, RequireRole } from './guards'
 import { AppLayout } from './app/AppLayout'
@@ -157,8 +158,10 @@ export const router = createBrowserRouter([
               { path: 'importar', element: <OrganizerImportPage /> },
               { path: 'equipos', element: <OrganizerTeamsPage /> },
               { path: 'equipos/:teamId', element: <OrganizerRosterPage /> },
-              // Ligas formato americano (0051): jornadas, juegos, resultados.
-              { path: 'liga/:leagueSlug', element: <AmericanoAdminPage /> },
+              // Panel independiente por liga (americano): hub con inscripciones
+              // y jornadas. Las jornadas viven en su propia subruta.
+              { path: 'liga/:leagueSlug', element: <OrganizerLeaguePanelPage /> },
+              { path: 'liga/:leagueSlug/jornadas', element: <AmericanoAdminPage /> },
             ],
           },
           {

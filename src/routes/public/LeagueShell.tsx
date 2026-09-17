@@ -68,7 +68,7 @@ export function LeagueShell({
           </nav>
           {isStaff && (
             <Link
-              to="/app/organizador"
+              to={`/app/organizador/liga/${slug}`}
               className="mt-2 flex items-center justify-center gap-1.5 rounded-xl border border-gold-500/30 bg-gold-500/10 px-3 py-2 text-xs font-semibold text-gold-300"
             >
               <Icon name="organizer" size={14} />
