@@ -113,10 +113,10 @@ export interface SaveIndMatchVars {
   playerIds: [string, string, string, string]
 }
 
-// Crear/editar un juego con sus 4 jugadoras. Sin RPC: la superficie es solo
-// del organizador y los candados reales (temporada, una por jornada, choques
-// de cancha) viven en el servidor (0051). Si al crear fallan las jugadoras,
-// se borra el juego para no dejar huérfanos.
+// Crear/editar un juego con sus 4 jugadoras vía el RPC save_ind_match (0054):
+// una sola transacción, así un candado que rechace (jugadora repetida en la
+// jornada, choque de cancha) revierte TODO y la alineación previa del juego
+// sobrevive. La RLS sigue mandando: el RPC es SECURITY INVOKER.
 export function useSaveIndMatch() {
   const qc = useQueryClient()
   return useMutation({
@@ -126,51 +126,16 @@ export function useSaveIndMatch() {
         throw new Error('Elige 4 jugadoras distintas.')
       }
 
-      let matchId = v.matchId
-      if (!matchId) {
-        const { data, error } = await supabase
-          .from('ind_matches')
-          .insert({
-            season_id: v.seasonId,
-            round_id: v.roundId,
-            category_code: v.categoryCode,
-            court_id: v.courtId,
-            time_block_id: v.timeBlockId,
-          })
-          .select('id')
-          .single()
-        if (error) throw new Error(friendly(error.message))
-        matchId = (data as { id: string }).id
-      } else {
-        const { error } = await supabase
-          .from('ind_matches')
-          .update({
-            category_code: v.categoryCode,
-            court_id: v.courtId,
-            time_block_id: v.timeBlockId,
-          })
-          .eq('id', matchId)
-        if (error) throw new Error(friendly(error.message))
-        const { error: delErr } = await supabase
-          .from('ind_match_players')
-          .delete()
-          .eq('match_id', matchId)
-        if (delErr) throw new Error(friendly(delErr.message))
-      }
-
-      const rows = v.playerIds.map((player_id, i) => ({
-        match_id: matchId,
-        player_id,
-        side: i < 2 ? 1 : 2,
-        slot: (i % 2) + 1,
-      }))
-      const { error: playersErr } = await supabase.from('ind_match_players').insert(rows)
-      if (playersErr) {
-        if (!v.matchId && matchId) {
-          await supabase.from('ind_matches').delete().eq('id', matchId)
-        }
-        throw new Error(friendly(playersErr.message))
-      }
+      const { error } = await supabase.rpc('save_ind_match', {
+        p_match_id: v.matchId ?? null,
+        p_season_id: v.seasonId,
+        p_round_id: v.roundId,
+        p_category_code: v.categoryCode,
+        p_court_id: v.courtId,
+        p_time_block_id: v.timeBlockId,
+        p_player_ids: v.playerIds,
+      })
+      if (error) throw new Error(friendly(error.message))
     },
     onSuccess: (_d, v) => {
       void qc.invalidateQueries({ queryKey: ['ind-matches', v.roundId] })

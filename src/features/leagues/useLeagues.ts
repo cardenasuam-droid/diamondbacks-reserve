@@ -40,7 +40,10 @@ export function useLeagueOpenSeason(leagueSlug: string | undefined) {
         .from('seasons')
         .select('*, league:leagues!inner(*)')
         .eq('registration_open', true)
-        .eq('leagues.slug', leagueSlug!)
+        // El filtro de un embed RENOMBRADO usa el alias ('league.'), no el
+        // nombre de la tabla: con 'leagues.slug' PostgREST rechaza la petición
+        // completa (hallazgo de la revisión del PR #1).
+        .eq('league.slug', leagueSlug!)
       if (error) throw error
       const rows = (data ?? []) as unknown as OpenRegistrationSeason[]
       if (rows.length === 0) return null
@@ -97,7 +100,8 @@ export function useLeagueSeason(leagueSlug: string | undefined) {
       const { data, error } = await supabase
         .from('seasons')
         .select('*, league:leagues!inner(*)')
-        .eq('leagues.slug', leagueSlug!)
+        // Alias, no nombre de tabla (mismo motivo que en useLeagueOpenSeason).
+        .eq('league.slug', leagueSlug!)
       if (error) throw error
       const rows = (data ?? []) as unknown as OpenRegistrationSeason[]
       if (rows.length === 0) return null
