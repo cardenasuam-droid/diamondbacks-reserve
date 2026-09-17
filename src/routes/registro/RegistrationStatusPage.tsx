@@ -57,7 +57,8 @@ export function RegistrationStatusPage() {
   }
 
   const league = season?.league
-  const categoryName = row
+  // null cuando la edición no pregunta categoría (0058): el comité la asigna.
+  const categoryName = row?.requested_category_code
     ? (categoriesQ.data ?? []).find((c) => c.code === row.requested_category_code)?.name ??
       row.requested_category_code
     : null
@@ -109,7 +110,7 @@ export function RegistrationStatusPage() {
               row={row}
               token={token}
               leagueSlug={leagueSlug ?? ''}
-              categoryName={categoryName ?? row.requested_category_code}
+              categoryName={categoryName}
               paymentInstructions={paymentInstructions}
             />
           )}
@@ -170,7 +171,7 @@ function StatusCard({
   row: RegistrationStatusRow
   token: string
   leagueSlug: string
-  categoryName: string
+  categoryName: string | null
   paymentInstructions: string | null
 }) {
   const attach = useAttachReceipt()
@@ -224,7 +225,7 @@ function StatusCard({
         </h2>
         <p className="mt-1 text-base font-semibold text-slate-800">{row.full_name}</p>
         <p className="mt-0.5 text-sm text-slate-500">
-          {categoryName} · enviada el {createdLabel}
+          {categoryName ? `${categoryName} · enviada el ${createdLabel}` : `Enviada el ${createdLabel}`}
         </p>
 
         {rejected ? (

@@ -4,12 +4,11 @@ import { americanoRegistrationSchema, MAX_BLOCKED_SLOTS } from '@/features/regis
 const SLOTS = ['18:30', '19:45', '21:00']
 const schema = americanoRegistrationSchema(SLOTS)
 
+// Sin categoría ni talla (0058): el comité asigna la categoría al aprobar.
 const valid = {
   fullName: 'Ana Gómez',
   phone: '614 123 4567',
-  categoryCode: 'FEM_5',
   position: 'ambas',
-  shirtSize: 'M',
   birthdate: '1990-05-14',
   blockedSlots: [] as string[],
   comment: '',
@@ -59,8 +58,11 @@ describe('americanoRegistrationSchema', () => {
     expect(schema.safeParse({ ...valid, comment: 'x'.repeat(501) }).success).toBe(false)
   })
 
-  it('exige posición y talla como en el formulario de Reserve', () => {
+  it('exige posición válida; categoría y talla ya no se piden (0058)', () => {
     expect(schema.safeParse({ ...valid, position: 'zurda' }).success).toBe(false)
-    expect(schema.safeParse({ ...valid, shirtSize: 'XXXL' }).success).toBe(false)
+    // Campos extra de versiones viejas del formulario no rompen el envío.
+    expect(
+      schema.safeParse({ ...valid, categoryCode: 'FEM_5', shirtSize: 'M' }).success
+    ).toBe(true)
   })
 })

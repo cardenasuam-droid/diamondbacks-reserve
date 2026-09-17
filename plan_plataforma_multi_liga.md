@@ -263,11 +263,12 @@ season_pairs        (season_id, category_code, player_1_id, player_2_id)  -- par
 
 Campos, calcados del formulario real de la 5a edición + pagos:
 
-- nombre (como aparecerá en la app), categoría solicitada (FEM_3…FEM_7 desde
-  `season_categories`), teléfono (privado), fecha de cumpleaños, talla de
-  playera, **horarios que NO puede jugar**, **días disponibles** (esta edición:
-  lunes — el campo queda por si vuelven ediciones de dos días), **semana de
-  descanso**, comentario.
+- nombre (como aparecerá en la app), teléfono (privado), fecha de cumpleaños,
+  **horarios que NO puede jugar**, posición, comentario. **Ya sin categoría ni
+  talla de playera** (0058, 17-sep, pedido del organizador): la categoría la
+  asigna el comité al aprobar (con el rating de Slicewin como referencia, F5)
+  y la talla dejó de pedirse. Los **días disponibles** y la **semana de
+  descanso** del formulario de la 5a no aplican en esta edición (lunes fijos).
 - **Comprobante de pago** (patrón peak-padel): subir imagen/PDF a un bucket
   **privado** de Storage; `payment_status` + revisión del organizador con
   fecha y quién validó. RLS: la inscrita sube el suyo; solo organizador/viewer
