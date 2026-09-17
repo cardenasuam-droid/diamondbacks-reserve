@@ -331,9 +331,10 @@ Notas:
 
 1. **Pago: ACTIVO (17-sep).** `payment_instructions` de la 6a lleva el link de
    Mercado Pago y la CLABE HSBC; el formulario sube comprobante de pago y,
-   opcional, el del torneo de Peak Padel (descuento $250, 0056). El cupo se
+   opcional, el del torneo de Peak Padel (descuento $225 desde el 17-sep;
+   0056). El cupo se
    cuenta por pagos verificados (`season_paid_count`). Cuota **$1,500 MXN**
-   ($1,250 con descuento Peak) ya escrita en el texto. Con "Mi inscripción"
+   ($1,275 con descuento Peak) ya escrita en el texto. Con "Mi inscripción"
    (0057) la jugadora comprueba su alta y sube el comprobante después si no
    lo tenía al inscribirse.
 2. **Colores femenil:** aplicados desde el flyer (violeta + azul). Revisar en
