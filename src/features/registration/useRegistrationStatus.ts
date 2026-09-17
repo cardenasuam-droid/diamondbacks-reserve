@@ -7,7 +7,8 @@ import type { RegistrationStatus } from './types'
 
 export interface RegistrationStatusRow {
   full_name: string
-  requested_category_code: string
+  /** null si la edición no pregunta categoría (0058). */
+  requested_category_code: string | null
   status: RegistrationStatus
   season_id: string
   created_at: string

@@ -17,7 +17,6 @@ function friendly(msg: string): string {
   }
   if (/row-level security/i.test(msg)) return 'No se pudo enviar tu inscripción. Inténtalo más tarde.'
   if (/check constraint|violates check/i.test(msg)) return 'Revisa tus datos: algún campo no es válido.'
-  if (/foreign key|category|violates/i.test(msg)) return 'La categoría elegida no es válida.'
   return 'No se pudo enviar tu inscripción. Inténtalo de nuevo.'
 }
 
@@ -39,9 +38,8 @@ export function useSubmitAmericanoRegistration(seasonId: string | null | undefin
         season_id: seasonId ?? null,
         full_name: vars.fullName.trim(),
         phone: vars.phone.trim(),
-        requested_category_code: vars.categoryCode,
+        // Sin categoría ni talla (0058): el comité asigna la categoría al aprobar.
         position: vars.position,
-        shirt_size: vars.shirtSize,
         birthdate: vars.birthdate,
         blocked_time_labels: vars.blockedSlots.length > 0 ? vars.blockedSlots : null,
         comment: vars.comment ?? null,

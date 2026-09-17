@@ -1,8 +1,6 @@
 import { z } from 'zod'
-import { SHIRT_SIZES } from '@/lib/shirtSize'
 import { POSITION_OPTIONS } from './schema'
 
-const SHIRT_SIZE_VALUES: readonly string[] = SHIRT_SIZES
 const POSITION_VALUES: readonly string[] = POSITION_OPTIONS.map((o) => o.value)
 
 // Cuántos bloques puede vetar una jugadora. Con 3 horarios por jornada, vetar
@@ -42,9 +40,9 @@ export function americanoRegistrationSchema(allowedSlotLabels: readonly string[]
       .min(2, 'Escribe tu nombre y primer apellido')
       .max(120, 'Nombre demasiado largo'),
     phone: phoneSchema,
-    categoryCode: z.string().min(1, 'Elige tu categoría'),
+    // Sin categoría ni talla (0058): la categoría la asigna el comité al
+    // aprobar y la talla dejó de pedirse.
     position: z.string().refine((v) => POSITION_VALUES.includes(v), 'Elige tu posición de juego'),
-    shirtSize: z.string().refine((v) => SHIRT_SIZE_VALUES.includes(v), 'Elige tu talla de playera'),
     birthdate: birthdateSchema,
     blockedSlots: z
       .array(z.string())

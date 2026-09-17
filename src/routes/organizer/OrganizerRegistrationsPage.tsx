@@ -220,7 +220,8 @@ function ReviewCard({
   const approve = useApproveRegistration()
   const reject = useRejectRegistration()
   const verify = useVerifyPayment()
-  const [categoryCode, setCategoryCode] = useState(registration.requested_category_code)
+  // Sin categoría solicitada (0058, americano): el comité la elige aquí.
+  const [categoryCode, setCategoryCode] = useState(registration.requested_category_code ?? '')
   const [localError, setLocalError] = useState<string | null>(null)
   const [rejecting, setRejecting] = useState(false)
   const [notes, setNotes] = useState('')
@@ -265,7 +266,11 @@ function ReviewCard({
       </div>
 
       <div className="mt-2 flex flex-wrap gap-1.5">
-        <Chip>Pide: {requested?.name ?? registration.requested_category_code}</Chip>
+        {registration.requested_category_code ? (
+          <Chip>Pide: {requested?.name ?? registration.requested_category_code}</Chip>
+        ) : (
+          <Chip>Categoría por asignar</Chip>
+        )}
         <Chip>Posición: {POSITION_LABEL[registration.position]}</Chip>
         {registration.shirt_size && <Chip>Talla: {registration.shirt_size}</Chip>}
         {age != null && <Chip>{age} años</Chip>}
@@ -369,6 +374,9 @@ function ReviewCard({
               onChange={(e) => setCategoryCode(e.target.value)}
               className="mt-1 w-full rounded-lg border border-slate-300 bg-slate-100 px-2 py-2 text-sm text-slate-800 outline-none focus:border-sky-500"
             >
+              <option value="" disabled>
+                Elige categoría…
+              </option>
               {categories.map((c) => (
                 <option key={c.code} value={c.code}>
                   {c.name}

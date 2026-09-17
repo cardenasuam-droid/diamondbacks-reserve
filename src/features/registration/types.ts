@@ -13,7 +13,9 @@ export interface PlayerRegistration {
   season_id: string | null
   full_name: string
   phone: string
-  requested_category_code: string
+  // Opcional desde 0058: el formulario americano ya no la pregunta (la asigna
+  // el comité al aprobar). El formulario de Reserve la sigue mandando.
+  requested_category_code: string | null
   position: PlayerPosition
   shirt_size: ShirtSize | null
   comment: string | null

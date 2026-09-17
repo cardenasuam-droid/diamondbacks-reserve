@@ -1,14 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { isSupabaseConfigured } from '@/lib/supabase'
 import { useAuth } from '@/features/auth/context'
 import { useMyPlayerPrefill } from '@/features/registration/usePrefill'
 import { getRegToken, saveRegToken } from '@/lib/regToken'
 import { Linkify } from '@/components/ui/Linkify'
-import { SHIRT_SIZES } from '@/lib/shirtSize'
 import {
   useLeagueOpenSeason,
-  useSeasonCategories,
   useSeasonTimeBlocks,
   useSeasonPaidCount,
 } from '@/features/leagues/useLeagues'
@@ -22,14 +20,9 @@ import { Field, inputCls } from './fields'
 import { pmLabel, longDate } from '@/lib/format'
 import { Icon } from '@/components/ui/Icon'
 import { Loader } from '@/components/ui/Loader'
-import { ShirtSizePicker } from '@/components/ui/ShirtSizePicker'
-import type { ShirtSize } from '@/lib/shirtSize'
 
 type FieldErrors = Partial<
-  Record<
-    'fullName' | 'phone' | 'categoryCode' | 'position' | 'shirtSize' | 'birthdate' | 'blockedSlots' | 'comment',
-    string
-  >
+  Record<'fullName' | 'phone' | 'position' | 'birthdate' | 'blockedSlots' | 'comment', string>
 >
 
 // Inscripción pública de una liga formato AMERICANO (individual, pareja
@@ -40,7 +33,6 @@ export function RegisterAmericanoPage() {
   const { leagueSlug } = useParams<{ leagueSlug: string }>()
   const seasonQ = useLeagueOpenSeason(leagueSlug)
   const season = seasonQ.data
-  const categoriesQ = useSeasonCategories(season?.id)
   const blocksQ = useSeasonTimeBlocks(season?.id)
   // El cupo se cuenta por PAGOS confirmados (0056), no por aprobaciones.
   const countQ = useSeasonPaidCount(season?.id)
@@ -48,9 +40,7 @@ export function RegisterAmericanoPage() {
 
   const [fullName, setFullName] = useState('')
   const [phone, setPhone] = useState('')
-  const [categoryCode, setCategoryCode] = useState('')
   const [position, setPosition] = useState('')
-  const [shirtSize, setShirtSize] = useState<ShirtSize | ''>('')
   const [birthdate, setBirthdate] = useState('')
   const [blockedSlots, setBlockedSlots] = useState<string[]>([])
   const [comment, setComment] = useState('')
@@ -65,39 +55,21 @@ export function RegisterAmericanoPage() {
 
   // Precarga para quien ya tiene cuenta (0055): sus datos de la ficha llegan
   // ya puestos (editables) en vez de teclearlos otra vez. Cada campo solo se
-  // rellena si sigue vacío; la categoría espera a que cargue el catálogo de
-  // la edición y solo aplica si es una de las que aquí se juegan.
+  // rellena si sigue vacío. (Categoría y talla ya no se preguntan, 0058.)
   const { session } = useAuth()
   const prefill = useMyPlayerPrefill(Boolean(session))
   const prefillDone = useRef(false)
-  const prefillCatDone = useRef(false)
   const [prefilledFrom, setPrefilledFrom] = useState<string | null>(null)
-
-  const categories = useMemo(
-    () => (categoriesQ.data ?? []).filter((c) => c.is_ranking && c.is_active),
-    [categoriesQ.data]
-  )
 
   useEffect(() => {
     const d = prefill.data
-    if (!d || done) return
-    if (!prefillDone.current) {
-      prefillDone.current = true
-      if (d.full_name) setFullName((v) => v || d.full_name!)
-      if (d.phone) setPhone((v) => v || d.phone!)
-      if (d.position) setPosition((v) => v || d.position!)
-      if (d.shirt_size && (SHIRT_SIZES as readonly string[]).includes(d.shirt_size)) {
-        setShirtSize((v) => v || (d.shirt_size as ShirtSize))
-      }
-      setPrefilledFrom(d.full_name ?? 'tu perfil')
-    }
-    if (!prefillCatDone.current && categories.length > 0) {
-      prefillCatDone.current = true
-      if (d.category_code && categories.some((c) => c.code === d.category_code)) {
-        setCategoryCode((v) => v || d.category_code!)
-      }
-    }
-  }, [prefill.data, categories, done])
+    if (!d || done || prefillDone.current) return
+    prefillDone.current = true
+    if (d.full_name) setFullName((v) => v || d.full_name!)
+    if (d.phone) setPhone((v) => v || d.phone!)
+    if (d.position) setPosition((v) => v || d.position!)
+    setPrefilledFrom(d.full_name ?? 'tu perfil')
+  }, [prefill.data, done])
   const blocks = blocksQ.data ?? []
   const remaining =
     season?.max_players != null && countQ.data != null
@@ -113,9 +85,7 @@ export function RegisterAmericanoPage() {
   function reset() {
     setFullName('')
     setPhone('')
-    setCategoryCode('')
     setPosition('')
-    setShirtSize('')
     setBirthdate('')
     setBlockedSlots([])
     setComment('')
@@ -133,9 +103,7 @@ export function RegisterAmericanoPage() {
     const parsed = schema.safeParse({
       fullName,
       phone,
-      categoryCode,
       position,
-      shirtSize,
       birthdate,
       blockedSlots,
       comment,
@@ -320,29 +288,6 @@ export function RegisterAmericanoPage() {
                   />
                 </Field>
 
-                <Field
-                  label="Categoría que solicitas"
-                  error={errors.categoryCode}
-                  hint="Sujeta a revisión del comité."
-                  hintIcon="medal"
-                >
-                  <select
-                    value={categoryCode}
-                    onChange={(e) => setCategoryCode(e.target.value)}
-                    disabled={categoriesQ.isLoading}
-                    className={inputCls(errors.categoryCode)}
-                  >
-                    <option value="" disabled>
-                      {categoriesQ.isLoading ? 'Cargando categorías…' : 'Elige tu categoría'}
-                    </option>
-                    {categories.map((c) => (
-                      <option key={c.code} value={c.code}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
-                </Field>
-
                 <div>
                   <span className="block text-sm font-medium text-slate-700">Posición de juego</span>
                   <div className="mt-1.5 grid grid-cols-3 gap-2">
@@ -401,14 +346,6 @@ export function RegisterAmericanoPage() {
                   {errors.blockedSlots && (
                     <p className="mt-1 text-xs text-red-600">{errors.blockedSlots}</p>
                   )}
-                </div>
-
-                <div>
-                  <span className="block text-sm font-medium text-slate-700">Talla de playera</span>
-                  <div className="mt-1.5">
-                    <ShirtSizePicker value={shirtSize || null} onChange={(s) => setShirtSize(s)} />
-                  </div>
-                  {errors.shirtSize && <p className="mt-1 text-xs text-red-600">{errors.shirtSize}</p>}
                 </div>
 
                 <Field label="Comentario (opcional)" error={errors.comment}>
