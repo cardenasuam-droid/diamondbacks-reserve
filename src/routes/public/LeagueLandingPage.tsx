@@ -7,6 +7,7 @@ import {
   useSeasonPaidCount,
 } from '@/features/leagues/useLeagues'
 import { pmLabel, longDate } from '@/lib/format'
+import { getRegToken } from '@/lib/regToken'
 import { LeagueShell } from './LeagueShell'
 import { Icon, type IconName } from '@/components/ui/Icon'
 import { Loader } from '@/components/ui/Loader'
@@ -126,6 +127,18 @@ export function LeagueLandingPage({ slug }: { slug: string }) {
         >
           Inscribirme
           <Icon name="chevron-right" size={18} />
+        </Link>
+      )}
+
+      {/* "Mi inscripción" (0057): visible si este dispositivo recuerda un token
+          de esta edición, también con inscripciones ya cerradas. */}
+      {getRegToken(season.id) && (
+        <Link
+          to={`/registro/${league.slug}/estado`}
+          className="neu-raised mt-3 flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold text-slate-700"
+        >
+          <Icon name="check" size={16} />
+          Ver mi inscripción
         </Link>
       )}
 

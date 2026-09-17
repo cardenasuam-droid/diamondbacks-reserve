@@ -1,5 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+import { uploadReceipt } from './receiptUpload'
 import type { AmericanoRegistrationInput } from './schemaAmericano'
 
 export interface SubmitAmericanoVars extends AmericanoRegistrationInput {
@@ -20,32 +21,17 @@ function friendly(msg: string): string {
   return 'No se pudo enviar tu inscripción. Inténtalo de nuevo.'
 }
 
-// Extensión segura del nombre de archivo (el bucket ya limita MIME y tamaño).
-function fileExt(name: string): string {
-  const ext = name.split('.').pop()?.toLowerCase() ?? ''
-  return /^[a-z0-9]{1,8}$/.test(ext) ? ext : 'bin'
-}
-
-// Inscripción a una liga americano: sube el comprobante (si hay) al bucket
-// privado 'receipts' y luego inserta en la bandeja. Si el INSERT fallara
-// después de subir, el archivo queda huérfano: costo aceptado (0050); el
-// organizador puede purgar.
+// Inscripción a una liga americano: sube comprobantes (si hay) al bucket
+// privado 'receipts' y luego inserta en la bandeja con un TOKEN generado aquí
+// (0057) — la credencial de "Mi inscripción". Devuelve el token para que la
+// página lo guarde y muestre el enlace. Si el INSERT fallara después de
+// subir, el archivo queda huérfano: costo aceptado (0050).
 export function useSubmitAmericanoRegistration(seasonId: string | null | undefined) {
   return useMutation({
-    mutationFn: async (vars: SubmitAmericanoVars) => {
-      if (vars.website && vars.website.trim() !== '') return
+    mutationFn: async (vars: SubmitAmericanoVars): Promise<string | null> => {
+      if (vars.website && vars.website.trim() !== '') return null
 
-      async function uploadReceipt(file: File): Promise<string> {
-        const path = `registrations/${crypto.randomUUID()}.${fileExt(file.name)}`
-        const { error: upErr } = await supabase.storage
-          .from('receipts')
-          .upload(path, file, { upsert: false })
-        if (upErr) {
-          throw new Error('No pudimos subir tu comprobante. Inténtalo de nuevo o envíalo después a la organizadora.')
-        }
-        return path
-      }
-
+      const accessToken = crypto.randomUUID()
       const receiptPath = vars.receiptFile ? await uploadReceipt(vars.receiptFile) : null
       const discountPath = vars.discountFile ? await uploadReceipt(vars.discountFile) : null
 
@@ -61,8 +47,10 @@ export function useSubmitAmericanoRegistration(seasonId: string | null | undefin
         comment: vars.comment ?? null,
         receipt_path: receiptPath,
         discount_receipt_path: discountPath,
+        access_token: accessToken,
       })
       if (error) throw new Error(friendly(error.message))
+      return accessToken
     },
   })
 }

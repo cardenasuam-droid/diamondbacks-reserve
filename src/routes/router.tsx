@@ -22,6 +22,7 @@ import { LoginPage } from './auth/LoginPage'
 import { RegisterPage } from './registro/RegisterPage'
 import { RegistrationHubPage } from './registro/RegistrationHubPage'
 import { RegisterAmericanoPage } from './registro/RegisterAmericanoPage'
+import { RegistrationStatusPage } from './registro/RegistrationStatusPage'
 import { LeagueLandingPage } from './public/LeagueLandingPage'
 import { AmericanoSchedulePage } from './public/AmericanoSchedulePage'
 import { AmericanoStandingsPage } from './public/AmericanoStandingsPage'
@@ -61,6 +62,9 @@ export const router = createBrowserRouter([
   { path: '/registro', element: <RegistrationHubPage /> },
   { path: '/registro/reserve', element: <RegisterPage /> },
   { path: '/registro/:leagueSlug', element: <RegisterAmericanoPage /> },
+  // "Mi inscripción" (0057): estado por token del enlace mágico o del guardado
+  // en el dispositivo; también aislada, con el tema de la liga.
+  { path: '/registro/:leagueSlug/estado', element: <RegistrationStatusPage /> },
   // Selector de ligas: la puerta de la plataforma, AISLADA del shell de
   // Reserve (identidad neutral del club). "Cambiar de liga" apunta aquí.
   { path: '/ligas', element: <LeagueSelectPage /> },
