@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import {
   useOpenRegistrationSeasons,
   useSeasonCategories,
-  useSeasonPlayerCount,
+  useSeasonPaidCount,
   type OpenRegistrationSeason,
 } from '@/features/leagues/useLeagues'
 import { useCategories } from '@/features/categories/useCategories'
@@ -94,7 +94,8 @@ function tabLabel(s: OpenRegistrationSeason): string {
 function SeasonQueue({ season }: { season: OpenRegistrationSeason }) {
   const isAmericano = season.league.kind === 'americano'
   const registrations = usePendingRegistrations(season.id)
-  const playerCount = useSeasonPlayerCount(season.max_players != null ? season.id : undefined)
+  // El cupo se cuenta por PAGOS verificados (0056), no por fichas creadas.
+  const paidCount = useSeasonPaidCount(season.max_players != null ? season.id : undefined)
 
   // Categorías ofrecidas al aprobar: las de la edición (0049); si la edición
   // no tiene catálogo (datos viejos), todas las de ranking como antes.
@@ -108,8 +109,8 @@ function SeasonQueue({ season }: { season: OpenRegistrationSeason }) {
 
   const pending = registrations.data ?? []
   const capacity =
-    season.max_players != null && playerCount.data != null
-      ? { approved: playerCount.data, max: season.max_players }
+    season.max_players != null && paidCount.data != null
+      ? { paid: paidCount.data, max: season.max_players }
       : null
 
   return (
@@ -120,9 +121,9 @@ function SeasonQueue({ season }: { season: OpenRegistrationSeason }) {
             <Icon name="account" size={18} />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="text-xs text-slate-500">Cupo de la edición</p>
+            <p className="text-xs text-slate-500">Cupo de la edición (por pago confirmado)</p>
             <p className="text-sm font-medium text-slate-800">
-              {capacity.approved} de {capacity.max} lugares ocupados
+              {capacity.paid} de {capacity.max} lugares pagados
               {pending.length > 0 && ` · ${pending.length} por revisar`}
             </p>
           </div>
@@ -155,7 +156,13 @@ function SeasonQueue({ season }: { season: OpenRegistrationSeason }) {
               registration={r}
               categories={categories}
               season={season}
-              capFull={capacity != null && capacity.approved >= capacity.max}
+              // Con cupo lleno solo se frena a quien NO tiene pago verificado:
+              // las pagadas ya ocupan uno de los lugares contados.
+              capFull={
+                capacity != null &&
+                capacity.paid >= capacity.max &&
+                !r.payment_verified_at
+              }
             />
           ))}
         </div>
@@ -233,10 +240,10 @@ function ReviewCard({
     approve.mutate({ registration, categoryCode, categoryType: cat.type, seasonId: season.id })
   }
 
-  async function openReceipt() {
-    if (!registration.receipt_path) return
+  async function openReceipt(path: string | null) {
+    if (!path) return
     try {
-      const url = await receiptSignedUrl(registration.receipt_path)
+      const url = await receiptSignedUrl(path)
       window.open(url, '_blank', 'noopener')
     } catch (e) {
       setLocalError((e as Error).message)
@@ -288,11 +295,25 @@ function ReviewCard({
           </span>
           {registration.receipt_path && (
             <button
-              onClick={() => void openReceipt()}
+              onClick={() => void openReceipt(registration.receipt_path)}
               className="rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-700 hover:border-slate-400"
             >
               Ver comprobante
             </button>
+          )}
+          {registration.discount_receipt_path && (
+            <>
+              <span className="inline-flex items-center gap-1 rounded-full border border-sky-500/30 bg-sky-500/10 px-2.5 py-0.5 text-xs font-medium text-sky-300">
+                <Icon name="medal" size={12} />
+                Pide descuento Peak (−$250)
+              </span>
+              <button
+                onClick={() => void openReceipt(registration.discount_receipt_path)}
+                className="rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-700 hover:border-slate-400"
+              >
+                Ver comprobante Peak
+              </button>
+            </>
           )}
           <button
             onClick={() => verify.mutate({ id: registration.id, verified: !paid })}
@@ -358,8 +379,8 @@ function ReviewCard({
 
           {capFull && (
             <p className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-2 text-xs text-amber-200">
-              Cupo lleno: el servidor rechazará más altas activas. Libera un lugar
-              antes de aprobar.
+              Cupo pagado lleno y esta inscripción no tiene pago verificado.
+              Libera un lugar (rechaza o quita una verificación) antes de aprobarla.
             </p>
           )}
 

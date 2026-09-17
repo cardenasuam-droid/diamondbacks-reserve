@@ -26,6 +26,9 @@ export interface PlayerRegistration {
   birthdate: string | null
   blocked_time_labels: string[] | null
   receipt_path: string | null
+  // Comprobante del torneo de Peak Padel (0056): descuento de $250, lo valida
+  // el comité junto con el pago.
+  discount_receipt_path: string | null
   payment_verified_at: string | null
   payment_verified_by: string | null
   created_at: string

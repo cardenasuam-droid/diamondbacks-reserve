@@ -4,6 +4,8 @@ import type { AmericanoRegistrationInput } from './schemaAmericano'
 
 export interface SubmitAmericanoVars extends AmericanoRegistrationInput {
   receiptFile?: File | null
+  /** Comprobante del torneo de Peak Padel (descuento $250, 0056). */
+  discountFile?: File | null
   // Honeypot (mismo truco que useSubmitRegistration).
   website?: string
 }
@@ -33,16 +35,19 @@ export function useSubmitAmericanoRegistration(seasonId: string | null | undefin
     mutationFn: async (vars: SubmitAmericanoVars) => {
       if (vars.website && vars.website.trim() !== '') return
 
-      let receiptPath: string | null = null
-      if (vars.receiptFile) {
-        receiptPath = `registrations/${crypto.randomUUID()}.${fileExt(vars.receiptFile.name)}`
+      async function uploadReceipt(file: File): Promise<string> {
+        const path = `registrations/${crypto.randomUUID()}.${fileExt(file.name)}`
         const { error: upErr } = await supabase.storage
           .from('receipts')
-          .upload(receiptPath, vars.receiptFile, { upsert: false })
+          .upload(path, file, { upsert: false })
         if (upErr) {
           throw new Error('No pudimos subir tu comprobante. Inténtalo de nuevo o envíalo después a la organizadora.')
         }
+        return path
       }
+
+      const receiptPath = vars.receiptFile ? await uploadReceipt(vars.receiptFile) : null
+      const discountPath = vars.discountFile ? await uploadReceipt(vars.discountFile) : null
 
       const { error } = await supabase.from('player_registrations').insert({
         season_id: seasonId ?? null,
@@ -55,6 +60,7 @@ export function useSubmitAmericanoRegistration(seasonId: string | null | undefin
         blocked_time_labels: vars.blockedSlots.length > 0 ? vars.blockedSlots : null,
         comment: vars.comment ?? null,
         receipt_path: receiptPath,
+        discount_receipt_path: discountPath,
       })
       if (error) throw new Error(friendly(error.message))
     },

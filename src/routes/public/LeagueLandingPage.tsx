@@ -4,7 +4,7 @@ import {
   useLeagueSeason,
   useSeasonCategories,
   useSeasonTimeBlocks,
-  useSeasonPlayerCount,
+  useSeasonPaidCount,
 } from '@/features/leagues/useLeagues'
 import { pmLabel, longDate } from '@/lib/format'
 import { LeagueShell } from './LeagueShell'
@@ -21,7 +21,8 @@ export function LeagueLandingPage({ slug }: { slug: string }) {
   const season = seasonQ.data
   const categoriesQ = useSeasonCategories(season?.id)
   const blocksQ = useSeasonTimeBlocks(season?.id)
-  const countQ = useSeasonPlayerCount(season?.id)
+  // Cupo por PAGOS confirmados (0056), no por aprobaciones.
+  const countQ = useSeasonPaidCount(season?.id)
 
   if (seasonQ.isLoading) {
     return (

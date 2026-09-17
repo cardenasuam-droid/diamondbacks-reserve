@@ -110,6 +110,8 @@ export function useVerifyPayment() {
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['registrations'] })
+      // El cupo se cuenta por pagos verificados (0056): refrescarlo aquí.
+      void qc.invalidateQueries({ queryKey: ['season-paid-count'] })
     },
   })
 }
@@ -141,6 +143,8 @@ export function useRejectRegistration() {
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['registrations'] })
+      // Rechazar una inscripción pagada libera su lugar del cupo (0056).
+      void qc.invalidateQueries({ queryKey: ['season-paid-count'] })
     },
   })
 }
