@@ -8,11 +8,12 @@ import {
 import { useCategories } from '@/features/categories/useCategories'
 import { rankingCategories } from '@/features/registration/category'
 import {
-  usePendingRegistrations,
+  useSeasonRegistrations,
   useApproveRegistration,
   useRejectRegistration,
   useVerifyPayment,
   receiptSignedUrl,
+  type SeasonRegistration,
 } from '@/features/registration/useRegistrations'
 import type { PlayerRegistration, PlayerPosition } from '@/features/registration/types'
 import type { MatchCategory } from '@/lib/types'
@@ -29,10 +30,11 @@ const POSITION_LABEL: Record<PlayerPosition, string> = {
   ambas: 'Ambas',
 }
 
-// Bandeja de inscripciones multi-liga (0049): una pestaña por edición con
-// inscripción abierta. Reserve conserva su flujo (aprobar → pool del draft);
-// las ligas americano aprueban directo a ficha sin equipo, con cupo visible y
-// comprobante de pago verificable (0050).
+// Panel de inscripciones multi-liga (0049): una pestaña por edición con
+// inscripción abierta y, dentro, PENDIENTES por revisar, INSCRITAS actuales
+// (aprobadas, con pago y comprobantes gestionables) y RECHAZADAS como
+// registro. Reserve conserva su flujo (aprobar → pool del draft); las ligas
+// americano aprueban directo a ficha sin equipo, con cupo visible (0050).
 export function OrganizerRegistrationsPage() {
   const open = useOpenRegistrationSeasons()
   const seasons = open.data ?? []
@@ -93,7 +95,8 @@ function tabLabel(s: OpenRegistrationSeason): string {
 
 function SeasonQueue({ season }: { season: OpenRegistrationSeason }) {
   const isAmericano = season.league.kind === 'americano'
-  const registrations = usePendingRegistrations(season.id)
+  const registrations = useSeasonRegistrations(season.id)
+  const [view, setView] = useState<'pending' | 'approved' | 'rejected'>('pending')
   // El cupo se cuenta por PAGOS verificados (0056), no por fichas creadas.
   const paidCount = useSeasonPaidCount(season.max_players != null ? season.id : undefined)
 
@@ -107,7 +110,14 @@ function SeasonQueue({ season }: { season: OpenRegistrationSeason }) {
     return rankingCategories(allCats.data ?? [])
   }, [seasonCats.data, allCats.data])
 
-  const pending = registrations.data ?? []
+  const all = registrations.data ?? []
+  const pending = all.filter((r) => r.status === 'pending')
+  // Inscritas actuales en orden alfabético (lista para pasar revista); las
+  // rechazadas al revés: la última decisión arriba.
+  const approved = [...all.filter((r) => r.status === 'approved')].sort((a, b) =>
+    a.full_name.localeCompare(b.full_name, 'es')
+  )
+  const rejected = [...all.filter((r) => r.status === 'rejected')].reverse()
   const capacity =
     season.max_players != null && paidCount.data != null
       ? { paid: paidCount.data, max: season.max_players }
@@ -135,6 +145,31 @@ function SeasonQueue({ season }: { season: OpenRegistrationSeason }) {
         label={isAmericano ? 'Landing pública para compartir' : 'Enlace público de inscripción'}
       />
 
+      {/* Panel: pendientes por revisar · inscritas actuales · rechazadas. */}
+      <div className="grid grid-cols-3 gap-2">
+        {(
+          [
+            ['pending', `Pendientes (${pending.length})`],
+            ['approved', `Inscritas (${approved.length})`],
+            ['rejected', `Rechazadas (${rejected.length})`],
+          ] as const
+        ).map(([key, label]) => (
+          <button
+            key={key}
+            type="button"
+            aria-pressed={view === key}
+            onClick={() => setView(key)}
+            className={
+              view === key
+                ? 'neu-pressed rounded-xl px-2 py-2.5 text-sm font-semibold text-brand-300'
+                : 'neu-raised rounded-xl px-2 py-2.5 text-sm font-medium text-slate-700'
+            }
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
       {registrations.isLoading ? (
         <Loader label="Cargando inscripciones…" />
       ) : registrations.isError ? (
@@ -142,32 +177,167 @@ function SeasonQueue({ season }: { season: OpenRegistrationSeason }) {
           description="No pudimos cargar las inscripciones."
           onRetry={() => void registrations.refetch()}
         />
-      ) : pending.length === 0 ? (
+      ) : view === 'pending' ? (
+        pending.length === 0 ? (
+          <EmptyState
+            icon="account"
+            title="Sin inscripciones pendientes"
+            description="Cuando alguien se inscriba aparecerá aquí para revisión."
+          />
+        ) : (
+          <div className="space-y-3">
+            {pending.map((r) => (
+              <ReviewCard
+                key={r.id}
+                registration={r}
+                categories={categories}
+                season={season}
+                // Con cupo lleno solo se frena a quien NO tiene pago verificado:
+                // las pagadas ya ocupan uno de los lugares contados.
+                capFull={
+                  capacity != null &&
+                  capacity.paid >= capacity.max &&
+                  !r.payment_verified_at
+                }
+              />
+            ))}
+          </div>
+        )
+      ) : view === 'approved' ? (
+        approved.length === 0 ? (
+          <EmptyState
+            icon="teams"
+            title="Aún no hay inscritas"
+            description="Las inscripciones aprobadas aparecen aquí, con su pago y comprobantes."
+          />
+        ) : (
+          <div className="space-y-2">
+            {approved.map((r) => (
+              <ApprovedCard key={r.id} registration={r} categories={categories} />
+            ))}
+          </div>
+        )
+      ) : rejected.length === 0 ? (
         <EmptyState
-          icon="account"
-          title="Sin inscripciones pendientes"
-          description="Cuando alguien se inscriba aparecerá aquí para revisión."
+          icon="ban"
+          title="Sin rechazadas"
+          description="Las inscripciones rechazadas quedan aquí como registro."
         />
       ) : (
-        <div className="space-y-3">
-          {pending.map((r) => (
-            <ReviewCard
-              key={r.id}
-              registration={r}
-              categories={categories}
-              season={season}
-              // Con cupo lleno solo se frena a quien NO tiene pago verificado:
-              // las pagadas ya ocupan uno de los lugares contados.
-              capFull={
-                capacity != null &&
-                capacity.paid >= capacity.max &&
-                !r.payment_verified_at
-              }
-            />
+        <div className="space-y-2">
+          {rejected.map((r) => (
+            <RejectedRow key={r.id} registration={r} />
           ))}
         </div>
       )}
     </>
+  )
+}
+
+// Inscrita ACTUAL (aprobada): fila compacta con su categoría asignada (la de
+// la ficha, no la solicitada), el estado del pago y los comprobantes. El pago
+// también se gestiona aquí: aprobar y pagar son pasos separados y a veces el
+// comprobante llega después de la aprobación.
+function ApprovedCard({
+  registration,
+  categories,
+}: {
+  registration: SeasonRegistration
+  categories: MatchCategory[]
+}) {
+  const verify = useVerifyPayment()
+  const [error, setError] = useState<string | null>(null)
+  const paid = Boolean(registration.payment_verified_at)
+  const assigned = registration.player?.category_code ?? null
+  const catName = assigned ? categories.find((c) => c.code === assigned)?.name ?? assigned : null
+  const when = new Date(registration.created_at).toLocaleDateString('es-MX', {
+    day: '2-digit',
+    month: 'short',
+  })
+
+  async function openReceipt(path: string | null) {
+    if (!path) return
+    try {
+      const url = await receiptSignedUrl(path)
+      window.open(url, '_blank', 'noopener')
+    } catch (e) {
+      setError((e as Error).message)
+    }
+  }
+
+  return (
+    <div className="rounded-xl border border-slate-200 bg-slate-100 p-3 shadow-sm">
+      <div className="flex items-center justify-between gap-2">
+        <p className="min-w-0 truncate font-medium text-slate-900">{registration.full_name}</p>
+        <span className="shrink-0 text-xs text-slate-500">{when}</span>
+      </div>
+
+      <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+        <Chip>{catName ?? 'Sin categoría'}</Chip>
+        <span
+          className={
+            paid
+              ? 'inline-flex items-center gap-1 rounded-full bg-brand-500/15 px-2.5 py-0.5 text-xs font-medium text-brand-200 ring-1 ring-brand-500/30'
+              : 'inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-xs font-medium text-amber-200'
+          }
+        >
+          <Icon name={paid ? 'check' : 'lock'} size={12} />
+          {paid ? 'Pago verificado' : 'Pago por verificar'}
+        </span>
+        {registration.discount_receipt_path && <Chip>Descuento Peak</Chip>}
+      </div>
+
+      {error && (
+        <p className="mt-2 rounded-lg border border-red-200 bg-red-50 p-2 text-xs text-red-700">
+          {error}
+        </p>
+      )}
+
+      <div className="mt-2 flex flex-wrap gap-2">
+        {registration.receipt_path && (
+          <button
+            onClick={() => void openReceipt(registration.receipt_path)}
+            className="rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-700 hover:border-slate-400"
+          >
+            Ver comprobante
+          </button>
+        )}
+        {registration.discount_receipt_path && (
+          <button
+            onClick={() => void openReceipt(registration.discount_receipt_path)}
+            className="rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-700 hover:border-slate-400"
+          >
+            Comprobante Peak
+          </button>
+        )}
+        <button
+          onClick={() => verify.mutate({ id: registration.id, verified: !paid })}
+          disabled={verify.isPending}
+          className="rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-700 hover:border-slate-400 disabled:opacity-50"
+        >
+          {verify.isPending ? 'Guardando…' : paid ? 'Quitar verificación' : 'Marcar pago verificado'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// Rechazada: solo registro (nombre, fecha y motivo interno si lo hubo).
+function RejectedRow({ registration }: { registration: SeasonRegistration }) {
+  const when = new Date(registration.created_at).toLocaleDateString('es-MX', {
+    day: '2-digit',
+    month: 'short',
+  })
+  return (
+    <div className="rounded-xl border border-slate-200 bg-slate-100 p-3 shadow-sm">
+      <div className="flex items-center justify-between gap-2">
+        <p className="min-w-0 truncate font-medium text-slate-700">{registration.full_name}</p>
+        <span className="shrink-0 text-xs text-slate-500">{when}</span>
+      </div>
+      {registration.review_notes && (
+        <p className="mt-1 text-xs text-slate-500">Motivo: {registration.review_notes}</p>
+      )}
+    </div>
   )
 }
 
