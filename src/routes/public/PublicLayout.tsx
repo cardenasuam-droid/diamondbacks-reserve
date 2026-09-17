@@ -26,7 +26,7 @@ export function PublicLayout() {
             >
               <Icon name="menu" size={22} />
             </button>
-            <Link to="/" aria-label="Inicio">
+            <Link to="/inicio" aria-label="Inicio">
               <Brand />
             </Link>
           </div>

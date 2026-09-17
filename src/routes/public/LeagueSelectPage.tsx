@@ -1,13 +1,12 @@
 import { useNavigate } from 'react-router-dom'
 import { useActiveLeagues, type LeagueWithSeason } from '@/features/leagues/useLeagues'
-import { setLeaguePref } from '@/lib/leaguePref'
 import { longDate } from '@/lib/format'
 import { Icon } from '@/components/ui/Icon'
 import { Loader } from '@/components/ui/Loader'
 
 // Puerta de entrada de la plataforma (visión multi-liga): elegir a qué liga o
-// torneo entrar. La elección se recuerda en el dispositivo (leaguePref) y '/'
-// deja de preguntar; siempre se puede volver desde /ligas ("cambiar de liga").
+// torneo entrar. '/' manda SIEMPRE aquí — la app arranca eligiendo liga en
+// cada apertura (decisión del organizador 2026-09-17; nada se recuerda).
 // Cada tarjeta se pinta con la identidad de SU liga vía [data-league].
 
 const KIND_LABEL: Record<string, string> = {
@@ -33,8 +32,7 @@ export function LeagueSelectPage() {
 
   function choose(item: LeagueWithSeason) {
     const slug = item.league.slug
-    setLeaguePref(slug)
-    navigate(slug === 'reserve' ? '/' : `/${slug}`, { replace: true })
+    navigate(slug === 'reserve' ? '/inicio' : `/${slug}`, { replace: true })
   }
 
   return (
@@ -88,8 +86,7 @@ export function LeagueSelectPage() {
           )}
 
           <p className="mt-5 text-center text-xs leading-relaxed text-slate-500">
-            Recordaremos tu liga en este dispositivo; puedes cambiarla cuando
-            quieras desde el menú.
+            También puedes cambiar de liga cuando quieras desde el menú.
           </p>
         </main>
 

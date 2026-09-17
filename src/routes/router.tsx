@@ -1,6 +1,6 @@
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { PublicLayout } from './public/PublicLayout'
-import { LeagueGate } from './public/LeagueGate'
+import { HomeGate } from './public/HomeGate'
 import { LeagueSelectPage } from './public/LeagueSelectPage'
 import { RouteError } from './RouteError'
 import { SchedulePage } from './public/SchedulePage'
@@ -82,9 +82,12 @@ export const router = createBrowserRouter([
     // de en la pantalla por defecto de react-router (en inglés y sin salida).
     errorElement: <RouteError />,
     children: [
-      // Plataforma multi-liga: '/' resuelve primero la LIGA (recordada en el
-      // dispositivo, o manda al selector /ligas) y luego el destino en ella.
-      { index: true, element: <LeagueGate /> },
+      // Plataforma multi-liga: la entrada de la app es el SELECTOR para todos,
+      // siempre (decisión del organizador 2026-09-17: sin liga recordada; cada
+      // apertura arranca eligiendo liga). La portada de Reserve vive en
+      // /inicio: dashboard con sesión, Home pública sin ella (HomeGate).
+      { index: true, element: <Navigate to="/ligas" replace /> },
+      { path: 'inicio', element: <HomeGate /> },
       { path: 'rol', element: <SchedulePage /> },
       { path: 'partidos/:matchId', element: <MatchDetailPage /> },
       { path: 'resultados', element: <ResultsPage /> },
