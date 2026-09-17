@@ -1,6 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { isSupabaseConfigured } from '@/lib/supabase'
+import { useAuth } from '@/features/auth/context'
+import { useMyPlayerPrefill } from '@/features/registration/usePrefill'
+import { SHIRT_SIZES } from '@/lib/shirtSize'
 import {
   useLeagueOpenSeason,
   useSeasonCategories,
@@ -53,10 +56,41 @@ export function RegisterAmericanoPage() {
   const [errors, setErrors] = useState<FieldErrors>({})
   const [done, setDone] = useState(false)
 
+  // Precarga para quien ya tiene cuenta (0055): sus datos de la ficha llegan
+  // ya puestos (editables) en vez de teclearlos otra vez. Cada campo solo se
+  // rellena si sigue vacío; la categoría espera a que cargue el catálogo de
+  // la edición y solo aplica si es una de las que aquí se juegan.
+  const { session } = useAuth()
+  const prefill = useMyPlayerPrefill(Boolean(session))
+  const prefillDone = useRef(false)
+  const prefillCatDone = useRef(false)
+  const [prefilledFrom, setPrefilledFrom] = useState<string | null>(null)
+
   const categories = useMemo(
     () => (categoriesQ.data ?? []).filter((c) => c.is_ranking && c.is_active),
     [categoriesQ.data]
   )
+
+  useEffect(() => {
+    const d = prefill.data
+    if (!d || done) return
+    if (!prefillDone.current) {
+      prefillDone.current = true
+      if (d.full_name) setFullName((v) => v || d.full_name!)
+      if (d.phone) setPhone((v) => v || d.phone!)
+      if (d.position) setPosition((v) => v || d.position!)
+      if (d.shirt_size && (SHIRT_SIZES as readonly string[]).includes(d.shirt_size)) {
+        setShirtSize((v) => v || (d.shirt_size as ShirtSize))
+      }
+      setPrefilledFrom(d.full_name ?? 'tu perfil')
+    }
+    if (!prefillCatDone.current && categories.length > 0) {
+      prefillCatDone.current = true
+      if (d.category_code && categories.some((c) => c.code === d.category_code)) {
+        setCategoryCode((v) => v || d.category_code!)
+      }
+    }
+  }, [prefill.data, categories, done])
   const blocks = blocksQ.data ?? []
   const remaining =
     season?.max_players != null && countQ.data != null
@@ -174,6 +208,16 @@ export function RegisterAmericanoPage() {
                   </p>
                 )}
               </section>
+
+              {prefilledFrom && (
+                <p className="mb-4 flex items-center gap-2 rounded-lg border border-brand-500/30 bg-brand-500/10 p-3 text-sm text-brand-200">
+                  <Icon name="account" size={16} />
+                  <span>
+                    Precargamos tus datos de tu perfil ({prefilledFrom}). Revísalos y
+                    edita lo que haga falta.
+                  </span>
+                </p>
+              )}
 
               {remaining === 0 && (
                 <p className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/15 p-3 text-sm text-amber-200">
