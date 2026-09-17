@@ -3,6 +3,7 @@ import { useLeagueSeason, useSeasonPaidCount } from '@/features/leagues/useLeagu
 import { useSeasonRegistrations } from '@/features/registration/useRegistrations'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { ErrorState } from '@/components/ui/ErrorState'
 import { Loader } from '@/components/ui/Loader'
 
 // Panel INDEPENDIENTE por liga (pedido del organizador, 2026-09-17): cada
@@ -32,9 +33,11 @@ export function OrganizerLeaguePanelPage() {
     )
   }
 
-  const all = regs.data ?? []
-  const pending = all.filter((r) => r.status === 'pending').length
-  const approved = all.filter((r) => r.status === 'approved').length
+  // Con la consulta fallida los números se muestran como '—', nunca como 0:
+  // un cero falso haría creer que la cola está vacía (hallazgo de Codex).
+  const all = regs.data
+  const pending = all ? all.filter((r) => r.status === 'pending').length : null
+  const approved = all ? all.filter((r) => r.status === 'approved').length : null
   const slug = season.league.slug
 
   const cards = [
@@ -43,7 +46,7 @@ export function OrganizerLeaguePanelPage() {
       icon: '📨',
       title: 'Inscripciones',
       desc:
-        pending > 0
+        pending != null && pending > 0
           ? `${pending} por revisar · inscritas actuales y pagos`
           : 'Pendientes, inscritas actuales y pagos',
     },
@@ -66,8 +69,8 @@ export function OrganizerLeaguePanelPage() {
       <PageHeader title={`Panel · ${season.league.name}`} subtitle={season.name} />
 
       <section className="grid grid-cols-3 gap-3">
-        <Stat value={regs.isLoading ? '—' : pending} label="Pendientes" />
-        <Stat value={regs.isLoading ? '—' : approved} label="Inscritas" />
+        <Stat value={pending ?? '—'} label="Pendientes" />
+        <Stat value={approved ?? '—'} label="Inscritas" />
         <Stat
           value={
             season.max_players != null
@@ -77,6 +80,13 @@ export function OrganizerLeaguePanelPage() {
           label="Pagadas"
         />
       </section>
+
+      {regs.isError && (
+        <ErrorState
+          description="No pudimos cargar los números de inscripción."
+          onRetry={() => void regs.refetch()}
+        />
+      )}
 
       <section className="space-y-2">
         {cards.map((s) => (

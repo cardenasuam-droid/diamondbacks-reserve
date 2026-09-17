@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import {
   useOpenRegistrationSeasons,
+  useLeagueSeason,
   useSeasonCategories,
   useSeasonPaidCount,
   type OpenRegistrationSeason,
@@ -38,19 +39,30 @@ const POSITION_LABEL: Record<PlayerPosition, string> = {
 // americano aprueban directo a ficha sin equipo, con cupo visible (0050).
 export function OrganizerRegistrationsPage() {
   const open = useOpenRegistrationSeasons()
-  const seasons = open.data ?? []
   const [selectedId, setSelectedId] = useState<string | null>(null)
   // ?liga=<slug> preselecciona la pestaña (los paneles por liga llegan aquí
-  // con su liga puesta); un tap manual del organizador siempre gana.
+  // con su liga puesta); un tap manual del organizador siempre gana. La
+  // edición de esa liga entra a las pestañas AUNQUE su inscripción ya esté
+  // cerrada (hallazgo de Codex en PR #9): el panel por liga sigue vivo
+  // después del cierre y su bandeja debe seguir abriéndose.
   const [searchParams] = useSearchParams()
   const paramSlug = searchParams.get('liga')
+  const paramSeasonQ = useLeagueSeason(paramSlug ?? undefined)
+  const seasons = useMemo(() => {
+    const base = open.data ?? []
+    const extra = paramSeasonQ.data
+    if (extra && !base.some((s) => s.id === extra.id)) return [...base, extra]
+    return base
+  }, [open.data, paramSeasonQ.data])
   const selected =
     seasons.find((s) => s.id === selectedId) ??
     seasons.find((s) => s.league.slug === paramSlug) ??
     seasons[0] ??
     null
 
-  if (open.isLoading) return <Loader label="Cargando…" />
+  if (open.isLoading || (paramSlug && paramSeasonQ.isLoading)) {
+    return <Loader label="Cargando…" />
+  }
   if (!selected) {
     return (
       <div>
