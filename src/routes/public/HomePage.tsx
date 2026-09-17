@@ -1,4 +1,5 @@
 import { useActiveSeason } from '@/features/season/useActiveSeason'
+import { useOpenRegistrationSeasons } from '@/features/leagues/useLeagues'
 import { Card } from '@/components/ui/Card'
 import { Icon, type IconName } from '@/components/ui/Icon'
 import type { CSSProperties } from 'react'
@@ -71,6 +72,8 @@ export function HomePage() {
         </div>
       </section>
 
+      <OtherLeaguesBanner />
+
       <section className="grid grid-cols-2 gap-3">
         {QUICK_LINKS.map((q, i) => (
           <Card
@@ -88,5 +91,37 @@ export function HomePage() {
         ))}
       </section>
     </div>
+  )
+}
+
+// Aviso de OTRAS ligas con inscripción abierta (0049). Reserve no se anuncia a
+// sí misma; hoy esto muestra la Liga Femenil y desaparece solo al cerrar sus
+// inscripciones. El tema de la liga colorea la tarjeta vía [data-league].
+function OtherLeaguesBanner() {
+  const open = useOpenRegistrationSeasons()
+  const others = (open.data ?? []).filter((s) => s.league.slug !== 'reserve')
+  if (others.length === 0) return null
+
+  return (
+    <section className="space-y-3">
+      {others.map((s) => (
+        <div key={s.id} data-league={s.league.slug}>
+          <Card to={`/${s.league.slug}`} className="flex items-center gap-3 p-4">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-500/15 text-brand-300 ring-1 ring-brand-500/30">
+              <Icon name="account" size={22} />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block truncate font-semibold text-slate-800">{s.league.name}</span>
+              <span className="mt-0.5 block text-xs text-slate-500">
+                {s.name} · inscripciones abiertas
+                {s.start_date &&
+                  ` · inicia ${new Date(`${s.start_date}T00:00:00`).toLocaleDateString('es-MX', { day: 'numeric', month: 'long' })}`}
+              </span>
+            </span>
+            <Icon name="chevron-right" size={18} />
+          </Card>
+        </div>
+      ))}
+    </section>
   )
 }

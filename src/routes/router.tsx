@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom'
 import { PublicLayout } from './public/PublicLayout'
-import { HomeGate } from './public/HomeGate'
+import { LeagueGate } from './public/LeagueGate'
+import { LeagueSelectPage } from './public/LeagueSelectPage'
 import { RouteError } from './RouteError'
 import { SchedulePage } from './public/SchedulePage'
 import { MatchDetailPage } from './public/MatchDetailPage'
@@ -19,6 +20,12 @@ import { DevPage } from './dev/DevPage'
 import { NotFoundPage } from './NotFoundPage'
 import { LoginPage } from './auth/LoginPage'
 import { RegisterPage } from './registro/RegisterPage'
+import { RegistrationHubPage } from './registro/RegistrationHubPage'
+import { RegisterAmericanoPage } from './registro/RegisterAmericanoPage'
+import { LeagueLandingPage } from './public/LeagueLandingPage'
+import { AmericanoSchedulePage } from './public/AmericanoSchedulePage'
+import { AmericanoStandingsPage } from './public/AmericanoStandingsPage'
+import { AmericanoAdminPage } from './organizer/AmericanoAdminPage'
 import { DraftPage } from './draft/DraftPage'
 import { RequireAuth, RequireRole } from './guards'
 import { AppLayout } from './app/AppLayout'
@@ -49,9 +56,19 @@ import { AvisosManagerPage } from './content/AvisosManagerPage'
 //   '/app'   área autenticada (RequireAuth). Paneles por rol llegan en su módulo.
 export const router = createBrowserRouter([
   // Inscripción pública AISLADA: su propia pantalla, sin el shell con menú ni
-  // login. Un link aparte (/registro) que comparte la base de datos pero no da
-  // acceso a la app.
-  { path: '/registro', element: <RegisterPage /> },
+  // login. /registro es un hub multi-liga (0049): con una sola edición abierta
+  // redirige a su formulario; 'reserve' (estático) gana sobre ':leagueSlug'.
+  { path: '/registro', element: <RegistrationHubPage /> },
+  { path: '/registro/reserve', element: <RegisterPage /> },
+  { path: '/registro/:leagueSlug', element: <RegisterAmericanoPage /> },
+  // Selector de ligas: la puerta de la plataforma, AISLADA del shell de
+  // Reserve (identidad neutral del club). "Cambiar de liga" apunta aquí.
+  { path: '/ligas', element: <LeagueSelectPage /> },
+  // Páginas públicas de la Liga Femenil (F1/F2): landing, rol y tabla, con la
+  // identidad de la liga. En F4 se cuelgan del selector liga→edición.
+  { path: '/femenil', element: <LeagueLandingPage slug="femenil" /> },
+  { path: '/femenil/rol', element: <AmericanoSchedulePage slug="femenil" /> },
+  { path: '/femenil/tabla', element: <AmericanoStandingsPage slug="femenil" /> },
   // Draft en vivo: board público + participante (capitanas eligen en su turno).
   { path: '/draft', element: <DraftPage /> },
   {
@@ -61,8 +78,9 @@ export const router = createBrowserRouter([
     // de en la pantalla por defecto de react-router (en inglés y sin salida).
     errorElement: <RouteError />,
     children: [
-      // Con sesión: directo al dashboard del jugador; anónimo: Home pública.
-      { index: true, element: <HomeGate /> },
+      // Plataforma multi-liga: '/' resuelve primero la LIGA (recordada en el
+      // dispositivo, o manda al selector /ligas) y luego el destino en ella.
+      { index: true, element: <LeagueGate /> },
       { path: 'rol', element: <SchedulePage /> },
       { path: 'partidos/:matchId', element: <MatchDetailPage /> },
       { path: 'resultados', element: <ResultsPage /> },
@@ -132,6 +150,8 @@ export const router = createBrowserRouter([
               { path: 'importar', element: <OrganizerImportPage /> },
               { path: 'equipos', element: <OrganizerTeamsPage /> },
               { path: 'equipos/:teamId', element: <OrganizerRosterPage /> },
+              // Ligas formato americano (0051): jornadas, juegos, resultados.
+              { path: 'liga/:leagueSlug', element: <AmericanoAdminPage /> },
             ],
           },
           {

@@ -279,3 +279,62 @@ textarea {
     transform: none;
   }
 }
+
+/* ===========================================================================
+   Tema por LIGA (0049, plan §4.4): cada liga redefine las variables de la
+   paleta dentro de su ámbito [data-league="…"]. Las utilidades de Tailwind v4
+   resuelven var() en el punto de uso, así que basta envolver la página en
+   <div data-league="femenil"> para que brand/slate/sombras cambien sin tocar
+   componentes. Reserve no necesita bloque: su tema es el @theme base.
+
+   FEMENIL — VIOLETA + AZUL ELÉCTRICO sobre ónix-violeta, deportiva premium.
+   Derivada del wordmark "DIAMONDBACKS" del flyer de la liga pasada (violeta
+   con contorno azul), único material de marca disponible; el organizador la
+   revisará. brand-* = violeta (primario); sky-* deja de ser alias del brand y
+   se vuelve el AZUL eléctrico (enlaces, chips secundarios). El ORO se
+   conserva: es el acento del club, común a todas las ligas.
+   =========================================================================== */
+[data-league='femenil'] {
+  /* Marca — VIOLETA. */
+  --color-brand-50:  #f3eefe;
+  --color-brand-100: #e4d9fd;
+  --color-brand-200: #c9b4fa;
+  --color-brand-300: #a78bfa;
+  --color-brand-400: #8b5cf6;
+  --color-brand-500: #7c3aed;
+  --color-brand-600: #6a2fd0;
+  --color-brand-700: #5626a8;
+  --color-brand-800: #451f86;
+  --color-brand-900: #371a6a;
+  --color-brand-950: #21103f;
+
+  /* Secundario — AZUL ELÉCTRICO (el contorno del wordmark). */
+  --color-sky-50:  #eaf6ff;
+  --color-sky-100: #d3edfe;
+  --color-sky-200: #a6dcfd;
+  --color-sky-300: #67c5fb;
+  --color-sky-400: #38b6f8;
+  --color-sky-500: #17a3ef;
+  --color-sky-600: #0d87cc;
+  --color-sky-700: #0c6ca3;
+  --color-sky-800: #0e5682;
+  --color-sky-900: #104766;
+  --color-sky-950: #0a2c40;
+
+  /* Neutros ÓNIX-VIOLETA (mismo papel que los ónix-esmeralda del tema base). */
+  --color-slate-50:  #100f17;
+  --color-slate-100: #16151f;
+  --color-slate-200: #23212e;
+  --color-slate-300: #363344;
+  --color-slate-400: #5b5770;
+  --color-slate-500: #948fa8;
+  --color-slate-600: #aca7bd;
+  --color-slate-700: #cbc7d8;
+  --color-slate-800: #e4e1ec;
+  --color-slate-900: #f3f1f8;
+  --color-slate-950: #ffffff;
+
+  /* Relieve dual sobre la base ónix-violeta. */
+  --shadow-sm: 4px 4px 9px #08070c, -4px -4px 9px #221f2e;
+  --shadow-md: 7px 7px 16px #07060a, -7px -7px 16px #252231;
+}

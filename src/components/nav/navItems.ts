@@ -55,7 +55,15 @@ export function navAllows(
 // Toda la navegación de la app, agrupada. El drawer la pinta filtrando por rol.
 export const NAV_GROUPS: NavGroup[] = [
   {
-    title: 'Liga',
+    // Nivel PLATAFORMA (multi-liga, 0049): visible para todos, con o sin
+    // sesión — es la única salida al selector desde el área autenticada.
+    title: 'Diamondbacks Pádel',
+    items: [
+      { to: '/ligas', label: 'Cambiar de liga', icon: 'medal' },
+    ],
+  },
+  {
+    title: 'Liga Reserve',
     items: [
       { to: '/', label: 'Inicio', icon: 'home', end: true },
       { to: '/rol', label: 'Rol de juegos', icon: 'schedule' },
@@ -95,6 +103,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { to: '/app/organizador', label: 'Panel organizador', icon: 'organizer', end: true, requires: 'organizer' },
       { to: '/app/organizador/inscripciones', label: 'Inscripciones', icon: 'account', requires: 'organizer' },
+      { to: '/app/organizador/liga/femenil', label: 'Liga Femenil · jornadas', icon: 'schedule', requires: 'organizer' },
       { to: '/app/pool', label: 'Pool de jugadores', icon: 'teams', requires: 'organizer' },
       { to: '/app/organizador/lista-espera', label: 'Lista de espera', icon: 'waitlist', requires: 'organizer' },
       { to: '/app/organizador/draft', label: 'Draft', icon: 'medal', requires: 'organizer' },

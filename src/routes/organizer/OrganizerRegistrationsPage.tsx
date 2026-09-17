@@ -1,14 +1,22 @@
 import { useMemo, useState } from 'react'
-import { useActiveSeason } from '@/features/season/useActiveSeason'
+import {
+  useOpenRegistrationSeasons,
+  useSeasonCategories,
+  useSeasonPlayerCount,
+  type OpenRegistrationSeason,
+} from '@/features/leagues/useLeagues'
 import { useCategories } from '@/features/categories/useCategories'
 import { rankingCategories } from '@/features/registration/category'
 import {
   usePendingRegistrations,
   useApproveRegistration,
   useRejectRegistration,
+  useVerifyPayment,
+  receiptSignedUrl,
 } from '@/features/registration/useRegistrations'
 import type { PlayerRegistration, PlayerPosition } from '@/features/registration/types'
 import type { MatchCategory } from '@/lib/types'
+import { pmLabel, ageFromBirthdate } from '@/lib/format'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
@@ -21,36 +29,110 @@ const POSITION_LABEL: Record<PlayerPosition, string> = {
   ambas: 'Ambas',
 }
 
+// Bandeja de inscripciones multi-liga (0049): una pestaña por edición con
+// inscripción abierta. Reserve conserva su flujo (aprobar → pool del draft);
+// las ligas americano aprueban directo a ficha sin equipo, con cupo visible y
+// comprobante de pago verificable (0050).
 export function OrganizerRegistrationsPage() {
-  const season = useActiveSeason()
-  const registrations = usePendingRegistrations(season.data?.id)
-  const categories = useCategories()
-  const ranking = useMemo(() => rankingCategories(categories.data ?? []), [categories.data])
+  const open = useOpenRegistrationSeasons()
+  const seasons = open.data ?? []
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const selected = seasons.find((s) => s.id === selectedId) ?? seasons[0] ?? null
 
-  if (season.isLoading) return <Loader label="Cargando…" />
-  if (!season.data) {
+  if (open.isLoading) return <Loader label="Cargando…" />
+  if (!selected) {
     return (
       <div>
         <PageHeader title="Inscripciones" />
         <EmptyState
           icon="organizer"
-          title="No hay temporada activa"
-          description="Activa una temporada para recibir inscripciones."
+          title="No hay inscripciones abiertas"
+          description="Abre la inscripción de una edición para recibir registros."
         />
       </div>
     )
   }
 
-  const pending = registrations.data ?? []
-
   return (
     <div className="space-y-5">
-      <PageHeader
-        title="Inscripciones"
-        subtitle={`${season.data.name} · ${pending.length} pendiente${pending.length === 1 ? '' : 's'}`}
-      />
+      <PageHeader title="Inscripciones" subtitle={`${selected.league.name} · ${selected.name}`} />
 
-      <ShareLink />
+      {seasons.length > 1 && (
+        <div className="grid grid-cols-2 gap-2">
+          {seasons.map((s) => {
+            const active = s.id === selected.id
+            return (
+              <button
+                key={s.id}
+                type="button"
+                aria-pressed={active}
+                onClick={() => setSelectedId(s.id)}
+                className={
+                  active
+                    ? 'neu-pressed rounded-xl px-3 py-2.5 text-sm font-semibold text-brand-300'
+                    : 'neu-raised rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700'
+                }
+              >
+                {tabLabel(s)}
+              </button>
+            )
+          })}
+        </div>
+      )}
+
+      <SeasonQueue key={selected.id} season={selected} />
+    </div>
+  )
+}
+
+function tabLabel(s: OpenRegistrationSeason): string {
+  if (s.league.slug === 'reserve') return 'Reserve'
+  const slug = s.league.slug
+  return slug.charAt(0).toUpperCase() + slug.slice(1)
+}
+
+function SeasonQueue({ season }: { season: OpenRegistrationSeason }) {
+  const isAmericano = season.league.kind === 'americano'
+  const registrations = usePendingRegistrations(season.id)
+  const playerCount = useSeasonPlayerCount(season.max_players != null ? season.id : undefined)
+
+  // Categorías ofrecidas al aprobar: las de la edición (0049); si la edición
+  // no tiene catálogo (datos viejos), todas las de ranking como antes.
+  const seasonCats = useSeasonCategories(season.id)
+  const allCats = useCategories()
+  const categories = useMemo(() => {
+    const own = (seasonCats.data ?? []).filter((c) => c.is_ranking && c.is_active)
+    if (own.length > 0) return own
+    return rankingCategories(allCats.data ?? [])
+  }, [seasonCats.data, allCats.data])
+
+  const pending = registrations.data ?? []
+  const capacity =
+    season.max_players != null && playerCount.data != null
+      ? { approved: playerCount.data, max: season.max_players }
+      : null
+
+  return (
+    <>
+      {capacity && (
+        <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-100 p-3 shadow-sm">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-500/10 text-brand-300">
+            <Icon name="account" size={18} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs text-slate-500">Cupo de la edición</p>
+            <p className="text-sm font-medium text-slate-800">
+              {capacity.approved} de {capacity.max} lugares ocupados
+              {pending.length > 0 && ` · ${pending.length} por revisar`}
+            </p>
+          </div>
+        </div>
+      )}
+
+      <ShareLink
+        url={isAmericano ? `/${season.league.slug}` : '/registro/reserve'}
+        label={isAmericano ? 'Landing pública para compartir' : 'Enlace público de inscripción'}
+      />
 
       {registrations.isLoading ? (
         <Loader label="Cargando inscripciones…" />
@@ -63,7 +145,7 @@ export function OrganizerRegistrationsPage() {
         <EmptyState
           icon="account"
           title="Sin inscripciones pendientes"
-          description="Cuando alguien se inscriba en /registro aparecerá aquí para revisión."
+          description="Cuando alguien se inscriba aparecerá aquí para revisión."
         />
       ) : (
         <div className="space-y-3">
@@ -71,24 +153,25 @@ export function OrganizerRegistrationsPage() {
             <ReviewCard
               key={r.id}
               registration={r}
-              categories={ranking}
-              seasonId={season.data!.id}
+              categories={categories}
+              season={season}
+              capFull={capacity != null && capacity.approved >= capacity.max}
             />
           ))}
         </div>
       )}
-    </div>
+    </>
   )
 }
 
 // Tarjeta con el enlace público para compartir (WhatsApp, redes, etc.).
-function ShareLink() {
+function ShareLink({ url, label }: { url: string; label: string }) {
   const [copied, setCopied] = useState(false)
-  const url = typeof window !== 'undefined' ? `${window.location.origin}/registro` : '/registro'
+  const full = typeof window !== 'undefined' ? `${window.location.origin}${url}` : url
 
   async function copy() {
     try {
-      await navigator.clipboard.writeText(url)
+      await navigator.clipboard.writeText(full)
       setCopied(true)
       setTimeout(() => setCopied(false), 1500)
     } catch {
@@ -102,8 +185,8 @@ function ShareLink() {
         <Icon name="share" size={18} />
       </span>
       <div className="min-w-0 flex-1">
-        <p className="text-xs text-slate-500">Enlace público de inscripción</p>
-        <p className="truncate text-sm font-medium text-slate-800">{url}</p>
+        <p className="text-xs text-slate-500">{label}</p>
+        <p className="truncate text-sm font-medium text-slate-800">{full}</p>
       </div>
       <button
         onClick={copy}
@@ -118,14 +201,18 @@ function ShareLink() {
 function ReviewCard({
   registration,
   categories,
-  seasonId,
+  season,
+  capFull,
 }: {
   registration: PlayerRegistration
   categories: MatchCategory[]
-  seasonId: string
+  season: OpenRegistrationSeason
+  capFull: boolean
 }) {
+  const isAmericano = season.league.kind === 'americano'
   const approve = useApproveRegistration()
   const reject = useRejectRegistration()
+  const verify = useVerifyPayment()
   const [categoryCode, setCategoryCode] = useState(registration.requested_category_code)
   const [localError, setLocalError] = useState<string | null>(null)
   const [rejecting, setRejecting] = useState(false)
@@ -136,12 +223,24 @@ function ReviewCard({
     day: '2-digit',
     month: 'short',
   })
+  const age = registration.birthdate ? ageFromBirthdate(registration.birthdate) : null
+  const paid = Boolean(registration.payment_verified_at)
 
   function onApprove() {
     setLocalError(null)
     const cat = categories.find((c) => c.code === categoryCode)
     if (!cat) return setLocalError('Elige una categoría válida.')
-    approve.mutate({ registration, categoryCode, categoryType: cat.type, seasonId })
+    approve.mutate({ registration, categoryCode, categoryType: cat.type, seasonId: season.id })
+  }
+
+  async function openReceipt() {
+    if (!registration.receipt_path) return
+    try {
+      const url = await receiptSignedUrl(registration.receipt_path)
+      window.open(url, '_blank', 'noopener')
+    } catch (e) {
+      setLocalError((e as Error).message)
+    }
   }
 
   return (
@@ -162,6 +261,10 @@ function ReviewCard({
         <Chip>Pide: {requested?.name ?? registration.requested_category_code}</Chip>
         <Chip>Posición: {POSITION_LABEL[registration.position]}</Chip>
         {registration.shirt_size && <Chip>Talla: {registration.shirt_size}</Chip>}
+        {age != null && <Chip>{age} años</Chip>}
+        {registration.blocked_time_labels && registration.blocked_time_labels.length > 0 && (
+          <Chip>Evita: {registration.blocked_time_labels.map(pmLabel).join(', ')}</Chip>
+        )}
       </div>
 
       {registration.comment && (
@@ -170,8 +273,39 @@ function ReviewCard({
         </p>
       )}
 
+      {/* Pago (0050): estado + comprobante + verificación con sello. */}
+      {(registration.receipt_path || paid || isAmericano) && (
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <span
+            className={
+              paid
+                ? 'inline-flex items-center gap-1 rounded-full bg-brand-500/15 px-2.5 py-0.5 text-xs font-medium text-brand-200 ring-1 ring-brand-500/30'
+                : 'inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-xs font-medium text-amber-200'
+            }
+          >
+            <Icon name={paid ? 'check' : 'lock'} size={12} />
+            {paid ? 'Pago verificado' : 'Pago por verificar'}
+          </span>
+          {registration.receipt_path && (
+            <button
+              onClick={() => void openReceipt()}
+              className="rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-700 hover:border-slate-400"
+            >
+              Ver comprobante
+            </button>
+          )}
+          <button
+            onClick={() => verify.mutate({ id: registration.id, verified: !paid })}
+            disabled={verify.isPending}
+            className="rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-700 hover:border-slate-400 disabled:opacity-50"
+          >
+            {verify.isPending ? 'Guardando…' : paid ? 'Quitar verificación' : 'Marcar pago verificado'}
+          </button>
+        </div>
+      )}
+
       {(approve.isError || localError) && (
-        <p className="mt-3 rounded-lg border border-red-200 bg-red-50 p-2 text-sm text-red-700">
+        <p className="mt-3 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
           {localError ?? (approve.error as Error).message}
         </p>
       )}
@@ -205,7 +339,9 @@ function ReviewCard({
         <>
           <label className="mt-3 block">
             <span className="block text-xs font-medium text-slate-600">
-              Categoría · el equipo se asigna en el Draft
+              {isAmericano
+                ? 'Categoría · la ficha se crea al aprobar'
+                : 'Categoría · el equipo se asigna en el Draft'}
             </span>
             <select
               value={categoryCode}
@@ -220,14 +356,21 @@ function ReviewCard({
             </select>
           </label>
 
+          {capFull && (
+            <p className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-2 text-xs text-amber-200">
+              Cupo lleno: el servidor rechazará más altas activas. Libera un lugar
+              antes de aprobar.
+            </p>
+          )}
+
           <div className="mt-3 flex gap-2">
             <button
               onClick={onApprove}
-              disabled={approve.isPending}
+              disabled={approve.isPending || capFull}
               className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-brand-400 px-3 py-2 text-sm font-semibold text-[#0c0c0f] disabled:opacity-50"
             >
               <Icon name="check" size={16} />
-              {approve.isPending ? 'Aprobando…' : 'Aprobar al pool'}
+              {approve.isPending ? 'Aprobando…' : isAmericano ? 'Aprobar inscripción' : 'Aprobar al pool'}
             </button>
             <button
               onClick={() => setRejecting(true)}
