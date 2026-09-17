@@ -1,5 +1,6 @@
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useActiveLeagues, type LeagueWithSeason } from '@/features/leagues/useLeagues'
+import { useAuth } from '@/features/auth/context'
 import { longDate } from '@/lib/format'
 import { Icon } from '@/components/ui/Icon'
 import { Loader } from '@/components/ui/Loader'
@@ -29,6 +30,11 @@ function seasonChip(item: LeagueWithSeason): string | null {
 export function LeagueSelectPage() {
   const navigate = useNavigate()
   const leagues = useActiveLeagues()
+  // La entrada de la app también necesita puerta a la cuenta: sin estos
+  // enlaces, quien llega aquí (todos, desde el gate de '/') no tiene cómo
+  // iniciar sesión ni volver a su panel.
+  const { session, role } = useAuth()
+  const isStaff = role === 'organizer' || role === 'viewer'
 
   function choose(item: LeagueWithSeason) {
     const slug = item.league.slug
@@ -88,6 +94,28 @@ export function LeagueSelectPage() {
           <p className="mt-5 text-center text-xs leading-relaxed text-slate-500">
             También puedes cambiar de liga cuando quieras desde el menú.
           </p>
+
+          <div className="mt-4 flex items-center justify-center gap-4">
+            {session ? (
+              <>
+                <Link to="/app" className="text-sm font-medium text-sky-300 underline">
+                  Mi cuenta
+                </Link>
+                {isStaff && (
+                  <Link
+                    to="/app/organizador"
+                    className="text-sm font-medium text-gold-300 underline"
+                  >
+                    Panel del organizador
+                  </Link>
+                )}
+              </>
+            ) : (
+              <Link to="/login" className="text-sm font-medium text-sky-300 underline">
+                ¿Ya tienes cuenta? Entrar
+              </Link>
+            )}
+          </div>
         </main>
 
         <footer className="pt-6 text-center text-xs text-slate-600">Diamondbacks Pádel</footer>
