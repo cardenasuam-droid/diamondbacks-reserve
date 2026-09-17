@@ -265,7 +265,7 @@ function StatusCard({
             onChange={onPick('payment')}
           />
           <ReceiptRow
-            label="Comprobante torneo Peak Padel (descuento $250)"
+            label="Comprobante torneo Peak Padel (descuento $225)"
             done={row.has_discount_receipt}
             canUpload={canUpload}
             uploading={attach.isPending && attach.variables?.kind === 'discount'}

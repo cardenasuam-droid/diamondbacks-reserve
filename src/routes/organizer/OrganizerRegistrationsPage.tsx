@@ -489,7 +489,7 @@ function ReviewCard({
             <>
               <span className="inline-flex items-center gap-1 rounded-full border border-sky-500/30 bg-sky-500/10 px-2.5 py-0.5 text-xs font-medium text-sky-300">
                 <Icon name="medal" size={12} />
-                Pide descuento Peak (−$250)
+                Pide descuento Peak (−$225)
               </span>
               <button
                 onClick={() => void openReceipt(registration.discount_receipt_path)}

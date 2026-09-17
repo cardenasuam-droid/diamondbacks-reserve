@@ -5,7 +5,7 @@ import type { AmericanoRegistrationInput } from './schemaAmericano'
 
 export interface SubmitAmericanoVars extends AmericanoRegistrationInput {
   receiptFile?: File | null
-  /** Comprobante del torneo de Peak Padel (descuento $250, 0056). */
+  /** Comprobante del torneo de Peak Padel (descuento $225, 0056). */
   discountFile?: File | null
   // Honeypot (mismo truco que useSubmitRegistration).
   website?: string

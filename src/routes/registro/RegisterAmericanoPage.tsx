@@ -382,7 +382,7 @@ export function RegisterAmericanoPage() {
                       <span className="min-w-0 truncate">
                         {discountFile
                           ? discountFile.name
-                          : 'Comprobante torneo Peak Padel (descuento $250)'}
+                          : 'Comprobante torneo Peak Padel (descuento $225)'}
                       </span>
                       <input
                         type="file"
