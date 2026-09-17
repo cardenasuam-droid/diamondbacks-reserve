@@ -4,22 +4,31 @@ import type { CategoryType } from '@/lib/types'
 import type { PlayerRegistration } from './types'
 import { genderForCategoryType } from './category'
 
-// Cola de inscripciones pendientes DE UNA EDICIÓN. Solo el organizador la lee
-// (RLS de 0014): las más antiguas primero, para atender por orden de llegada.
-// El filtro por season_id es imprescindible desde 0049: hay más de una bandeja
-// abierta a la vez (Reserve y Femenil) y no deben mezclarse.
-export function usePendingRegistrations(seasonId: string | undefined) {
+export interface SeasonRegistration extends PlayerRegistration {
+  /** Ficha creada al aprobar (embed por created_player_id): la categoría ASIGNADA. */
+  player: { id: string; category_code: string | null } | null
+}
+
+// TODAS las inscripciones de una edición (panel del organizador): pendientes
+// para revisar, aprobadas (las inscritas actuales) y rechazadas. Solo el
+// organizador la lee (RLS de 0014). Las más antiguas primero: la cola de
+// pendientes se atiende por orden de llegada. El filtro por season_id es
+// imprescindible desde 0049: hay más de una bandeja abierta a la vez.
+export function useSeasonRegistrations(seasonId: string | undefined) {
   return useQuery({
-    queryKey: ['registrations', 'pending', seasonId],
-    queryFn: async (): Promise<PlayerRegistration[]> => {
+    queryKey: ['registrations', 'season', seasonId],
+    queryFn: async (): Promise<SeasonRegistration[]> => {
       const { data, error } = await supabase
         .from('player_registrations')
-        .select('*')
-        .eq('status', 'pending')
+        // Embed sin nombre de constraint: solo existe UNA relación entre
+        // player_registrations y players (created_player_id), así que es
+        // inequívoco — mismo formato que category:match_categories, ya
+        // probado en producción.
+        .select('*, player:players(id, category_code)')
         .eq('season_id', seasonId!)
         .order('created_at', { ascending: true })
       if (error) throw error
-      return (data ?? []) as PlayerRegistration[]
+      return (data ?? []) as unknown as SeasonRegistration[]
     },
     enabled: Boolean(seasonId),
   })
