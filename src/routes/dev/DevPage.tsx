@@ -16,7 +16,7 @@ const SCREENS: ScreenGroup[] = [
   {
     title: 'Público (sin sesión)',
     items: [
-      { to: '/', label: 'Inicio' },
+      { to: '/inicio', label: 'Inicio' },
       { to: '/rol', label: 'Rol de juegos' },
       { to: '/resultados', label: 'Resultados' },
       { to: '/tabla', label: 'Tabla de posiciones' },

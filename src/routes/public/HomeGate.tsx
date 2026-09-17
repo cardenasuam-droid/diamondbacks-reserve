@@ -3,10 +3,10 @@ import { useAuth } from '@/features/auth/context'
 import { Loader } from '@/components/ui/Loader'
 import { HomePage } from './HomePage'
 
-// La pantalla de inicio es el DASHBOARD para quien tiene sesión (decisión de la
-// organizadora, 2026-07-20): un jugador que abre la app —la PWA arranca en '/'—
-// aterriza en sus partidos y sus estadísticas, no en el hero de presentación.
-// El visitante anónimo sigue viendo la Home pública.
+// Portada de Reserve (/inicio; '/' es el selector de ligas). Para quien tiene
+// sesión es el DASHBOARD (decisión de la organizadora, 2026-07-20): al entrar
+// a Reserve aterriza en sus partidos y estadísticas, no en el hero de
+// presentación. El visitante anónimo ve la Home pública.
 //
 // Mientras la sesión se restaura del almacenamiento se muestra el Loader: sin
 // él, el jugador vería la Home pública un instante y luego el salto al

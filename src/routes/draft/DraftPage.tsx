@@ -26,7 +26,7 @@ export function DraftPage() {
   // historial si venimos de dentro de la app; si se abrió directo (enlace/PWA), al inicio.
   const goBack = () => {
     if (window.history.length > 1) navigate(-1)
-    else navigate('/')
+    else navigate('/inicio')
   }
   const view = useDraftView(season.data?.id)
   const captain = useCaptainTeam()

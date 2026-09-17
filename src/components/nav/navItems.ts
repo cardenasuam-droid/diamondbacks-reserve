@@ -65,7 +65,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     title: 'Liga Reserve',
     items: [
-      { to: '/', label: 'Inicio', icon: 'home', end: true },
+      { to: '/inicio', label: 'Inicio', icon: 'home', end: true },
       { to: '/rol', label: 'Rol de juegos', icon: 'schedule' },
       { to: '/resultados', label: 'Resultados', icon: 'results' },
       { to: '/tabla', label: 'Tabla de posiciones', icon: 'standings' },
