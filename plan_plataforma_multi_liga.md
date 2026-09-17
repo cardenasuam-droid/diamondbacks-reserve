@@ -274,6 +274,12 @@ Campos, calcados del formulario real de la 5a edición + pagos:
   leen.
 - Todo cae en `player_registrations` (columnas nuevas + `availability jsonb`),
   status pending → el comité aprueba y crea la ficha (`players`) como hoy.
+- **"Mi inscripción" (0057, 17-sep):** cada alta genera un token (enlace
+  mágico, patrón peak-padel); `/registro/<liga>/estado` muestra la
+  confirmación (nombre, categoría, fecha, pago verificado o no) y permite
+  subir/reemplazar comprobantes después, hasta que el comité confirme el
+  pago. El token se recuerda por dispositivo y el RPC nunca expone teléfono
+  ni fecha de nacimiento.
 
 ---
 
@@ -325,8 +331,10 @@ Notas:
 1. **Pago: ACTIVO (17-sep).** `payment_instructions` de la 6a lleva el link de
    Mercado Pago y la CLABE HSBC; el formulario sube comprobante de pago y,
    opcional, el del torneo de Peak Padel (descuento $250, 0056). El cupo se
-   cuenta por pagos verificados (`season_paid_count`). Falta solo el **monto
-   de la cuota** para escribirlo en el texto (un UPDATE cuando lo dé).
+   cuenta por pagos verificados (`season_paid_count`). Cuota **$1,500 MXN**
+   ($1,250 con descuento Peak) ya escrita en el texto. Con "Mi inscripción"
+   (0057) la jugadora comprueba su alta y sube el comprobante después si no
+   lo tenía al inscribirse.
 2. **Colores femenil:** aplicados desde el flyer (violeta + azul). Revisar en
    el deploy y ajustar si no coinciden con el recuerdo; si existe el escudo
    real en algún archivo, con pasarlo se recalibra la paleta.

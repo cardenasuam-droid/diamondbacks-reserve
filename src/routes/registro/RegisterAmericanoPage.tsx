@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { isSupabaseConfigured } from '@/lib/supabase'
 import { useAuth } from '@/features/auth/context'
 import { useMyPlayerPrefill } from '@/features/registration/usePrefill'
+import { getRegToken, saveRegToken } from '@/lib/regToken'
+import { Linkify } from '@/components/ui/Linkify'
 import { SHIRT_SIZES } from '@/lib/shirtSize'
 import {
   useLeagueOpenSeason,
@@ -57,6 +59,9 @@ export function RegisterAmericanoPage() {
   const [website, setWebsite] = useState('') // honeypot
   const [errors, setErrors] = useState<FieldErrors>({})
   const [done, setDone] = useState(false)
+  // Token de "Mi inscripción" (0057): el de ESTA alta recién enviada, y el
+  // que ya viva en el dispositivo por una inscripción anterior a esta edición.
+  const [myToken, setMyToken] = useState<string | null>(null)
 
   // Precarga para quien ya tiene cuenta (0055): sus datos de la ficha llegan
   // ya puestos (editables) en vez de teclearlos otra vez. Cada campo solo se
@@ -149,7 +154,15 @@ export function RegisterAmericanoPage() {
     setErrors({})
     submit.mutate(
       { ...parsed.data, receiptFile, discountFile, website },
-      { onSuccess: () => setDone(true) }
+      {
+        onSuccess: (token) => {
+          if (token && season) {
+            saveRegToken(season.id, token)
+            setMyToken(token)
+          }
+          setDone(true)
+        },
+      }
     )
   }
 
@@ -192,7 +205,14 @@ export function RegisterAmericanoPage() {
 
         <main className="rise flex-1 pt-3">
           {done ? (
-            <SuccessCard onAgain={reset} />
+            <SuccessCard
+              onAgain={reset}
+              statusUrl={
+                myToken
+                  ? `/registro/${league.slug}/estado?t=${myToken}`
+                  : `/registro/${league.slug}/estado`
+              }
+            />
           ) : (
             <>
               <section className="mb-5">
@@ -214,6 +234,18 @@ export function RegisterAmericanoPage() {
                   </p>
                 )}
               </section>
+
+              {season && getRegToken(season.id) && (
+                <p className="mb-4 flex items-center justify-between gap-2 rounded-lg border border-sky-500/30 bg-sky-500/10 p-3 text-sm text-sky-300">
+                  <span>Ya hay una inscripción guardada en este teléfono.</span>
+                  <Link
+                    to={`/registro/${league.slug}/estado`}
+                    className="shrink-0 font-semibold underline"
+                  >
+                    Ver mi inscripción
+                  </Link>
+                </p>
+              )}
 
               {prefilledFrom && (
                 <p className="mb-4 flex items-center gap-2 rounded-lg border border-brand-500/30 bg-brand-500/10 p-3 text-sm text-brand-200">
@@ -394,7 +426,7 @@ export function RegisterAmericanoPage() {
                   <div className="rounded-2xl bg-slate-50 p-4">
                     <p className="text-sm font-medium text-slate-700">Pago de inscripción</p>
                     <p className="mt-1 whitespace-pre-line text-xs leading-relaxed text-slate-500">
-                      {linkify(season.payment_instructions)}
+                      <Linkify text={season.payment_instructions} />
                     </p>
                     <label className="neu-raised mt-3 flex cursor-pointer items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700">
                       <Icon name="plus" size={16} />
@@ -462,27 +494,21 @@ export function RegisterAmericanoPage() {
   )
 }
 
-// URLs del texto de pago como enlaces reales (el texto vive en la base,
-// seasons.payment_instructions, y se edita sin deploy).
-function linkify(text: string): React.ReactNode[] {
-  return text.split(/(https?:\/\/[^\s]+)/g).map((part, i) =>
-    /^https?:\/\//.test(part) ? (
-      <a
-        key={i}
-        href={part}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="break-all text-sky-300 underline"
-      >
-        {part}
-      </a>
-    ) : (
-      <span key={i}>{part}</span>
-    )
-  )
-}
+function SuccessCard({ onAgain, statusUrl }: { onAgain: () => void; statusUrl: string }) {
+  const [copied, setCopied] = useState(false)
+  const fullUrl =
+    typeof window !== 'undefined' ? `${window.location.origin}${statusUrl}` : statusUrl
 
-function SuccessCard({ onAgain }: { onAgain: () => void }) {
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(fullUrl)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    } catch {
+      setCopied(false)
+    }
+  }
+
   return (
     <div className="rounded-3xl bg-slate-100 p-6 text-center shadow-md">
       <span className="neu-raised mx-auto flex h-16 w-16 items-center justify-center rounded-full text-brand-300">
@@ -490,15 +516,31 @@ function SuccessCard({ onAgain }: { onAgain: () => void }) {
       </span>
       <h1 className="mt-4 font-heading text-xl text-slate-900">¡Listo! Recibimos tu inscripción</h1>
       <p className="mt-2 text-sm leading-relaxed text-slate-500">
-        El comité revisará tu categoría y confirmará tu lugar. Te contactaremos por
-        teléfono si hace falta algo más.
+        El comité revisará tu categoría y confirmará tu lugar al validar tu pago. En
+        "Mi inscripción" puedes comprobar tu registro y subir tu comprobante cuando
+        quieras — quedó guardada en este teléfono y también en tu enlace.
       </p>
-      <button
-        onClick={onAgain}
-        className="neu-raised mt-5 inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-700"
+      <Link
+        to={statusUrl}
+        className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-gold-300 px-4 py-3 font-semibold text-[#1a1405] shadow-sm"
       >
-        <Icon name="plus" size={16} /> Inscribir a otra persona
-      </button>
+        Ver mi inscripción
+        <Icon name="chevron-right" size={18} />
+      </Link>
+      <div className="mt-2 flex gap-2">
+        <button
+          onClick={() => void copy()}
+          className="neu-raised flex-1 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-700"
+        >
+          {copied ? 'Enlace copiado' : 'Copiar mi enlace'}
+        </button>
+        <button
+          onClick={onAgain}
+          className="neu-raised inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-700"
+        >
+          <Icon name="plus" size={16} /> Otra persona
+        </button>
+      </div>
     </div>
   )
 }
